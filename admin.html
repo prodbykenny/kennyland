@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Back office — KENNYLAND</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a12;--bg2:#12121e;--panel:#15151f;--ink:#f2f0e8;--muted:#a0a4bb;--line:#2a2a3a;--acid:#3dffa0;--mag:#ff3ea5;color-scheme:dark;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;line-height:1.5;}
+.wrap{max-width:820px;margin:0 auto;padding:24px 18px 80px;}
+a{color:var(--acid);}
+h1{font-family:'Press Start 2P',monospace;font-size:15px;line-height:1.6;margin:14px 0 4px;}
+h2{font-size:16px;margin:0;color:var(--acid);}
+.muted{color:var(--muted);font-size:13px;}
+.panel{border:1px solid var(--line);background:var(--panel);padding:16px;margin:16px 0;}
+input,select{background:var(--bg2);border:1px solid var(--line);color:var(--ink);padding:9px 10px;font-family:'Space Grotesk',sans-serif;font-size:14px;max-width:100%;}
+input[type=file]{width:100%;}
+button{background:transparent;border:1px solid var(--line);color:var(--ink);padding:8px 12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;}
+button:hover{border-color:var(--acid);}
+button.main{border-color:var(--acid);color:var(--acid);}
+button.del{border-color:var(--mag);color:var(--mag);}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.field label{font-size:12px;color:var(--muted);}
+.plhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:26px 0 8px;flex-wrap:wrap;}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);background:var(--panel);padding:10px;margin-bottom:8px;}
+.row input[type=text]{flex:1;min-width:150px;}
+.msg{font-size:13px;min-height:18px;margin-top:8px;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="./">← Torna a KENNYLAND</a>
+<h1>BACK OFFICE<br>MEMBERS ONLY</h1>
+
+<div id="stLogin" class="panel hidden">
+  <p>Non sei dentro. Vai su <a href="./">KENNYLAND</a>, premi ENTRA e accedi con la tua email, poi riapri questa pagina.</p>
+</div>
+<div id="stNo" class="panel hidden">
+  <p>Sei dentro, ma questo account non è abilitato come amministratore. Se è il tuo, aggiungilo alla tabella <b>admins</b> da Supabase (SQL Editor).</p>
+</div>
+
+<div id="panel" class="hidden">
+  <p class="muted">Account: <span id="who"></span> · File audio consigliati: mp3 compressi, massimo 50 MB ciascuno.</p>
+
+  <div class="panel">
+    <div class="field"><label for="fFile">File audio</label><input type="file" id="fFile" accept="audio/*"></div>
+    <div class="field"><label for="fTitle">Titolo (se vuoto uso il nome del file)</label><input type="text" id="fTitle" maxlength="120"></div>
+    <div class="field"><label for="fPl">Playlist (scegli una esistente o scrivine una nuova)</label><input type="text" id="fPl" list="plList" value="Beats" maxlength="40"></div>
+    <datalist id="plList"></datalist>
+    <button class="main" id="btnUp" type="button">Carica brano</button>
+    <div class="msg" id="upMsg"></div>
+  </div>
+
+  <div id="lists"></div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var SB_URL = "https://honeqycgjwoegjuuatbb.supabase.co";
+  var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbmVxeWNnandvZWdqdXVhdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTAwNTMsImV4cCI6MjEwODk2NjA1M30.ovYuRVykNDjVgqFdbvIcM8-4Mt0VVE146gZPzGxsXbo";
+  var sb = window.supabase.createClient(SB_URL, SB_KEY);
+  var $ = function(id){ return document.getElementById(id); };
+  var tracks = [];
+
+  function show(which){
+    $('stLogin').classList.toggle('hidden', which !== 'login');
+    $('stNo').classList.toggle('hidden', which !== 'no');
+    $('panel').classList.toggle('hidden', which !== 'panel');
+  }
+  function say(el, text, bad){ el.textContent = text || ''; el.style.color = bad ? 'var(--mag)' : 'var(--acid)'; }
+  function btn(label, cls, fn){
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = label; if(cls) b.className = cls;
+    b.addEventListener('click', fn);
+    return b;
+  }
+  function maxPos(){ return tracks.reduce(function(m, t){ return Math.max(m, t.position || 0); }, 0); }
+
+  async function init(){
+    var s = await sb.auth.getSession();
+    var session = s && s.data && s.data.session;
+    if(!session){ show('login'); return; }
+    var r = await sb.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+    if(!r || !r.data){ show('no'); return; }
+    $('who').textContent = session.user.email || '';
+    show('panel');
+    await load();
+  }
+
+  async function load(){
+    var r = await sb.from('tracks').select('id,title,playlist,position,file_path').order('position', {ascending:true});
+    tracks = (r && r.data) || [];
+    var pls = [];
+    tracks.forEach(function(t){ if(pls.indexOf(t.playlist) < 0) pls.push(t.playlist); });
+    $('plList').innerHTML = '';
+    pls.forEach(function(p){ var o = document.createElement('option'); o.value = p; $('plList').appendChild(o); });
+    var root = $('lists'); root.innerHTML = '';
+    if(!tracks.length){ var e = document.createElement('p'); e.className = 'muted'; e.textContent = 'Nessun brano ancora: carica il primo qui sopra.'; root.appendChild(e); return; }
+    pls.forEach(function(p){
+      var head = document.createElement('div'); head.className = 'plhead';
+      var h = document.createElement('h2'); h.textContent = p;
+      head.appendChild(h);
+      head.appendChild(btn('Rinomina playlist', '', async function(){
+        var n = prompt('Nuovo nome della playlist', p);
+        if(!n || !n.trim() || n.trim() === p) return;
+        var u = await sb.from('tracks').update({playlist: n.trim()}).eq('playlist', p);
+        if(u.error){ alert('Errore: ' + u.error.message); }
+        await load();
+      }));
+      root.appendChild(head);
+      var same = tracks.filter(function(t){ return t.playlist === p; });
+      same.forEach(function(t, i){ root.appendChild(row(t, i, same, pls)); });
+    });
+  }
+
+  async function swap(a, b){
+    var u1 = await sb.from('tracks').update({position: b.position}).eq('id', a.id);
+    var u2 = await sb.from('tracks').update({position: a.position}).eq('id', b.id);
+    if(u1.error || u2.error){ alert('Errore nel riordino.'); }
+    await load();
+  }
+
+  function row(t, i, same, pls){
+    var el = document.createElement('div'); el.className = 'row';
+    var title = document.createElement('input'); title.type = 'text'; title.value = t.title; title.maxLength = 120;
+    el.appendChild(title);
+    el.appendChild(btn('Salva titolo', '', async function(){
+      var v = title.value.trim(); if(!v) return;
+      var u = await sb.from('tracks').update({title: v}).eq('id', t.id);
+      if(u.error){ alert('Errore: ' + u.error.message); } else { await load(); }
+    }));
+    var up = btn('↑', '', function(){ if(i > 0) swap(t, same[i - 1]); });
+    var down = btn('↓', '', function(){ if(i < same.length - 1) swap(t, same[i + 1]); });
+    up.disabled = (i === 0); down.disabled = (i === same.length - 1);
+    el.appendChild(up); el.appendChild(down);
+    var sel = document.createElement('select');
+    pls.forEach(function(p){ var o = document.createElement('option'); o.value = p; o.textContent = p; if(p === t.playlist) o.selected = true; sel.appendChild(o); });
+    var on = document.createElement('option'); on.value = '__new__'; on.textContent = 'Nuova playlist…'; sel.appendChild(on);
+    sel.addEventListener('change', async function(){
+      var dest = sel.value;
+      if(dest === '__new__'){ dest = prompt('Nome della nuova playlist', ''); if(!dest || !dest.trim()){ await load(); return; } dest = dest.trim(); }
+      var u = await sb.from('tracks').update({playlist: dest, position: maxPos() + 1}).eq('id', t.id);
+      if(u.error){ alert('Errore: ' + u.error.message); }
+      await load();
+    });
+    el.appendChild(sel);
+    el.appendChild(btn('Elimina', 'del', async function(){
+      if(!confirm('Eliminare "' + t.title + '"? Il file viene cancellato per sempre.')) return;
+      await sb.storage.from('member-tracks').remove([t.file_path]);
+      var d = await sb.from('tracks').delete().eq('id', t.id);
+      if(d.error){ alert('Errore: ' + d.error.message); }
+      await load();
+    }));
+    return el;
+  }
+
+  $('btnUp').addEventListener('click', async function(){
+    var msg = $('upMsg');
+    var f = $('fFile').files[0];
+    if(!f){ say(msg, 'Scegli prima un file audio.', true); return; }
+    if(f.type && f.type.indexOf('audio/') !== 0){ say(msg, 'Il file non sembra un audio.', true); return; }
+    if(f.size > 50 * 1024 * 1024){ say(msg, 'File oltre i 50 MB: comprimilo (mp3 128-192 kbps).', true); return; }
+    var title = $('fTitle').value.trim() || f.name.replace(/\.[^.]+$/, '');
+    var playlist = $('fPl').value.trim() || 'Beats';
+    var ext = (f.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp3';
+    var path = (window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)) + '.' + ext;
+    $('btnUp').disabled = true; say(msg, 'Carico…');
+    try{
+      var up = await sb.storage.from('member-tracks').upload(path, f, {contentType: f.type || 'audio/mpeg', upsert: false});
+      if(up.error){ say(msg, 'Errore nel caricamento: ' + up.error.message, true); return; }
+      var ins = await sb.from('tracks').insert({title: title, playlist: playlist, position: maxPos() + 1, file_path: path});
+      if(ins.error){
+        await sb.storage.from('member-tracks').remove([path]);
+        say(msg, 'Errore nel salvataggio: ' + ins.error.message, true); return;
+      }
+      say(msg, 'Caricato ✓');
+      $('fFile').value = ''; $('fTitle').value = '';
+      await load();
+    }catch(e){ say(msg, 'Qualcosa non ha funzionato, riprova.', true); }
+    finally{ $('btnUp').disabled = false; }
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
