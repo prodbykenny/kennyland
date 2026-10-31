@@ -79,15 +79,39 @@ html.bgc body{background-image:none;}
 .goal-row.done .gbar i{background:var(--acid);}
 #roomSign{animation:neonflick 5s infinite;}
 #roomSign .tube{transition:stroke .15s;}
-body.hot #roomSign .tube{stroke:var(--red);}
 @keyframes neonflick{0%,18%,22%,62%,64%,100%{opacity:1;}20%,63%{opacity:.55;}}
 @media (prefers-reduced-motion: reduce){#roomSign{animation:none;}}
 @media (max-width:520px){.stat3{grid-template-columns:1fr 62px 62px;font-size:12px;}.stat3 b{font-size:9px;}}
+
+.shop-ov{position:fixed;inset:0;background:rgba(5,5,12,.74);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;}
+.shop-win{width:min(740px,100%);max-height:90vh;display:flex;flex-direction:column;background:var(--panel);border:3px solid #7b2fff;box-shadow:0 0 0 2px #0a0a12,0 0 34px rgba(123,47,255,.5);}
+.shop-title{display:flex;align-items:center;gap:12px;background:linear-gradient(#8a45ff,#5a1fc4);padding:8px 12px;font-family:'Press Start 2P',monospace;font-size:11px;color:#fff;}
+.shop-title .shop-wal{margin-left:auto;font-family:'Space Grotesk',sans-serif;font-size:12px;}
+.shop-title button{background:#ff3b3b;border:2px solid #0a0a12;color:#fff;width:26px;height:26px;cursor:pointer;font-weight:700;}
+.shop-body{display:flex;min-height:320px;overflow:hidden;}
+.shop-cats{width:180px;flex:none;border-right:2px solid var(--line);background:var(--bg2);overflow:auto;}
+.shop-cat{display:block;width:100%;text-align:left;padding:12px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink);font:600 13px 'Space Grotesk',sans-serif;cursor:pointer;}
+.shop-cat.on{background:#7b2fff;color:#fff;} .shop-cat.soon{color:var(--muted);}
+.shop-main{flex:1;display:flex;flex-direction:column;overflow:auto;min-width:0;}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:12px;}
+.shop-card{position:relative;border:2px solid var(--line);background:var(--bg2);cursor:pointer;padding:6px;text-align:center;}
+.shop-card.sel{border-color:var(--acid);}
+.shop-card>svg:first-child{width:100%;height:84px;display:block;}
+.shop-card .nm{font-size:12px;font-weight:600;margin-top:4px;} .shop-card .pc{font-size:12px;color:var(--acid);}
+.shop-card.locked>svg:first-child{opacity:.3;filter:grayscale(1);}
+.shop-card .lkico{position:absolute;top:30px;left:50%;width:26px;height:30px;margin-left:-13px;}
+.shop-card .ph{height:84px;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:20px;color:var(--line);}
+.shop-detail{border-top:2px solid var(--line);padding:12px;font-size:13px;margin-top:auto;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.shop-detail .dn{font-weight:700;font-size:15px;} .shop-detail .dd{color:var(--muted);}
+.shop-detail .rq.ok{color:var(--acid);} .shop-detail .rq.no{color:var(--red);}
+@media (max-width:560px){.shop-body{flex-direction:column;}.shop-cats{width:auto;display:flex;overflow-x:auto;border-right:0;border-bottom:2px solid var(--line);}.shop-cat{white-space:nowrap;width:auto;border-bottom:0;border-right:1px solid var(--line);}}
 #bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 .hud{font-family:'Press Start 2P',monospace;}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
 .logo{font-family:'Press Start 2P',monospace;font-size:14px;letter-spacing:1px;}
-.logo span{color:var(--acid);}
+.logo .lg-g{color:var(--acid);}
+.logo .lg-w{color:#fff;}
+.logo .lg-v{color:#b18cff;}
 nav a{color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 14px;font-size:13px;margin-left:8px;}
 nav a:hover{border-color:var(--acid);}
 
@@ -125,7 +149,8 @@ h1 em{font-style:normal;color:var(--mag);}
 .goal-text{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-family:'Press Start 2P',monospace;font-size:9px;color:#fff;text-shadow:0 0 4px #000,0 0 4px #000;padding:0 8px;text-align:center;}
 @media (prefers-reduced-motion: reduce){.goal-fill{animation:none;}}
 .enter-btn{font-family:'Press Start 2P',monospace;font-size:15px;padding:18px 46px;background:var(--acid);color:var(--bg);border:none;cursor:pointer;letter-spacing:2px;box-shadow:0 0 0 2px var(--line),0 0 26px rgba(61,255,160,.4);}
-.enter-btn:hover{background:var(--mag);box-shadow:0 0 0 2px var(--line),0 0 26px rgba(255,62,165,.5);}
+.enter-btn:hover{background:#7b2fff;color:#fff;box-shadow:0 0 0 2px var(--line),0 0 26px rgba(123,47,255,.55);}
+.acct-btn:hover{border-color:#b18cff;color:#fff;background:#7b2fff;}
 .modal-overlay{position:fixed;inset:0;background:rgba(10,10,18,.86);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
 .modal-overlay.show{display:flex;}
 .modal{background:var(--panel);border:1px solid var(--line);padding:28px;max-width:340px;width:100%;}
@@ -190,7 +215,7 @@ section{margin-top:56px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media (max-width:560px){.grid2{grid-template-columns:1fr;}}
 .panel{border:1px solid var(--line);background:var(--panel);padding:20px;}
-.panel h3{margin:0 0 4px;font-size:15px;color:var(--red);}
+.panel h3{margin:0 0 4px;font-size:15px;color:#fff;}
 .panel p{color:var(--muted);font-size:13px;margin:0 0 16px;}
 .stat{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px dashed var(--line);}
 .stat:first-of-type{border-top:none;}
@@ -221,7 +246,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 <div class="wrap">
 
 <header>
-  <div class="logo">OMG KENNY! <span>// KENNYLAND</span></div>
+  <div class="logo"><span class="lg-g">OMG KENNY!</span> <span class="lg-w">//</span> <span class="lg-v">KENNYLAND</span></div>
   <nav>
     <a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a>
     <a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a>
@@ -353,7 +378,6 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <button class="room-btn" id="roomShop" type="button">NEGOZIO</button>
       <span class="room-note">Tocca il pavimento per camminare. Vestiti e mobili per arredare la stanza arrivano presto.</span>
     </div>
-    <div id="shopPanel" style="display:none"></div>
   </div>
 </div>
   <div class="panel avatar-area" id="avatarEditor">
@@ -887,7 +911,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     for(var i = 0; i < n; i++){
       if(sq.length > 360) break;
       sq.push({x:Math.floor(Math.random() * cols), y:Math.floor(Math.random() * rows),
-        a:a * (0.6 + Math.random() * 0.4), c:(red && Math.random() < 0.55 ? '255,59,59' : (Math.random() < 0.5 ? '61,255,160' : '123,47,255'))});
+        a:a * (0.6 + Math.random() * 0.4), c:(Math.random() < 0.5 ? '61,255,160' : '123,47,255')});
     }
   }
   // un colpo (onset) di forza 0..1: accende quadretti, scuote le linee
@@ -1066,15 +1090,15 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       }
     }
     // insegna neon stile lounge bar sulla parete sinistra
-    var c = iso(0, 4), text = (nick || '') + ' Room';
-    var size = Math.max(14, Math.min(26, Math.floor(180 / (text.length * 0.6))));
+    var c = iso(0, 4), text = ((nick || '') + ' ROOM').toUpperCase();
+    var size = Math.max(12, Math.min(24, Math.floor(190 / (text.length * 0.78))));
     var sg = el('g', {id:'roomSign', transform:'matrix(1,-0.5,0,1,' + c[0] + ',' + (c[1] - 66) + ')'}, dc);
-    var glow = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Pacifico, cursive', 'font-size':size, fill:'none', stroke:'#3dffa0', 'stroke-width':'3', filter:'url(#neonGlow)', opacity:'.8'}, sg);
+    var glow = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Space Grotesk, sans-serif', 'font-weight':'700', 'letter-spacing':'2', 'font-size':size, fill:'none', stroke:'#3dffa0', 'stroke-width':'3', filter:'url(#neonGlow)', opacity:'.8', id:'roomGlow'}, sg);
     glow.textContent = text;
-    var tube = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Pacifico, cursive', 'font-size':size, fill:'rgba(61,255,160,.12)', stroke:'#c8ffe6', 'stroke-width':'1', 'class':'tube'}, sg);
+    var tube = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Space Grotesk, sans-serif', 'font-weight':'700', 'letter-spacing':'2', 'font-size':size, fill:'rgba(61,255,160,.12)', stroke:'#c8ffe6', 'stroke-width':'1', 'class':'tube'}, sg);
     tube.textContent = text;
-    var uw = Math.min(110, text.length * size * 0.26);
-    var ul = el('path', {d:'M' + (-uw) + ',10 L' + uw + ',10', stroke:'#b57bff', 'stroke-width':'2.5', 'stroke-linecap':'round', filter:'url(#neonGlow)'}, sg);
+    var uw = Math.min(110, text.length * size * 0.34);
+    var ul = el('path', {d:'M' + (-uw) + ',10 L' + uw + ',10', stroke:'#b57bff', 'stroke-width':'2.5', 'stroke-linecap':'round', filter:'url(#neonGlow)', id:'roomUl'}, sg);
     // tavolo, portatile e cassa di base (vecchi e rovinati: quelli belli sono nel negozio)
     box(dc, 3.3, 0.3, 2.3, 1.1, 0, 28, '#2d1f4d', '#1a1230', '#150e26');
     drawLaptop(dc, 'old');
@@ -1146,11 +1170,16 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(t - dzT > 40){
       dzT = t;
       var on = window.klMusicOn, kk = window.klKick ? window.klKick() : 0, step = window.klHits ? window.klHits() : 0;
+      var gl = $('roomGlow'), ul = $('roomUl');
+      if(gl && ul){
+        var alt = on && (step % 2);
+        gl.setAttribute('stroke', alt ? '#b57bff' : '#3dffa0'); ul.setAttribute('stroke', alt ? '#3dffa0' : '#b57bff');
+        gl.setAttribute('opacity', on ? (0.55 + 0.45 * Math.min(1, kk * 1.2)).toFixed(2) : '.8');
+      }
       for(var n = 0; n < dz.length; n++){
         var c = dz[n], f;
         if(on){
           var col = ((c.i + c.j + step) % 2) ? '61,255,160' : '123,47,255';
-          if(kk > 0.8 && ((c.i * 7 + c.j * 3 + step) % 5 === 0)) col = '255,59,59';
           f = 'rgba(' + col + ',' + (0.22 + 0.65 * Math.max(kk, 0.2)).toFixed(2) + ')';
         } else f = 'rgba(123,47,255,0.16)';
         c.el.setAttribute('fill', f);
@@ -1239,8 +1268,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   }
   document.addEventListener('kl-login', function(e){ if(e.detail && e.detail.sb) enter(e.detail); });
   // ----- livello e negozio -----
-  var LV = [0, 15, 40, 80, 140, 220, 330, 470, 650, 900], BUY_LEVEL = 5, ITEMS = [
-    {name:'Portatile nuovo', price:100}, {name:'Cassa nuova', price:100}];
+  var LV = [0, 15, 40, 80, 140, 220, 330, 470, 650, 900], BUY_LEVEL = 5;
   function calcLevel(){
     var U = window.klUserStats ? window.klUserStats() : {};
     function c(k, m){ return Math.min(U[k] || 0, m); }
@@ -1251,22 +1279,102 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     return {lvl:lvl, music:music, world:world, tot:tot, cur:LV[lvl - 1], next:(lvl < LV.length ? LV[lvl] : null)};
   }
   window.klLevelInfo = calcLevel;
+  var CATS = [
+    {id:'tech', name:'Tecnologia', items:[{id:'laptop_pro', name:'Portatile nuovo', price:100, kind:'laptop', desc:'Schermo acceso e tastiera che funziona. Sostituisce il rottame sul tavolo.'}]},
+    {id:'audio', name:'Audio', items:[{id:'speaker_pro', name:'Cassa nuova', price:100, kind:'speaker', desc:'Cassa vera, senza nastro adesivo. Pulsa a tempo con la musica.'}]},
+    {id:'clothes', name:'Vestiti', items:[], soon:'Maglie, cappelli e occhiali firmati KENNYLAND.'},
+    {id:'floor', name:'Pavimenti e pareti', items:[], soon:'Cambia pavimento, pareti e luci della stanza.'},
+    {id:'dance', name:'Balli', items:[], soon:'Animazioni da ballare nella Dance Zone.'}
+  ];
+  var shopCat = 'tech', shopSel = null, shopBuilt = false;
+  function shopState(){
+    var L = calcLevel(), g = window.klGoals && window.klGoals.shop;
+    return {L:L, target:(g ? g.target : 10), comOk:!!(g && g.done), lvOk:(L.lvl >= BUY_LEVEL), members:(window.klMembers || 0)};
+  }
+  function preview(kind){
+    var s = document.createElementNS(NS, 'svg');
+    var g = el('g', {}, s);
+    if(kind === 'laptop'){
+      s.setAttribute('viewBox', '385 70 105 100');
+      box(g, 3.9, 0.45, 1.15, 0.75, 0, 28, '#2d1f4d', '#1a1230', '#150e26');
+      drawLaptop(g, 'pro');
+      var t = el('g', {}, g);
+      [38, 43, 48].forEach(function(hz, n){
+        el('polygon', {points:pts([Pz(4.1, 0.55, hz), Pz(4.1 + 0.5 - n * 0.1, 0.55, hz), Pz(4.1 + 0.5 - n * 0.1, 0.55, hz + 2), Pz(4.1, 0.55, hz + 2)]), fill:(n === 1 ? '#7b2fff' : '#3dffa0'), opacity:'.85'}, t);
+      });
+    } else {
+      s.setAttribute('viewBox', '-26 -46 52 62');
+      drawSpeaker(g, 'pro');
+    }
+    return s;
+  }
+  function lockIcon(){
+    var s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 48 56'); s.setAttribute('class', 'lkico');
+    el('path', {d:'M14 24 V16 a10 10 0 0 1 20 0 V24', fill:'none', stroke:'#fff', 'stroke-width':'5', 'stroke-linecap':'round'}, s);
+    el('rect', {x:6, y:24, width:36, height:28, rx:4, fill:'#15151f', stroke:'#fff', 'stroke-width':'4'}, s);
+    return s;
+  }
+  function buildShop(){
+    if(shopBuilt) return; shopBuilt = true;
+    var ov = document.createElement('div'); ov.className = 'shop-ov'; ov.id = 'shopModal'; ov.style.display = 'none';
+    ov.innerHTML = '<div class="shop-win" role="dialog" aria-label="Negozio"><div class="shop-title"><span>NEGOZIO</span><span class="shop-wal" id="shopWal"></span><button type="button" id="shopX" aria-label="Chiudi">✕</button></div>' +
+      '<div class="shop-body"><div class="shop-cats" id="shopCats"></div><div class="shop-main"><div class="shop-grid" id="shopGrid"></div><div class="shop-detail" id="shopDetail"></div></div></div></div>';
+    document.body.appendChild(ov);
+    $('shopX').addEventListener('click', closeShop);
+    ov.addEventListener('click', function(e){ if(e.target === ov) closeShop(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeShop(); });
+  }
+  function closeShop(){ var m = $('shopModal'); if(m) m.style.display = 'none'; }
   function renderShop(){
-    var box = $('shopPanel');
-    if(!box || box.style.display === 'none') return;
-    var L = calcLevel(), g = window.klGoals && window.klGoals.shop, open = !!(g && g.done);
-    box.innerHTML = '';
-    var p = document.createElement('p');
-    p.textContent = 'Il negozio apre quando la community arriva a ' + (g ? g.target : 10) + ' abitanti. Per comprare serve il livello ' + BUY_LEVEL + ': sale con ascolti e click di MUSICA e MONDO. Gli oggetti che hai in stanza ora sono quelli di partenza.';
-    box.appendChild(p);
-    ITEMS.forEach(function(it){
-      var row = document.createElement('div'); row.className = 'shop-item';
-      var n = document.createElement('b'); n.textContent = it.name;
-      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = it.price + ' monete';
-      var lk = document.createElement('span'); lk.className = 'lk';
-      lk.textContent = !open ? 'bloccato: serve la community a ' + (g ? g.target : 10) + ' abitanti' : (L.lvl < BUY_LEVEL ? 'bloccato: livello ' + BUY_LEVEL + ' (tu ' + L.lvl + ')' : 'acquisto in arrivo');
-      row.appendChild(n); row.appendChild(pr); row.appendChild(lk); box.appendChild(row);
+    var m = $('shopModal');
+    if(!m || m.style.display === 'none') return;
+    var S = shopState(), coins = wallet ? wallet.coins : 0;
+    $('shopWal').textContent = 'Monete ' + coins + ' · Livello ' + S.L.lvl;
+    var cats = $('shopCats'); cats.innerHTML = '';
+    CATS.forEach(function(c){
+      var b = document.createElement('button'); b.type = 'button';
+      b.className = 'shop-cat' + (c.id === shopCat ? ' on' : '') + (c.soon ? ' soon' : '');
+      b.textContent = c.name + (c.soon ? ' · presto' : '');
+      b.addEventListener('click', function(){ shopCat = c.id; shopSel = null; renderShop(); });
+      cats.appendChild(b);
     });
+    var cat = CATS.filter(function(c){ return c.id === shopCat; })[0] || CATS[0];
+    var grid = $('shopGrid'); grid.innerHTML = '';
+    var locked = !(S.comOk && S.lvOk);
+    if(!shopSel && cat.items.length) shopSel = cat.items[0].id;
+    cat.items.forEach(function(it){
+      var card = document.createElement('div'); card.className = 'shop-card' + (locked ? ' locked' : '') + (shopSel === it.id ? ' sel' : '');
+      card.appendChild(preview(it.kind));
+      if(locked) card.appendChild(lockIcon());
+      var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = it.name;
+      var pc = document.createElement('div'); pc.className = 'pc'; pc.textContent = it.price + ' monete';
+      card.appendChild(nm); card.appendChild(pc);
+      card.addEventListener('click', function(){ shopSel = it.id; renderShop(); });
+      grid.appendChild(card);
+    });
+    if(!cat.items.length){
+      for(var i = 0; i < 3; i++){
+        var ph = document.createElement('div'); ph.className = 'shop-card locked';
+        var q = document.createElement('div'); q.className = 'ph'; q.textContent = '?';
+        ph.appendChild(q); ph.appendChild(lockIcon());
+        var n2 = document.createElement('div'); n2.className = 'nm'; n2.textContent = 'In arrivo';
+        ph.appendChild(n2); grid.appendChild(ph);
+      }
+    }
+    var d = $('shopDetail'); d.innerHTML = '';
+    function line(ok, text){ var r = document.createElement('div'); r.className = 'rq ' + (ok ? 'ok' : 'no'); r.textContent = (ok ? '✓ ' : '✗ ') + text; d.appendChild(r); }
+    if(!cat.items.length){
+      var t = document.createElement('div'); t.textContent = cat.soon; d.appendChild(t);
+      return;
+    }
+    var it = cat.items.filter(function(x){ return x.id === shopSel; })[0] || cat.items[0];
+    var h = document.createElement('div'); h.className = 'dn'; h.textContent = it.name + ' — ' + it.price + ' monete'; d.appendChild(h);
+    var p = document.createElement('div'); p.className = 'dd'; p.textContent = it.desc; d.appendChild(p);
+    line(S.comOk, 'Community a ' + S.target + ' abitanti (ora ' + Math.min(S.members, S.target) + ')');
+    line(S.lvOk, 'Livello ' + BUY_LEVEL + ' (tu sei al ' + S.L.lvl + ')');
+    var buy = document.createElement('button'); buy.type = 'button'; buy.className = 'room-btn go'; buy.disabled = true;
+    buy.textContent = locked ? 'BLOCCATO' : 'COMPRA — presto';
+    d.appendChild(buy);
   }
   function paintLevel(){
     if(!active) return;
@@ -1276,11 +1384,10 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     $('lvlTxt').textContent = 'MUSICA ' + L.music + ' · MONDO ' + L.world + (L.next ? ' · prossimo livello a ' + L.next : ' · livello massimo');
     renderShop();
   }
-  $('roomShop').addEventListener('click', function(){
-    var box = $('shopPanel'); box.style.display = (box.style.display === 'none') ? 'block' : 'none'; renderShop();
-  });
+  $('roomShop').addEventListener('click', function(){ buildShop(); $('shopModal').style.display = 'flex'; renderShop(); });
   document.addEventListener('kl-stats', paintLevel);
   document.addEventListener('kl-goals', renderShop);
+  document.addEventListener('kl-logout', closeShop);
   document.addEventListener('kl-logout', leave);
 })();
 
