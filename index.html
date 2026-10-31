@@ -150,6 +150,34 @@ html.bgc body{background-image:none;}
 .viz-screen::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45));}
 .viz-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:8px;color:var(--muted);text-align:center;padding:10px;z-index:1;}
 .obj{cursor:pointer;}
+
+.acct-drop{width:max-content;max-width:min(400px,92vw);}
+.acct-row b{word-break:normal!important;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hub-pop{display:flex;align-items:center;gap:6px;color:var(--muted);} .hub-pop b{color:#fff;}
+.hub-pop svg{color:#b18cff;}
+.rec{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);animation:hubpulse 1.4s infinite;}
+.hub.anon .hub-me{display:none!important;}
+.mis{margin-top:12px;border:1px solid var(--line);background:var(--bg2);padding:10px 12px;}
+.mis-t{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--red);margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;}
+.mis-t span{color:var(--muted);}
+.mis-r{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px dashed var(--line);font-size:13px;} .mis-r:first-of-type{border-top:0;}
+.mis-c{width:15px;height:15px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--acid);flex:none;}
+.mis-r.done .mis-c{border-color:var(--acid);} .mis-r.done .mis-x{color:var(--muted);text-decoration:line-through;}
+.mis-x{flex:1;} .mis-p{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--acid);}
+.deck{position:relative;border:3px solid #2a2a3a;background:linear-gradient(#10101c,#0b0b14);box-shadow:inset 0 0 0 2px #0a0a12,0 0 0 1px rgba(123,47,255,.4);}
+.deck::before,.deck::after{content:"";position:absolute;top:7px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#777,#222);}
+.deck::before{left:8px;} .deck::after{right:8px;}
+.deck-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 24px;border-bottom:1px solid #2a2a3a;background:linear-gradient(#1a1a2e,#10101c);}
+.deck-top .mp-tabs{padding:0;margin-left:auto;}
+.deck-screen{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px;background:#07070d;}
+.mod{position:relative;border:2px solid #1c1c30;border-radius:5px;overflow:hidden;background:#07070d;box-shadow:inset 0 0 14px rgba(0,0,0,.9);}
+.mod canvas{display:block;width:100%;}
+.mod::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45));}
+.mod-l{position:absolute;top:5px;left:7px;z-index:2;font-family:'Press Start 2P',monospace;font-size:6px;color:#6a6e8a;}
+.m-spec{grid-column:span 4;} .m-vec{grid-column:span 2;} .m-wave{grid-column:span 2;} .m-sono{grid-column:span 4;} .m-vu{grid-column:span 6;}
+.deck-screen .viz-msg{position:absolute;inset:0;background:rgba(7,7,13,.72);z-index:3;}
+.deck .mp-list{border-top:1px solid #2a2a3a;max-height:170px;}
+@media (max-width:640px){.m-spec,.m-vec,.m-wave,.m-sono,.m-vu{grid-column:span 6;}.deck-top{padding:8px 22px;}}
 #bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 .hud{font-family:'Press Start 2P',monospace;}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
@@ -288,7 +316,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-cur" viewBox="0 0 16 16"><path d="M3 1l9 6.5-4 .8 2.4 5-2 1-2.4-5L3 12z" fill="currentColor"/></symbol><symbol id="i-spk" viewBox="0 0 16 16"><path d="M1 6h3l4-3.5v11L4 10H1z" fill="currentColor"/><path d="M10.5 5.2q2.3 2.8 0 5.6M12.4 3.4q4 4.6 0 9.2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-cur" viewBox="0 0 16 16"><path d="M3 1l9 6.5-4 .8 2.4 5-2 1-2.4-5L3 12z" fill="currentColor"/></symbol><symbol id="i-users" viewBox="0 0 16 16"><circle cx="5.5" cy="5" r="2.5" fill="currentColor"/><path d="M1 13c0-2.6 2-4 4.5-4S10 10.4 10 13z" fill="currentColor"/><circle cx="11.5" cy="5.5" r="2" fill="currentColor"/><path d="M11 9c2.3 0 4 1.2 4 3.5V13h-4.2c0-1.6-.5-3-1.6-3.8.4-.1.9-.2 1.8-.2z" fill="currentColor"/></symbol><symbol id="i-spk" viewBox="0 0 16 16"><path d="M1 6h3l4-3.5v11L4 10H1z" fill="currentColor"/><path d="M10.5 5.2q2.3 2.8 0 5.6M12.4 3.4q4 4.6 0 9.2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></symbol></svg>
 <div class="wrap">
 
 <header>
@@ -315,12 +343,14 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     </div>
   </nav>
 </header>
-<div class="hub" id="hubBar" style="display:none">
-  <div class="hub-lvl">LIV <b id="hubLvl">1</b></div>
-  <div class="hub-xp"><div class="hub-bar"><i id="hubFill"></i></div><span id="hubXp">XP 0</span></div>
-  <div class="hub-st"><i class="coin-dot"></i><b id="hubCoins">0</b></div>
-  <div class="hub-st">GIORNI <b id="hubStreak">0</b></div>
-  <button type="button" class="hub-bonus" id="hubBonus" style="display:none">BONUS!</button>
+<div class="hub" id="hubBar">
+  <div class="hub-pop" title="Abitanti iscritti"><svg width="14" height="14" aria-hidden="true"><use href="#i-users"/></svg><b id="memberCount">0</b></div>
+  <div class="hub-pop" title="Online ora"><i class="rec"></i><b id="onlineCount">0</b></div>
+  <div class="hub-me hub-lvl">LIV <b id="hubLvl">1</b></div>
+  <div class="hub-me hub-xp"><div class="hub-bar"><i id="hubFill"></i></div><span id="hubXp">XP 0</span></div>
+  <div class="hub-me hub-st"><i class="coin-dot"></i><b id="hubCoins">0</b></div>
+  <div class="hub-me hub-st">GIORNI <b id="hubStreak">0</b></div>
+  <button type="button" class="hub-bonus hub-me" id="hubBonus" style="display:none">BONUS!</button>
 </div>
 
 <div class="hero hero-gate">
@@ -356,8 +386,16 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       </svg>
       <div class="lock-text" id="lockText">click me!</div>
     </div>
-    <div class="mp" id="memberPlayer" style="display:none">
-      <div class="mp-tabs" id="mpTabs"></div>
+    <div class="mp deck" id="memberPlayer" style="display:none">
+      <div class="deck-top"><span class="viz-brand">KL-METER <i>MK1</i></span><span class="viz-led" id="vizLed"></span><div class="mp-tabs" id="mpTabs"></div></div>
+      <div class="deck-screen" id="deckScreen">
+        <div class="mod m-spec"><span class="mod-l">SPETTRO</span><canvas data-viz="spec"></canvas></div>
+        <div class="mod m-vec"><span class="mod-l">VECTOR</span><canvas data-viz="vec"></canvas></div>
+        <div class="mod m-wave"><span class="mod-l">ONDA</span><canvas data-viz="wave"></canvas></div>
+        <div class="mod m-sono"><span class="mod-l">SONOGRAMMA</span><canvas data-viz="sono"></canvas></div>
+        <div class="mod m-vu"><span class="mod-l">VU</span><canvas data-viz="vu"></canvas></div>
+        <div class="viz-msg" id="vizMsg">premi play per accendere il pannello</div>
+      </div>
       <div class="mp-list" id="mpList"></div>
       <div class="mp-bar">
         <div class="mp-now" id="mpNow">—</div>
@@ -371,10 +409,6 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
           </div>
         </div>
         <div class="mp-seek"><span id="mpCur">0:00</span><input type="range" id="mpSeek" min="0" max="1000" value="0" aria-label="Posizione"><span id="mpDur">0:00</span></div>
-      </div>
-      <div class="viz" id="viz">
-        <div class="viz-top"><span class="viz-brand">KL-METER <i>MK1</i></span><div class="viz-tabs" id="vizTabs"></div><span class="viz-led" id="vizLed"></span></div>
-        <div class="viz-screen"><canvas id="vizCv"></canvas><div class="viz-msg" id="vizMsg">premi play per accendere il pannello</div></div>
       </div>
     </div>
   </div>
@@ -397,21 +431,19 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
   <div class="grid2">
     <div class="panel">
       <h3>Musica</h3>
-      <div class="legend"><span><svg width="12" height="12"><use href="#i-cur"/></svg>click</span><span><svg width="12" height="12"><use href="#i-spk"/></svg>ascolti</span></div>
       <div class="stat3 head"><span></span><b class="colUser">TU</b><b>COMMUNITY</b></div>
-      <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-cur"/></svg>Spotify</span><b data-k="click_spotify" data-s="u">—</b><b data-k="click_spotify" data-s="t">0</b></div>
       <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-spk"/></svg>Spotify</span><b data-k="listen_spotify" data-s="u">—</b><b data-k="listen_spotify" data-s="t">0</b></div>
-      <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-cur"/></svg>SoundCloud</span><b data-k="click_soundcloud" data-s="u">—</b><b data-k="click_soundcloud" data-s="t">0</b></div>
       <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-spk"/></svg>SoundCloud</span><b data-k="listen_soundcloud" data-s="u">—</b><b data-k="listen_soundcloud" data-s="t">0</b></div>
-      <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-cur"/></svg>Player KENNYLAND</span><b data-k="click_player" data-s="u">—</b><b data-k="click_player" data-s="t">0</b></div>
       <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-spk"/></svg>Player KENNYLAND</span><b data-k="listen_player" data-s="u">—</b><b data-k="listen_player" data-s="t">0</b></div>
     </div>
     <div class="panel">
       <h3>Mondo</h3>
       <div class="stat3 head"><span></span><b class="colUser">TU</b><b>COMMUNITY</b></div>
-      <div class="stat3"><span>Abitanti</span><b>—</b><b id="memberCount">0</b></div>
-      <div class="stat3"><span>Online ora</span><b>—</b><b id="onlineCount">0</b></div>
-      <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-cur"/></svg>Room</span><b data-k="click_room" data-s="u">—</b><b data-k="click_room" data-s="t">0</b></div>
+      <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-cur"/></svg>Click ovunque</span><b data-k="click_page" data-s="u">—</b><b data-k="click_page" data-s="t">0</b></div>
+      <div class="stat3">Missioni completate<b data-k="missions_completed" data-s="u">—</b><b data-k="missions_completed" data-s="t">0</b></div>
+      <div class="stat3">Cambi outfit<b data-k="outfit_change" data-s="u">—</b><b data-k="outfit_change" data-s="t">0</b></div>
+      <div class="stat3">Interazioni oggetti<b data-k="object_interact" data-s="u">—</b><b data-k="object_interact" data-s="t">0</b></div>
+      <div class="stat3">Oggetti sbloccati<b data-k="items_unlocked" data-s="u">—</b><b data-k="items_unlocked" data-s="t">0</b></div>
       <div class="stat3">Monete generate<b data-k="coins_generated" data-s="u">—</b><b data-k="coins_generated" data-s="t">0</b></div>
       <div class="stat3">Monete spese<b data-k="coins_spent" data-s="u">—</b><b data-k="coins_spent" data-s="t">0</b></div>
     </div>
@@ -442,6 +474,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <g id="roomDeco"></g>
       <g id="roomAv"></g>
     </svg>
+    <div class="mis" id="roomMis" style="display:none"></div>
     <div class="room-foot">
       <button class="room-btn" id="roomLook" type="button">CAMBIA LOOK</button>
       <button class="room-btn" id="roomShop" type="button">NEGOZIO</button>
@@ -798,7 +831,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     try{ localStorage.setItem('kl_has_account', '1'); }catch(e){}
     document.getElementById('acctMenu').style.display = 'inline-flex';
     document.getElementById('menuNick').textContent = profile.nickname;
-    document.getElementById('menuEmail').textContent = (user && user.email) || '';
+    var em = document.getElementById('menuEmail'); em.textContent = (user && user.email) || ''; em.title = em.textContent;
     syncPrefs();
     document.dispatchEvent(new CustomEvent('kl-login',{detail:{nick:profile.nickname,sb:sb,user:user}}));
     var w = document.getElementById('welcomeLine');
@@ -954,6 +987,7 @@ function klMusic(on, key){
   var kk = key || 'x', was = !!klSources[kk];
   klSources[kk] = !!on;
   if(on && !was && window.klTrack){ var lm = {sc:'listen_soundcloud', sp:'listen_spotify'}[kk]; if(lm) klTrack(lm); }
+  if(on && !was && window.klMission) window.klMission('listen_any');
   klMusicOn = Object.keys(klSources).some(function(k){ return klSources[k]; });
 }
 function klSetAnalyser(a){ klAnalyser = a || null; }
@@ -1172,15 +1206,22 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var wg = el('g', {'class':'obj'}, dc);
     el('title', {}, wg).textContent = 'Armadio: cambia look';
     drawWardrobe(wg);
-    wg.addEventListener('click', function(e){ e.stopPropagation(); goTo('look'); });
+    wg.addEventListener('click', function(e){ e.stopPropagation(); objHit('click_wardrobe'); goTo('look'); });
     var tg = el('g', {'class':'obj'}, dc);
     el('title', {}, tg).textContent = 'Computer: negozio';
     box(tg, 3.3, 0.3, 2.3, 1.1, 0, 28, '#2d1f4d', '#1a1230', '#150e26');
     drawLaptop(tg, 'old');
-    tg.addEventListener('click', function(e){ e.stopPropagation(); goTo('shop'); });
+    tg.addEventListener('click', function(e){ e.stopPropagation(); objHit('click_pc'); goTo('shop'); });
     var g = el('g', {id:'roomSpk', transform:'translate(' + SPK[0] + ',' + SPK[1] + ')'}, dc);
     drawSpeaker(g, 'old');
+    g.setAttribute('class', 'obj');
+    el('title', {}, g).textContent = 'Cassa';
+    g.addEventListener('click', function(e){ e.stopPropagation(); spkBoost = 1; objHit('click_speaker'); });
+    sg.setAttribute('class', 'obj');
+    sg.addEventListener('click', function(e){ e.stopPropagation(); objHit('click_sign'); });
   }
+  var spkBoost = 0;
+  function objHit(m){ if(window.klTrack) klTrack('object_interact'); if(window.klMission) window.klMission(m); }
   function drawWardrobe(g){
     box(g, 0.4, 0.2, 1.1, 0.8, 0, 80, '#6b5a45', '#4d4030', '#3b3125');
     var y = 1.0;
@@ -1253,7 +1294,8 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var spk = $('roomSpk');
     if(spk && window.klKick){
       var k = window.klKick();
-      spk.setAttribute('transform', 'translate(' + SPK[0] + ',' + SPK[1] + ') scale(' + (1 + k * 0.06) + ')');
+      spkBoost *= 0.9;
+      spk.setAttribute('transform', 'translate(' + SPK[0] + ',' + SPK[1] + ') scale(' + (1 + k * 0.06 + spkBoost * 0.12) + ')');
     }
     if(t - dzT > 40){
       dzT = t;
@@ -1274,17 +1316,22 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       }
     }
   }
-  var STAND = {shop:{x:4.5, y:1.9}, look:{x:1.2, y:1.8}}, NEAR = 1.25;
+  var STAND = {shop:{x:4.5, y:1.9}, look:{x:1.2, y:1.8}}, NEAR = 1.25, pending = null;
   function near(a){ var q = STAND[a], dx = pos.x - q.x, dy = pos.y - q.y; return Math.sqrt(dx * dx + dy * dy) < NEAR; }
   function runAct(a){ if(a === 'shop') openShop(); else if(a === 'look') setLook(true); }
-  function goTo(a){ if(near(a)){ runAct(a); return; } target = {x:STAND[a].x, y:STAND[a].y}; }
-  function arrive(){ ['shop', 'look'].forEach(function(a){ if(near(a)) runAct(a); }); }
+  function goTo(a){ pending = a; if(near(a)){ pending = null; runAct(a); return; } target = {x:STAND[a].x, y:STAND[a].y}; }
+  function arrive(){
+    if(pos.x >= 2 && pos.x <= 6 && pos.y >= 2 && pos.y <= 6 && window.klMission) window.klMission('walk_dance');
+    var a = pending; pending = null;
+    if(a && near(a)) runAct(a);
+  }
   svg.addEventListener('click', function(e){
     var r = svg.getBoundingClientRect();
     var px = (e.clientX - r.left) / r.width * 640, py = (e.clientY - r.top) / r.height * 420 - 40;
     var u = (px - OX) / TW, v = (py - OY) / TH;
     var x = (u + v) / 2, y = (v - u) / 2;
     if(x < 0 || y < 0 || x > N || y > N) return;
+    pending = null;
     target = {x:Math.min(N - 0.5, Math.max(0.5, x)), y:Math.min(N - 0.5, Math.max(0.5, y))};
   });
   // ----- monete e bonus giornaliero -----
@@ -1320,6 +1367,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       wallet = {coins:row.total_coins, streak:row.cur_streak, last_claim:todayRome()};
       var p = $('roomPlus'); p.textContent = row.did_claim ? '+' + row.got : ''; p.classList.add('show');
       setTimeout(function(){ p.classList.remove('show'); }, 2400);
+      if(window.klMission) window.klMission('claim_bonus');
     }catch(e){}
     setCoins();
     if(window.klStatsRefresh) klStatsRefresh();
@@ -1348,7 +1396,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     $('roomLook').textContent = 'CAMBIA LOOK';
     build(); cloneAvatar(); watch();
     if(!rafId) rafId = requestAnimationFrame(loop);
-    loadWallet(); paintLevel();
+    loadWallet(); paintLevel(); loadMissions();
   }
   function leave(){
     active = false;
@@ -1357,10 +1405,62 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     wrap.style.display = 'none';
     editor.style.display = '';
     if(label) label.textContent = origLabel;
-    wallet = null; paintHub();
+    wallet = null; missions = []; paintMissions(); paintHub();
     ['menuCoins', 'menuCoins2'].forEach(function(id){ var e = $(id); if(e) e.textContent = 0; });
   }
   document.addEventListener('kl-login', function(e){ if(e.detail && e.detail.sb) enter(e.detail); });
+  // ----- missioni giornaliere -----
+  var MIS_T = {walk_dance:'Cammina fino alla Dance Zone', click_pc:'Clicca il computer', click_wardrobe:"Clicca l'armadio", click_speaker:'Clicca la cassa',
+    click_sign:"Clicca l'insegna al neon", open_shop:'Apri il negozio', change_look:"Cambia un colore all'avatar", listen_any:'Ascolta un brano', claim_bonus:'Ritira il bonus del giorno'};
+  var missions = [], misDay = '';
+  function flash(t){ var p = $('roomPlus'); p.textContent = t; p.classList.add('show'); setTimeout(function(){ p.classList.remove('show'); }, 2600); }
+  function paintMissions(){
+    var box = $('roomMis'); if(!box) return;
+    box.innerHTML = '';
+    if(!active || !missions.length){ box.style.display = 'none'; return; }
+    box.style.display = '';
+    var done = missions.filter(function(m){ return m.done; }).length;
+    var t = document.createElement('div'); t.className = 'mis-t'; t.textContent = 'MISSIONI DEL GIORNO';
+    var c = document.createElement('span'); c.textContent = done + ' / ' + missions.length; t.appendChild(c); box.appendChild(t);
+    missions.forEach(function(m){
+      var r = document.createElement('div'); r.className = 'mis-r' + (m.done ? ' done' : '');
+      var ck = document.createElement('span'); ck.className = 'mis-c'; ck.textContent = m.done ? '✓' : '';
+      var tx = document.createElement('span'); tx.className = 'mis-x'; tx.textContent = MIS_T[m.key] || m.key;
+      var pr = document.createElement('span'); pr.className = 'mis-p'; pr.textContent = '+' + m.reward;
+      r.appendChild(ck); r.appendChild(tx); r.appendChild(pr); box.appendChild(r);
+    });
+  }
+  async function loadMissions(){
+    if(!sb || !user) return;
+    try{ var r = await sb.rpc('my_missions'); if(!r.error && r.data){ missions = r.data; misDay = todayRome(); } }catch(e){}
+    paintMissions();
+  }
+  window.klMission = async function(key){
+    if(!active || !sb) return;
+    var m = missions.filter(function(x){ return x.key === key && !x.done; })[0];
+    if(!m) return;
+    m.done = true; paintMissions();
+    try{
+      var r = await sb.rpc('complete_mission', {p_key:key});
+      var row = r && r.data ? (Array.isArray(r.data) ? r.data[0] : r.data) : null;
+      if(!row){ m.done = false; paintMissions(); return; }
+      if(row.did){
+        if(!wallet) wallet = {coins:0, streak:0, last_claim:null};
+        wallet.coins = row.total_coins; setCoins(); flash('+' + row.got + ' monete · missione completata!');
+        if(window.klStatsRefresh) klStatsRefresh();
+      }
+    }catch(e){ m.done = false; paintMissions(); }
+  };
+  setInterval(function(){ if(active && misDay && misDay !== todayRome()) loadMissions(); }, 60000);
+  // cambi di outfit
+  var outT = 0;
+  function outfit(e){
+    var t = e.target; if(!t || !t.closest || t.closest('#saveAvatar')) return;
+    if(!t.closest('button, .sw, input, label')) return;
+    clearTimeout(outT);
+    outT = setTimeout(function(){ if(window.klTrack) klTrack('outfit_change'); if(window.klMission) window.klMission('change_look'); }, 900);
+  }
+  editor.addEventListener('click', outfit); editor.addEventListener('input', outfit);
   // ----- livello e negozio -----
   var LV = [0, 15, 40, 80, 140, 220, 330, 470, 650, 900], BUY_LEVEL = 5;
   function calcLevel(){
@@ -1474,7 +1574,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   }
   function paintHub(){
     var h = $('hubBar'); if(!h) return;
-    h.style.display = active ? 'flex' : 'none';
+    h.classList.toggle('anon', !active);
     if(!active) return;
     var L = calcLevel();
     $('hubLvl').textContent = L.lvl;
@@ -1494,7 +1594,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     $('lvlTxt').textContent = 'MUSICA ' + L.music + ' · MONDO ' + L.world + (L.next ? ' · prossimo livello a ' + L.next : ' · livello massimo');
     renderShop();
   }
-  function openShop(){ buildShop(); $('shopModal').style.display = 'flex'; renderShop(); }
+  function openShop(){ buildShop(); $('shopModal').style.display = 'flex'; renderShop(); if(window.klMission) window.klMission('open_shop'); }
   $('roomShop').addEventListener('click', openShop);
   document.addEventListener('kl-stats', paintLevel);
   document.addEventListener('kl-goals', renderShop);
@@ -1544,7 +1644,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     T[k] = (T[k] || 0) + 1;
     if(uid) U[k] = (U[k] || 0) + 1;
     paint();
-    document.dispatchEvent(new Event('kl-stats'));
+    if(k !== 'click_page') document.dispatchEvent(new Event('kl-stats'));
     if(!timer) timer = setTimeout(flush, 4000);
   };
   window.klStatsRefresh = refresh;
@@ -1556,6 +1656,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   // click sui link e nelle aree
   document.addEventListener('click', function(e){
     var t = e.target;
+    klTrack('click_page');
     var a = t.closest ? t.closest('a[href]') : null;
     if(a){
       var h = a.getAttribute('href') || '';
@@ -1675,38 +1776,26 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   setInterval(load, 60000);
 })();
 
-// ===== pannello visualizer del player (ispirato ai misuratori audio da studio) =====
+// ===== KL-METER: la skin del player, tutti i visualizer insieme =====
 (function(){
-  var cv = document.getElementById('vizCv'), tabs = document.getElementById('vizTabs'), msg = document.getElementById('vizMsg'), led = document.getElementById('vizLed');
-  if(!cv || !tabs) return;
-  var ctx = cv.getContext('2d'), W = 0, H = 0, mode = 'spec', visible = false, last = 0;
-  var MODES = [['spec', 'SPETTRO'], ['wave', 'ONDA'], ['vec', 'VECTOR'], ['sono', 'SONOGRAMMA'], ['vu', 'VU']];
-  try{ var sv = localStorage.getItem('kl_viz'); if(sv && MODES.some(function(m){ return m[0] === sv; })) mode = sv; }catch(e){}
+  var screen = document.getElementById('deckScreen'), msg = document.getElementById('vizMsg'), led = document.getElementById('vizLed');
+  var mods = [].map.call(document.querySelectorAll('canvas[data-viz]'), function(c){ return {id:c.getAttribute('data-viz'), cv:c, ctx:c.getContext('2d'), W:0, H:0}; });
+  if(!screen || !mods.length) return;
+  var HEIGHTS = {spec:150, vec:150, wave:110, sono:110, vu:130};
+  var ctx = null, W = 0, H = 0, visible = false, last = 0;
   var sc = document.createElement('canvas'), sctx = sc.getContext('2d');
   var fData = null, tData = null, lData = null, rData = null, bars = [], peaks = [], nL = 0, nR = 0, pkL = 0, pkR = 0, grad = null;
-  function buildTabs(){
-    tabs.innerHTML = '';
-    MODES.forEach(function(m){
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = m[1];
-      b.className = 'viz-tab' + (m[0] === mode ? ' on' : '');
-      b.addEventListener('click', function(){
-        mode = m[0]; try{ localStorage.setItem('kl_viz', mode); }catch(e){}
-        buildTabs(); clearAll();
-      });
-      tabs.appendChild(b);
+  function size(){
+    var d = Math.min(2, window.devicePixelRatio || 1);
+    mods.forEach(function(m){
+      var r = m.cv.getBoundingClientRect(); if(r.width < 30) return;
+      m.W = Math.round(r.width); m.H = HEIGHTS[m.id];
+      m.cv.style.height = m.H + 'px'; m.cv.width = m.W * d; m.cv.height = m.H * d; m.ctx.setTransform(d, 0, 0, d, 0, 0);
+      m.ctx.fillStyle = '#07070d'; m.ctx.fillRect(0, 0, m.W, m.H);
+      if(m.id === 'sono'){ sc.width = m.W; sc.height = m.H; sctx.fillStyle = '#07070d'; sctx.fillRect(0, 0, m.W, m.H); }
+      if(m.id === 'spec'){ grad = m.ctx.createLinearGradient(0, m.H, 0, 0); grad.addColorStop(0, '#7b2fff'); grad.addColorStop(0.55, '#3dffa0'); grad.addColorStop(0.88, '#3dffa0'); grad.addColorStop(1, '#ff3b3b'); }
     });
   }
-  function size(){
-    var r = cv.getBoundingClientRect(); if(r.width < 50) return;
-    var d = Math.min(2, window.devicePixelRatio || 1);
-    W = Math.round(r.width); H = Math.round(W * 0.3);
-    cv.style.height = H + 'px'; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
-    sc.width = W; sc.height = H;
-    grad = ctx.createLinearGradient(0, H, 0, 0);
-    grad.addColorStop(0, '#7b2fff'); grad.addColorStop(0.55, '#3dffa0'); grad.addColorStop(0.88, '#3dffa0'); grad.addColorStop(1, '#ff3b3b');
-    clearAll();
-  }
-  function clearAll(){ ctx.fillStyle = '#07070d'; ctx.fillRect(0, 0, W, H); sctx.fillStyle = '#07070d'; sctx.fillRect(0, 0, sc.width, sc.height); bars = []; peaks = []; }
   function gridBg(){
     ctx.fillStyle = '#07070d'; ctx.fillRect(0, 0, W, H);
     ctx.strokeStyle = '#15152a'; ctx.lineWidth = 1; ctx.beginPath();
@@ -1812,7 +1901,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var tl = level(lData), tr = mono ? tl : level(rData);
     nL += (tl - nL) * (tl > nL ? 0.35 : 0.08); nR += (tr - nR) * (tr > nR ? 0.35 : 0.08);
     pkL = Math.max(tl, pkL * 0.97); pkR = Math.max(tr, pkR * 0.97);
-    var r = Math.min(H * 0.38, W / 7);
+    var r = Math.min(H * 0.5, W / 6);
     dial(W * 0.27, H * 0.62, r, nL, pkL, 'L'); dial(W * 0.73, H * 0.62, r, nR, pkR, 'R');
   }
   function frame(now){
@@ -1825,15 +1914,18 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(!V){ msg.style.display = 'flex'; msg.textContent = (window.klVizFailed ? 'analisi audio non disponibile su questo brano' : 'premi play per accendere il pannello'); return; }
     msg.style.display = 'none';
     if(!fData || fData.length !== V.an.frequencyBinCount){ fData = new Uint8Array(V.an.frequencyBinCount); tData = new Uint8Array(V.an.fftSize); lData = new Uint8Array(V.aL.fftSize); rData = new Uint8Array(V.aR.fftSize); }
-    if(W < 50) size();
-    try{
-      if(mode === 'spec') spec(V); else if(mode === 'wave') wave(V); else if(mode === 'vec') vec(V); else if(mode === 'sono') sono(V); else vu(V);
-    }catch(e){}
+    mods.forEach(function(m){
+      if(m.W < 30) size();
+      if(m.W < 30) return;
+      ctx = m.ctx; W = m.W; H = m.H;
+      try{
+        if(m.id === 'spec') spec(V); else if(m.id === 'wave') wave(V); else if(m.id === 'vec') vec(V); else if(m.id === 'sono') sono(V); else vu(V);
+      }catch(e){}
+    });
   }
-  buildTabs();
   window.addEventListener('resize', size);
   if(window.IntersectionObserver){
-    new IntersectionObserver(function(en){ visible = en[0].isIntersecting; if(visible && W < 50) size(); }).observe(cv);
+    new IntersectionObserver(function(en){ visible = en[0].isIntersecting; if(visible) size(); }).observe(screen);
   } else visible = true;
   setTimeout(size, 50);
   requestAnimationFrame(frame);
