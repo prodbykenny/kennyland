@@ -71,6 +71,8 @@ h1 em{font-style:normal;color:var(--mag);}
 .modal p{color:var(--muted);font-size:13px;margin:0 0 18px;}
 .modal input{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--ink);padding:10px;margin-bottom:12px;font-family:'Space Grotesk',sans-serif;}
 .modal .btn{width:100%;margin-bottom:8px;text-align:center;}
+.modal label{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px;align-items:flex-start;line-height:1.4;}
+.modal .msg{font-size:12px;color:var(--mag);min-height:16px;margin:0 0 10px;}
 
 section{margin-top:56px;}
 .label{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;}
@@ -122,6 +124,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
   </div>
   <button class="enter-btn" id="enterBtn">ENTRA</button>
   <p class="gate-tag">new world for you, new live for us</p>
+  <p class="gate-tag" id="welcomeLine" style="display:none;margin-top:14px"></p>
 </div>
 
 <section>
@@ -150,7 +153,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <div class="panel">
       <h3>Hub</h3>
       <p>Abitanti, monete e classifica — si accendono con l'Area Personale.</p>
-      <div class="stat soon"><span>Abitanti iscritti</span><b>0</b></div>
+      <div class="stat"><span>Abitanti iscritti</span><b id="memberCount">0</b></div>
       <div class="stat soon"><span>Online ora</span><b>0</b></div>
       <div class="stat"><span>Click in KENNYLAND</span><b id="clickCount">0</b></div>
       <div class="soonbar"></div>
@@ -236,17 +239,20 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h3>Benvenuto in KENNYLAND</h3>
-    <p>Lascia nickname ed email per entrare nel mondo.</p>
-    <input type="text" id="inputNick" placeholder="Nickname">
-    <input type="email" id="inputEmail" placeholder="Email">
-    <button id="modalSubmit" class="btn">Conferma</button>
-    <button id="modalClose" class="btn alt" type="button">Annulla</button>
+    <h3 id="modalTitle">Benvenuto in KENNYLAND</h3>
+    <p id="modalText">Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.</p>
+    <input type="text" id="inputNick" placeholder="Nickname" maxlength="20" autocomplete="nickname">
+    <input type="email" id="inputEmail" placeholder="Email" autocomplete="email">
+    <label id="consentRow"><input type="checkbox" id="inputConsent" style="width:auto;margin:2px 0 0"><span>Acconsento all'uso della mia email per accedere a KENNYLAND.</span></label>
+    <p class="msg" id="modalMsg"></p>
+    <button id="modalSubmit" class="btn">Invia il link</button>
+    <button id="modalClose" class="btn alt" type="button">Chiudi</button>
   </div>
 </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 // Giorno 1: contatore giorni dalla nascita dell'hub
 (function(){
@@ -254,23 +260,6 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
   if(!launch){ launch = Date.now(); localStorage.setItem('kl_launch2', launch); }
   var days = Math.max(1, Math.floor((Date.now()-launch)/86400000)+1);
   document.getElementById('dayCounter').textContent = 'GIORNO ' + days;
-})();
-
-// bottone ENTRA + popup nickname/email
-(function(){
-  var enterBtn = document.getElementById('enterBtn');
-  var overlay = document.getElementById('modalOverlay');
-  enterBtn.addEventListener('click', function(){ overlay.classList.add('show'); });
-  document.getElementById('modalClose').addEventListener('click', function(){ overlay.classList.remove('show'); });
-  document.getElementById('modalSubmit').addEventListener('click', function(){
-    var nick = document.getElementById('inputNick').value.trim();
-    var email = document.getElementById('inputEmail').value.trim();
-    if(!nick){ alert('Inserisci un nickname per entrare.'); return; }
-    try{ localStorage.setItem('kl_nick', nick); localStorage.setItem('kl_email', email); }catch(e){}
-    overlay.classList.remove('show');
-    var av = document.getElementById('avatarSection');
-    if(av) av.scrollIntoView({behavior:'smooth'});
-  });
 })();
 
 // contatore click "scemo e divertente"
@@ -342,6 +331,156 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     document.getElementById('saveHint').textContent = 'Non sono riuscito a salvarlo su questo dispositivo — riprova.';
   }
 });
+
+// ===== KENNYLAND: registrazione reale con Supabase =====
+(function(){
+  var SB_URL = "https://honeqycgjwoegjuuatbb.supabase.co";
+  var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbmVxeWNnandvZWdqdXVhdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTAwNTMsImV4cCI6MjEwODk2NjA1M30.ovYuRVykNDjVgqFdbvIcM8-4Mt0VVE146gZPzGxsXbo";
+  var overlay = document.getElementById('modalOverlay');
+  var enterBtn = document.getElementById('enterBtn');
+  var msg = document.getElementById('modalMsg');
+  var nickInput = document.getElementById('inputNick');
+  var emailInput = document.getElementById('inputEmail');
+  var consent = document.getElementById('inputConsent');
+  var submitBtn = document.getElementById('modalSubmit');
+  var hint = document.getElementById('saveHint');
+  var sb = null;
+  try{ sb = window.supabase.createClient(SB_URL, SB_KEY); }catch(e){}
+  var user = null, profile = null, mode = 'signup', handling = false;
+  var cameFromLink = /access_token|code=|type=magiclink/.test(location.hash + location.search);
+
+  function say(t){ msg.textContent = t || ''; }
+  function validNick(n){ return /^[A-Za-z0-9_.-]{3,20}$/.test(n); }
+  function toAvatar(){ return JSON.parse(JSON.stringify(avState)); }
+
+  function openModal(m){
+    mode = m; say('');
+    var only = (m === 'nickonly');
+    emailInput.style.display = only ? 'none' : 'block';
+    document.getElementById('consentRow').style.display = only ? 'none' : 'flex';
+    document.getElementById('modalTitle').textContent = only ? 'Scegli il tuo nickname' : 'Benvenuto in KENNYLAND';
+    document.getElementById('modalText').textContent = only
+      ? 'Accesso confermato: manca solo il nome con cui ti vedranno gli altri.'
+      : 'Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.';
+    submitBtn.textContent = only ? 'Conferma' : 'Invia il link';
+    submitBtn.style.display = 'block';
+    overlay.classList.add('show');
+  }
+
+  function applyAvatar(a){
+    ['shirt','pants','shoes','accessori'].forEach(function(g){
+      if(a[g]){
+        applyGroup(g, a[g]);
+        var box = document.querySelector('.swatches[data-group="'+g+'"]');
+        box.querySelectorAll('.sw').forEach(function(s){ s.classList.toggle('active', s.dataset.c === a[g]); });
+      }
+    });
+    ['acc-cap','acc-glasses','acc-phones'].forEach(function(id){
+      var on = (a.accs || []).indexOf(id) > -1;
+      document.getElementById(id).style.display = on ? 'block' : 'none';
+      document.querySelector('[data-acc="'+id+'"]').classList.toggle('on', on);
+    });
+    avState.accs = a.accs || [];
+  }
+
+  async function nickTaken(n){
+    var r = await sb.from('profiles').select('id', {count:'exact', head:true}).ilike('nickname', n.replace(/_/g, '\\_'));
+    return (r.count || 0) > 0;
+  }
+
+  async function refreshMembers(){
+    if(!sb) return;
+    try{
+      var r = await sb.from('profiles').select('id', {count:'exact', head:true});
+      if(!r.error && r.count !== null) document.getElementById('memberCount').textContent = r.count;
+    }catch(e){}
+  }
+
+  function afterLogin(scroll){
+    enterBtn.textContent = 'SEI DENTRO';
+    var w = document.getElementById('welcomeLine');
+    w.style.display = 'block';
+    w.textContent = 'bentornato, ' + profile.nickname;
+    if(profile.avatar && Object.keys(profile.avatar).length){ applyAvatar(profile.avatar); }
+    hint.textContent = 'Sei dentro come ' + profile.nickname + ': il tuo avatar si salva sul tuo profilo.';
+    refreshMembers();
+    if(scroll){ document.getElementById('avatarSection').scrollIntoView({behavior:'smooth'}); }
+  }
+
+  async function handleSession(session){
+    if(handling) return;
+    handling = true;
+    try{
+      user = session ? session.user : null;
+      if(!user){ profile = null; return; }
+      var r = await sb.from('profiles').select('nickname,avatar').eq('id', user.id).maybeSingle();
+      profile = r.data || null;
+      if(!profile){
+        var pend = null;
+        try{ pend = localStorage.getItem('kl_pending_nick'); }catch(e){}
+        if(pend && validNick(pend)){
+          var ins = await sb.from('profiles').insert({id:user.id, nickname:pend, avatar:toAvatar()});
+          if(!ins.error){ profile = {nickname:pend, avatar:toAvatar()}; try{ localStorage.removeItem('kl_pending_nick'); }catch(e){} }
+        }
+      }
+      if(!profile){ openModal('nickonly'); return; }
+      afterLogin(cameFromLink);
+      cameFromLink = false;
+    }catch(e){
+    }finally{ handling = false; }
+  }
+
+  enterBtn.addEventListener('click', function(){
+    if(user && profile){ document.getElementById('avatarSection').scrollIntoView({behavior:'smooth'}); return; }
+    openModal('signup');
+  });
+  document.getElementById('modalClose').addEventListener('click', function(){ overlay.classList.remove('show'); });
+
+  submitBtn.addEventListener('click', async function(){
+    if(!sb){ say('Servizio non raggiungibile, riprova più tardi.'); return; }
+    var nick = nickInput.value.trim();
+    if(!validNick(nick)){ say('Nickname: da 3 a 20 caratteri tra lettere, numeri, _ . -'); return; }
+    submitBtn.disabled = true; say('Un attimo...');
+    try{
+      if(await nickTaken(nick)){ say('Nickname già preso, scegline un altro.'); return; }
+      if(mode === 'nickonly'){
+        var ins = await sb.from('profiles').insert({id:user.id, nickname:nick, avatar:toAvatar()});
+        if(ins.error){ say(ins.error.code === '23505' ? 'Nickname già preso, scegline un altro.' : 'Errore nel salvataggio, riprova.'); return; }
+        profile = {nickname:nick, avatar:toAvatar()};
+        overlay.classList.remove('show');
+        afterLogin(true);
+        return;
+      }
+      var email = emailInput.value.trim();
+      if(!/^\S+@\S+\.\S+$/.test(email)){ say("Inserisci un'email valida."); return; }
+      if(!consent.checked){ say("Serve il consenso all'uso dell'email."); return; }
+      try{ localStorage.setItem('kl_pending_nick', nick); }catch(e){}
+      var r = await sb.auth.signInWithOtp({email:email, options:{emailRedirectTo: location.origin + location.pathname}});
+      if(r.error){ say('Non riesco a inviare il link: ' + r.error.message); return; }
+      say('Link inviato! Controlla la tua email (anche lo spam) e clicca per entrare.');
+      submitBtn.style.display = 'none';
+    }catch(e){
+      say('Qualcosa non ha funzionato, riprova.');
+    }finally{ submitBtn.disabled = false; }
+  });
+
+  document.getElementById('saveAvatar').addEventListener('click', async function(){
+    if(!sb || !user || !profile) return;
+    try{
+      var r = await sb.from('profiles').update({avatar: toAvatar()}).eq('id', user.id);
+      hint.textContent = r.error ? 'Salvato solo su questo dispositivo: non sono riuscito ad aggiornare il profilo.' : 'Salvato sul tuo profilo ✓';
+    }catch(e){
+      hint.textContent = 'Salvato solo su questo dispositivo: non sono riuscito ad aggiornare il profilo.';
+    }
+  });
+
+  if(sb){
+    sb.auth.onAuthStateChange(function(ev, session){
+      setTimeout(function(){ handleSession(session); }, 0);
+    });
+    refreshMembers();
+  }
+})();
 </script>
 </body>
 </html>
