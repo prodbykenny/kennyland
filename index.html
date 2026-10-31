@@ -33,6 +33,20 @@ body{
   background-attachment:fixed;
 }
 .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:28px 20px 80px;}
+html.bgc body{background-image:none;}
+#roomWrap{display:none;}
+.room-hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.room-hud .stat{display:flex;gap:14px;align-items:center;font-size:14px;color:var(--muted);}
+.room-hud .stat b{color:var(--ink);}
+.room-btn{background:transparent;border:1px solid var(--line);color:var(--ink);padding:9px 14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;}
+.room-btn:hover:not(:disabled){border-color:var(--acid);color:var(--acid);}
+.room-btn:disabled{opacity:.5;cursor:default;}
+.room-btn.go{border-color:var(--acid);color:var(--acid);}
+.room-svg{width:100%;height:auto;display:block;background:var(--bg2);border:1px solid var(--line);touch-action:manipulation;cursor:pointer;}
+.room-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;}
+.room-note{font-size:12px;color:var(--muted);}
+#roomPlus{color:var(--acid);font-weight:700;opacity:0;transition:opacity .4s;}
+#roomPlus.show{opacity:1;}
 #bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 .hud{font-family:'Press Start 2P',monospace;}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
@@ -177,7 +191,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a>
     <a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a>
     <div class="acct" id="acctMenu" style="display:none">
-      <span class="coin-chip" title="Le monete arrivano presto"><i class="coin-dot"></i><b id="menuCoins">0</b></span>
+      <span class="coin-chip" title="Le tue monete"><i class="coin-dot"></i><b id="menuCoins">0</b></span>
       <button type="button" class="acct-btn" id="acctBtn">IL TUO ACCOUNT ▾</button>
       <div class="acct-drop">
         <div class="acct-row"><span class="acct-k">Nickname</span><b id="menuNick"></b></div>
@@ -279,8 +293,27 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 </section>
 
 <section id="avatarSection">
-  <div class="label">CREA IL TUO PRIMO PROTOTIPO — WORKING PROGRESS..</div>
-  <div class="panel avatar-area">
+  <div class="label" id="avatarLabel">CREA IL TUO PRIMO PROTOTIPO — WORKING PROGRESS..</div>
+<div id="roomWrap">
+  <div class="panel">
+    <div class="room-hud">
+      <div class="stat"><span>Monete <b id="roomCoins">0</b></span><span>Giorni di fila <b id="roomStreak">0</b></span><span id="roomPlus"></span></div>
+      <button class="room-btn go" id="roomClaim" type="button" disabled>BONUS DEL GIORNO</button>
+    </div>
+    <svg class="room-svg" id="roomSvg" viewBox="0 0 640 380" role="img" aria-label="La tua stanza">
+      <g id="roomFloor"></g>
+      <g id="roomWalls"></g>
+      <g id="roomDeco"></g>
+      <g id="roomAv"></g>
+    </svg>
+    <div class="room-foot">
+      <button class="room-btn" id="roomLook" type="button">CAMBIA LOOK</button>
+      <button class="room-btn" type="button" disabled title="Presto">NEGOZIO — presto</button>
+      <span class="room-note">Tocca il pavimento per camminare. Vestiti e mobili per arredare la stanza arrivano presto.</span>
+    </div>
+  </div>
+</div>
+  <div class="panel avatar-area" id="avatarEditor">
     <div class="stage">
       <svg width="130" height="195" viewBox="0 0 120 180">
         <rect x="40" y="8" width="40" height="36" rx="6" fill="#c9ccdb" stroke="#0a0a12" stroke-width="3"/>
@@ -630,7 +663,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     document.getElementById('menuNick').textContent = profile.nickname;
     document.getElementById('menuEmail').textContent = (user && user.email) || '';
     syncPrefs();
-    document.dispatchEvent(new Event('kl-login'));
+    document.dispatchEvent(new CustomEvent('kl-login',{detail:{nick:profile.nickname,sb:sb,user:user}}));
     var w = document.getElementById('welcomeLine');
     w.style.display = 'block';
     w.textContent = 'bentornato, ' + profile.nickname;
@@ -790,21 +823,40 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   var ctx = (cv && cv.getContext) ? cv.getContext('2d') : null;
   if(!ctx) return;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var CELL = 28, W = 0, H = 0, cols = 0, rows = 0, sq = [];
-  var last = 0, lastSpawn = 0, nextBeat = 0, beatN = 0;
-  var energy = 0, bassAvg = 0, lastBeat = 0, waveF = 0.006, nextWave = 0, data = null;
-  var bands = [0, 0, 0, 0, 0, 0, 0, 0];
+  document.documentElement.classList.add('bgc');
+  var CELL = 28, W = 0, H = 0, cols = 0, rows = 0, nx = 0, ny = 0, VX = null, VY = null, sq = [];
+  var last = 0, lastSpawn = 0, nextBeat = 0, beatN = 0, lastOn = 0, dirty = true;
+  var kick = 0, glitch = 0, fluxAvg = 0.02, prev = null, data = null, rippleT = -1e9, rx = 0, ry = 0;
+  var ph1 = 0, ph2 = 0, gRows = [], bands = [0,0,0,0,0,0,0,0], bass = 0, high = 0;
   var EDGES = [0, 2, 4, 7, 12, 20, 36, 64, 128];
   function rnd(a, b){ return a + Math.random() * (b - a); }
-  function resize(){ W = window.innerWidth; H = window.innerHeight; cv.width = W; cv.height = H; cols = Math.ceil(W / CELL); rows = Math.ceil(H / CELL); }
+  function resize(){
+    W = window.innerWidth; H = window.innerHeight; cv.width = W; cv.height = H;
+    cols = Math.ceil(W / CELL); rows = Math.ceil(H / CELL); nx = cols + 1; ny = rows + 1;
+    VX = new Float32Array(nx * ny); VY = new Float32Array(nx * ny); dirty = true;
+  }
   resize();
   window.addEventListener('resize', resize);
-  function spawn(n, amax){
+  function spawn(n, a){
     for(var i = 0; i < n; i++){
-      if(sq.length > 320) break;
-      sq.push({x:Math.floor(Math.random() * cols), y:Math.floor(Math.random() * rows), a:amax * (0.5 + Math.random() * 0.5),
-        c:(Math.random() < 0.5 ? '61,255,160' : '123,47,255'),
-        f1:rnd(0.003, 0.02), f2:rnd(0.003, 0.02), f3:rnd(0.004, 0.018), p1:rnd(0, 6.28), p2:rnd(0, 6.28)});
+      if(sq.length > 360) break;
+      sq.push({x:Math.floor(Math.random() * cols), y:Math.floor(Math.random() * rows),
+        a:a * (0.6 + Math.random() * 0.4), c:(Math.random() < 0.5 ? '61,255,160' : '123,47,255')});
+    }
+  }
+  // un colpo (onset) di forza 0..1: accende quadretti, scuote le linee
+  function hit(now, s){
+    kick = Math.max(kick, s);
+    spawn(Math.round(8 + s * 90), 0.2 + s * 0.45);
+    rippleT = now; rx = rnd(0, W); ry = rnd(0, H);
+    ph1 = rnd(0, 6.28); ph2 = rnd(0, 6.28);
+    if(s > 0.7 || Math.random() < 0.3){
+      glitch = s; gRows = [];
+      var n = 2 + Math.floor(s * 3);
+      for(var i = 0; i < n; i++){
+        var y0 = rnd(0, H), hh = rnd(14, 70);
+        gRows.push({y0:y0, y1:y0 + hh, dx:(Math.random() < 0.5 ? -1 : 1) * rnd(10, 46)});
+      }
     }
   }
   function frame(now){
@@ -813,69 +865,265 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(now - last < 33) return;
     var dt = Math.min(now - last, 100);
     last = now;
-    var real = false;
     if(!klMusicOn){
-      nextBeat = 0; energy *= 0.8;
-      for(var q = 0; q < 8; q++) bands[q] *= 0.8;
+      nextBeat = 0; prev = null;
       if(now - lastSpawn > 160){ spawn(1, 0.16); lastSpawn = now; }
     } else if(klAnalyser){
-      real = true;
       try{
-        if(!data || data.length !== klAnalyser.frequencyBinCount) data = new Uint8Array(klAnalyser.frequencyBinCount);
+        if(!data || data.length !== klAnalyser.frequencyBinCount){ data = new Uint8Array(klAnalyser.frequencyBinCount); prev = null; }
         klAnalyser.getByteFrequencyData(data);
-        var bins = data.length;
+        var bins = data.length, flux = 0;
+        if(prev){ for(var k = 0; k < bins; k++){ var d = data[k] - prev[k]; if(d > 0) flux += d; } flux /= bins * 255; }
+        else prev = new Uint8Array(bins);
+        prev.set(data);
         for(var b = 0; b < 8; b++){
           var lo = Math.floor(EDGES[b] * bins / 128), hi = Math.max(lo + 1, Math.floor(EDGES[b + 1] * bins / 128));
-          var sum = 0; for(var k = lo; k < hi; k++) sum += data[k];
+          var sum = 0; for(var q = lo; q < hi; q++) sum += data[q];
           bands[b] = sum / (hi - lo) / 255;
         }
-        var bass = (bands[0] + bands[1]) / 2;
-        energy = Math.max(energy * 0.88, bass);
-        if(bass > 0.3 && bass > bassAvg * 1.18 && now - lastBeat > 170){
-          lastBeat = now;
-          spawn(Math.round(20 + bass * 60), 0.28 + bass * 0.25);
+        bass = (bands[0] + bands[1]) / 2;
+        high = (bands[5] + bands[6] + bands[7]) / 3;
+        var ratio = flux / (fluxAvg + 0.008);
+        if(ratio > 1.7 && now - lastOn > 110 && (bass > 0.08 || flux > 0.02)){
+          lastOn = now;
+          hit(now, Math.min(1, 0.25 + (ratio - 1.7) / 2.5));
         }
-        bassAvg = bassAvg * 0.94 + bass * 0.06;
-        spawn(Math.floor(energy * 5), 0.2);
+        fluxAvg = fluxAvg * 0.95 + flux * 0.05;
+        spawn(Math.floor(bass * 3), 0.16);
       }catch(e){ klAnalyser = null; }
     } else {
       if(!nextBeat) nextBeat = now;
       if(now >= nextBeat){
         beatN++;
-        var strong = (beatN % 4 === 1);
-        spawn(strong ? 70 : 28, strong ? 0.5 : 0.32);
-        energy = strong ? 1 : 0.6;
+        hit(now, (beatN % 4 === 1) ? 1 : 0.55);
         nextBeat += 60000 / KL_BPM;
         if(nextBeat < now) nextBeat = now + 60000 / KL_BPM;
       }
-      energy *= 0.9;
-      for(var q2 = 0; q2 < 8; q2++) bands[q2] = energy * (0.6 + 0.4 * Math.sin(now * 0.004 * (q2 + 1)));
+      bass = kick * 0.6; high = 0.2 + 0.2 * Math.sin(now * 0.01);
     }
-    if(now > nextWave){ waveF = rnd(0.002, 0.012); nextWave = now + rnd(600, 1400); }
+    kick *= Math.exp(-dt / 150); if(kick < 0.01) kick = 0;
+    glitch *= Math.exp(-dt / 110); if(glitch < 0.02) glitch = 0;
+    var moving = kick > 0 || glitch > 0;
+    if(!moving && !sq.length && !dirty) return;
+    dirty = false;
+    // posizioni dei vertici: dritti quando e' calmo, deformati quando c'e' un colpo
+    var ws = 1 + high * 2, w = kick * CELL * 0.8, rr = (now - rippleT) * 0.9, ringOn = kick > 0 && rr < 1.2 * Math.max(W, H);
+    for(var j = 0; j < ny; j++){
+      for(var i = 0; i < nx; i++){
+        var x = i * CELL, y = j * CELL, ox = 0, oy = 0;
+        if(kick > 0){
+          ox += Math.sin(y * 0.021 + now * 0.004 * ws + ph1) * w * 0.6;
+          oy += Math.sin(x * 0.017 + now * 0.005 * ws + ph2) * w * 0.6;
+          if(ringOn){
+            var ddx = x - rx, ddy = y - ry, dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1, t = (dd - rr) / 70;
+            var g = Math.exp(-t * t) * kick * CELL * 1.1;
+            ox += ddx / dd * g; oy += ddy / dd * g;
+          }
+        }
+        if(glitch > 0){
+          for(var r = 0; r < gRows.length; r++){ var gr = gRows[r]; if(y >= gr.y0 && y < gr.y1) ox += gr.dx * glitch; }
+        }
+        VX[j * nx + i] = x + ox; VY[j * nx + i] = y + oy;
+      }
+    }
     ctx.clearRect(0, 0, W, H);
-    for(var i = sq.length - 1; i >= 0; i--){
-      var s = sq[i];
-      s.a -= dt * (klMusicOn ? 0.0009 : 0.00006);
-      if(s.a <= 0.01){ sq.splice(i, 1); continue; }
+    // quadretti accesi: restano nella loro cella (ne seguono la forma)
+    for(var n = sq.length - 1; n >= 0; n--){
+      var s = sq[n];
+      s.a -= dt * (klMusicOn ? 0.0012 : 0.00006);
+      if(s.a <= 0.01){ sq.splice(n, 1); continue; }
+      if(s.x >= cols || s.y >= rows) continue;
+      var i0 = s.y * nx + s.x;
       ctx.fillStyle = 'rgba(' + s.c + ',' + s.a.toFixed(3) + ')';
-      var amp = 0;
-      if(klMusicOn || energy > 0.02){
-        var bi = Math.min(7, Math.floor(s.x / cols * 8));
-        amp = Math.min(1.3, (real ? bands[bi] * 1.4 : bands[bi]) + energy * 0.25);
+      ctx.beginPath();
+      ctx.moveTo(VX[i0], VY[i0]); ctx.lineTo(VX[i0 + 1], VY[i0 + 1]);
+      ctx.lineTo(VX[i0 + nx + 1], VY[i0 + nx + 1]); ctx.lineTo(VX[i0 + nx], VY[i0 + nx]);
+      ctx.closePath(); ctx.fill();
+    }
+    // linee della griglia
+    var k2 = Math.min(1, kick * 0.6 + glitch * 0.3);
+    ctx.strokeStyle = 'rgb(' + Math.round(42 + 19 * k2) + ',' + Math.round(42 + 213 * k2 * 0.8) + ',' + Math.round(58 + 102 * k2 * 0.8) + ')';
+    ctx.lineWidth = 1;
+    var off = moving ? 0 : 0.5;
+    ctx.beginPath();
+    for(var jj = 0; jj < ny; jj++){
+      ctx.moveTo(VX[jj * nx] + off, VY[jj * nx] + off);
+      for(var ii = 1; ii < nx; ii++) ctx.lineTo(VX[jj * nx + ii] + off, VY[jj * nx + ii] + off);
+    }
+    for(var i2 = 0; i2 < nx; i2++){
+      ctx.moveTo(VX[i2] + off, VY[i2] + off);
+      for(var j2 = 1; j2 < ny; j2++) ctx.lineTo(VX[j2 * nx + i2] + off, VY[j2 * nx + i2] + off);
+    }
+    ctx.stroke();
+  }
+  window.klKick = function(){ return kick; };
+  requestAnimationFrame(frame);
+})();
+
+// ===== la stanza (Room) del tuo avatar =====
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  var $ = function(id){ return document.getElementById(id); };
+  var wrap = $('roomWrap'), editor = $('avatarEditor'), label = $('avatarLabel'), svg = $('roomSvg');
+  if(!wrap || !editor || !svg) return;
+  var origLabel = label ? label.textContent : '';
+  var N = 8, OX = 320, OY = 60, TW = 32, TH = 16, WALL = 130;
+  var sb = null, user = null, nick = '', wallet = null, active = false;
+  var pos = {x:4, y:4}, target = null, face = 1, rafId = 0, lastT = 0, walkT = 0;
+  function iso(x, y){ return [OX + (x - y) * TW, OY + (x + y) * TH]; }
+  function el(name, attrs, parent){
+    var e = document.createElementNS(NS, name);
+    for(var k in attrs) e.setAttribute(k, attrs[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function pts(arr){ return arr.map(function(p){ return p[0] + ',' + p[1]; }).join(' '); }
+  function build(){
+    var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco');
+    fl.innerHTML = ''; wl.innerHTML = ''; dc.innerHTML = '';
+    var top = iso(0, 0), lft = iso(0, N), rgt = iso(N, 0);
+    el('polygon', {points:pts([top, [top[0], top[1] - WALL], [lft[0], lft[1] - WALL], lft]), fill:'#14142a', stroke:'#2a2a3a'}, wl);
+    el('polygon', {points:pts([top, [top[0], top[1] - WALL], [rgt[0], rgt[1] - WALL], rgt]), fill:'#1b1233', stroke:'#2a2a3a'}, wl);
+    for(var i = 0; i < N; i++){
+      for(var j = 0; j < N; j++){
+        el('polygon', {points:pts([iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1)]),
+          fill:((i + j) % 2 ? '#101020' : '#161628'), stroke:'#2a2a3a', 'stroke-width':'1'}, fl);
       }
-      var size = CELL - 1;
-      if(amp > 0.02){
-        var dx = Math.sin(now * s.f1 + s.p1) * CELL * 0.55 * amp + Math.sin(s.y * 0.6 + now * waveF) * CELL * 0.35 * amp;
-        var dy = Math.cos(now * s.f2 + s.p2) * CELL * 0.55 * amp;
-        var sc = 1 + Math.sin(now * s.f3 + s.p1) * 0.5 * amp;
-        var w = size * sc;
-        ctx.fillRect(s.x * CELL + CELL / 2 + dx - w / 2, s.y * CELL + CELL / 2 + dy - w / 2, w, w);
-      } else {
-        ctx.fillRect(s.x * CELL + 1, s.y * CELL + 1, size, size);
-      }
+    }
+    // tappeto
+    el('polygon', {points:pts([iso(2.5, 2.5), iso(5.5, 2.5), iso(5.5, 5.5), iso(2.5, 5.5)]), fill:'rgba(123,47,255,.28)', stroke:'#7b2fff', 'stroke-width':'1.5'}, dc);
+    // insegna al neon con il nickname sulla parete sinistra
+    var st = iso(0, 6.6);
+    var t = el('text', {x:0, y:0, 'font-family':'Press Start 2P, monospace', 'font-size':'11', fill:'#3dffa0',
+      transform:'matrix(1,-0.5,0,1,' + st[0] + ',' + (st[1] - 70) + ')'}, dc);
+    t.setAttribute('id', 'roomSign');
+    t.textContent = (nick || '').toUpperCase().slice(0, 14) + ' ROOM';
+    // cassa che pulsa con la musica
+    var s = iso(7, 1.2);
+    var g = el('g', {id:'roomSpk', transform:'translate(' + s[0] + ',' + s[1] + ')'}, dc);
+    el('polygon', {points:'-16,0 0,8 16,0 16,-34 0,-26 -16,-34', fill:'#1a1a2e', stroke:'#2a2a3a'}, g);
+    el('circle', {cx:'-6', cy:'-12', r:'5', fill:'none', stroke:'#3dffa0', 'stroke-width':'1.5', id:'roomSpkC'}, g);
+    el('circle', {cx:'6', cy:'-10', r:'4', fill:'none', stroke:'#7b2fff', 'stroke-width':'1.5'}, g);
+  }
+  // copia dell'avatar dell'editor (senza id duplicati)
+  function cloneAvatar(){
+    var src = editor.querySelector('.stage svg');
+    var g = $('roomAv');
+    if(!src) return;
+    var html = src.innerHTML.replace(/\sid="[^"]*"/g, '');
+    var av = g.querySelector('.av');
+    if(!av){
+      av = el('g', {'class':'av'}, g);
+      el('ellipse', {cx:0, cy:0, rx:'16', ry:'7', fill:'rgba(0,0,0,.45)', 'class':'sh'}, g);
+      g.insertBefore(g.lastChild, av);
+    }
+    av.innerHTML = html;
+    place();
+  }
+  function place(){
+    var p = iso(pos.x, pos.y), g = $('roomAv'), av = g.querySelector('.av'), sh = g.querySelector('.sh');
+    var bob = target ? Math.abs(Math.sin(walkT * 9)) * 3 : 0, sc = 0.4;
+    if(sh){ sh.setAttribute('cx', p[0]); sh.setAttribute('cy', p[1]); }
+    if(av) av.setAttribute('transform', 'translate(' + p[0] + ',' + (p[1] - bob) + ') scale(' + (sc * face) + ',' + sc + ') translate(-60,-176)');
+  }
+  function loop(t){
+    rafId = requestAnimationFrame(loop);
+    var dt = Math.min(0.05, (t - lastT) / 1000 || 0); lastT = t;
+    if(target){
+      var dx = target.x - pos.x, dy = target.y - pos.y, d = Math.sqrt(dx * dx + dy * dy), step = 2.2 * dt;
+      walkT += dt;
+      if(d <= step){ pos.x = target.x; pos.y = target.y; target = null; }
+      else { pos.x += dx / d * step; pos.y += dy / d * step; var sd = (dx - dy); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; }
+      place();
+    }
+    var spk = $('roomSpk');
+    if(spk && window.klKick){
+      var k = window.klKick();
+      var p = iso(7, 1.2);
+      spk.setAttribute('transform', 'translate(' + p[0] + ',' + p[1] + ') scale(' + (1 + k * 0.12) + ')');
     }
   }
-  requestAnimationFrame(frame);
+  svg.addEventListener('click', function(e){
+    var r = svg.getBoundingClientRect();
+    var px = (e.clientX - r.left) / r.width * 640, py = (e.clientY - r.top) / r.height * 380;
+    var u = (px - OX) / TW, v = (py - OY) / TH;
+    var x = (u + v) / 2, y = (v - u) / 2;
+    if(x < 0 || y < 0 || x > N || y > N) return;
+    target = {x:Math.min(N - 0.5, Math.max(0.5, x)), y:Math.min(N - 0.5, Math.max(0.5, y))};
+  });
+  // ----- monete e bonus giornaliero -----
+  function todayRome(d){ return (d || new Date()).toLocaleDateString('en-CA', {timeZone:'Europe/Rome'}); }
+  function setCoins(){
+    var c = wallet ? wallet.coins : 0;
+    ['roomCoins', 'menuCoins', 'menuCoins2'].forEach(function(id){ var e = $(id); if(e) e.textContent = c; });
+    $('roomStreak').textContent = wallet ? wallet.streak : 0;
+    var btn = $('roomClaim');
+    if(!wallet){ btn.textContent = 'BONUS DEL GIORNO'; btn.disabled = true; return; }
+    var today = todayRome();
+    if(wallet.last_claim === today){ btn.textContent = 'BONUS RITIRATO — TORNA DOMANI'; btn.disabled = true; return; }
+    var y = todayRome(new Date(Date.now() - 86400000));
+    var nextStreak = (wallet.last_claim === y) ? wallet.streak + 1 : 1;
+    btn.textContent = 'RITIRA BONUS +' + (10 + Math.min(nextStreak - 1, 6) * 5);
+    btn.disabled = false;
+  }
+  async function loadWallet(){
+    wallet = null;
+    try{
+      var r = await sb.from('wallets').select('coins,streak,last_claim').eq('user_id', user.id).maybeSingle();
+      if(!r.error) wallet = r.data || {coins:0, streak:0, last_claim:null};
+    }catch(e){}
+    setCoins();
+  }
+  $('roomClaim').addEventListener('click', async function(){
+    var btn = $('roomClaim'); btn.disabled = true;
+    try{
+      var r = await sb.rpc('claim_daily');
+      if(r.error || !r.data){ setCoins(); return; }
+      var row = Array.isArray(r.data) ? r.data[0] : r.data;
+      wallet = {coins:row.total_coins, streak:row.cur_streak, last_claim:todayRome()};
+      var p = $('roomPlus'); p.textContent = row.did_claim ? '+' + row.got : ''; p.classList.add('show');
+      setTimeout(function(){ p.classList.remove('show'); }, 2400);
+    }catch(e){}
+    setCoins();
+  });
+  $('roomLook').addEventListener('click', function(){
+    var open = editor.style.display !== 'none';
+    editor.style.display = open ? 'none' : '';
+    $('roomLook').textContent = open ? 'CAMBIA LOOK' : 'CHIUDI LOOK';
+    if(open) cloneAvatar();
+    else editor.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+  // aggiorna la copia quando l'avatar cambia
+  var obs = null, obsT = 0;
+  function watch(){
+    var src = editor.querySelector('.stage svg');
+    if(!src || !window.MutationObserver) return;
+    obs = new MutationObserver(function(){ clearTimeout(obsT); obsT = setTimeout(cloneAvatar, 80); });
+    obs.observe(src, {attributes:true, subtree:true});
+  }
+  function enter(d){
+    sb = d.sb; user = d.user; nick = d.nick || '';
+    active = true;
+    if(label) label.textContent = nick + ' Room';
+    wrap.style.display = 'block';
+    editor.style.display = 'none';
+    $('roomLook').textContent = 'CAMBIA LOOK';
+    build(); cloneAvatar(); watch();
+    if(!rafId) rafId = requestAnimationFrame(loop);
+    loadWallet();
+  }
+  function leave(){
+    active = false;
+    if(obs){ obs.disconnect(); obs = null; }
+    if(rafId){ cancelAnimationFrame(rafId); rafId = 0; }
+    wrap.style.display = 'none';
+    editor.style.display = '';
+    if(label) label.textContent = origLabel;
+    wallet = null;
+    ['menuCoins', 'menuCoins2'].forEach(function(id){ var e = $(id); if(e) e.textContent = 0; });
+  }
+  document.addEventListener('kl-login', function(e){ if(e.detail && e.detail.sb) enter(e.detail); });
+  document.addEventListener('kl-logout', leave);
 })();
 
 // il player SoundCloud avvisa quando parte o si ferma
