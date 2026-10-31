@@ -45,11 +45,18 @@ html.bgc body{background-image:none;}
 .room-btn.go{border-color:var(--acid);color:var(--acid);}
 .room-svg{width:100%;height:auto;display:block;touch-action:manipulation;cursor:pointer;}
 .room-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;}
-.room-note{font-size:12px;color:var(--muted);}
 .room-stage{position:relative;width:min(1180px,calc(100vw - 24px));left:50%;transform:translateX(-50%);border:1px solid var(--line);background:radial-gradient(ellipse at 50% 40%,#161628 0,#0a0a12 80%);overflow:hidden;box-shadow:0 0 0 1px #000,0 0 60px rgba(123,47,255,.18) inset;}
 .room-stage .room-svg{border:0;background:transparent;max-height:82vh;}
 .room-vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.55) 100%);}
-.room-note{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--muted);max-width:60%;pointer-events:none;text-shadow:0 1px 2px #000;}
+.room-tip{position:absolute;left:14px;top:14px;z-index:4;background:rgba(24,16,48,.9);border:2px solid #b18cff;border-radius:26px 26px 26px 8px;padding:9px 16px;color:#f4f1ff;font-family:'Space Grotesk',sans-serif;font-size:13px;line-height:1.45;text-align:left;cursor:pointer;max-width:min(330px,58%);box-shadow:3px 3px 0 #5a20bb,6px 6px 0 #2e0f66,0 10px 24px rgba(0,0,0,.55);transition:max-width .3s;min-width:54px;min-height:36px;}
+.room-tip::before,.room-tip::after{content:"";position:absolute;background:rgba(24,16,48,.95);border:2px solid #b18cff;border-radius:50%;box-shadow:2px 2px 0 #5a20bb;}
+.room-tip::before{width:11px;height:11px;left:8px;bottom:-16px;} .room-tip::after{width:6px;height:6px;left:-2px;bottom:-26px;}
+.room-tip:hover{border-color:var(--acid);}
+.tip-txt{display:none;} .room-tip.open .tip-txt{display:inline;}
+.tip-txt.typing::after{content:"▌";color:var(--acid);animation:blink .7s steps(1) infinite;margin-left:1px;}
+.tip-d{display:inline-flex;gap:4px;align-items:center;height:16px;} .room-tip.open .tip-d{display:none;}
+.tip-d b{width:6px;height:6px;border-radius:50%;background:#b18cff;animation:tpd 1.2s infinite;} .tip-d b:nth-child(2){animation-delay:.2s;} .tip-d b:nth-child(3){animation-delay:.4s;}
+@keyframes tpd{40%{transform:translateY(-4px);background:var(--acid);}}
 .room-toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:11px;color:var(--acid);opacity:0;transition:opacity .4s;pointer-events:none;text-shadow:0 0 12px rgba(61,255,160,.6);}
 .room-toast.show{opacity:1;}
 .hud{position:absolute;top:10px;right:10px;width:min(300px,calc(100% - 20px));z-index:3;}
@@ -78,7 +85,7 @@ html.bgc body{background-image:none;}
 .hud-pop .mis-r{font-size:11px;padding:4px 0;gap:8px;}
 .hud-pop .mis-c{width:12px;height:12px;font-size:8px;}
 .hud-pop .mis-p{font-size:7px;}
-@media(max-width:560px){.room-note{display:none;}.hud-nick{font-size:8px;}}
+@media(max-width:560px){.hud-nick{font-size:8px;}.room-tip{top:auto;bottom:34px;max-width:78%;}}
 :root{--red:#ff3b3b;}
 .stat3{display:grid;grid-template-columns:1fr 96px 96px;gap:8px;align-items:baseline;padding:8px 0;border-top:1px dashed var(--line);font-size:14px;}
 .stat3.head{border-top:none;color:var(--muted);font-size:10px;letter-spacing:.1em;padding:0 0 4px;font-family:'Press Start 2P',monospace;}
@@ -269,10 +276,13 @@ h1 em{font-style:normal;color:var(--mag);}
 @media (min-width:700px){.hero-gate{aspect-ratio:1.45/1;}}
 .hero-gate>*{position:relative;z-index:2;}
 .hero-gate>.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.hb-img{position:absolute;inset:-4%;background:url(img/box.jpg) 50% 50%/cover no-repeat;transition:transform .25s ease-out;will-change:transform;}
+.hb-img{position:absolute;inset:-4%;background:url(img/box.jpg) 50% 50%/cover no-repeat;filter:brightness(.62) saturate(.92);transition:transform .25s ease-out;will-change:transform;}
 .hb-rays{position:absolute;inset:-4%;background:radial-gradient(ellipse 38% 34% at 50% 80%,rgba(255,235,200,.95),rgba(255,120,200,.35) 45%,transparent 72%),conic-gradient(from 180deg at 50% 82%,transparent 0 .24turn,rgba(255,200,160,.35) .26turn,transparent .29turn 40%,rgba(255,160,220,.3) .445turn,transparent .47turn 100%);mix-blend-mode:screen;opacity:calc(.12 + var(--hk,0) * .55);transition:transform .35s ease-out;will-change:transform,opacity;}
 .hero-gate .gate-tag:not(#welcomeLine){position:absolute;left:0;right:0;bottom:3.5%;margin:0;}
-.hero-gate .gate-tag{text-shadow:0 1px 6px #000;}
+.hero-gate>.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(6,3,16,.72) 0,rgba(6,3,16,.5) 38%,rgba(6,3,16,.12) 66%,rgba(6,3,16,.5) 100%);}
+.hero-gate .gate-tag{text-shadow:0 0 8px #000,0 2px 10px #000,0 0 22px rgba(0,0,0,.9);color:#fff;}
+.hero-gate .day{text-shadow:0 0 8px #000,0 2px 12px #000;font-size:17px;}
+.hero-gate .w-green{text-shadow:0 0 8px #000,0 2px 10px #000,0 0 14px rgba(61,255,160,.45);} .hero-gate .w-purple{color:#c9aaff;text-shadow:0 0 8px #000,0 2px 10px #000,0 0 14px rgba(177,140,255,.5);}
 .gate-frame{display:block;margin:14px 0 26px;}
 .gate-title{font-family:'Playfair Display','Times New Roman',serif;font-weight:900;font-size:clamp(36px,9vw,86px);letter-spacing:.04em;color:#f4f1ff;margin:0;text-shadow:1px 1px 0 #7b2fff,2px 2px 0 #6a27dd,3px 3px 0 #5a20bb,4px 4px 0 #4a1a99,5px 5px 0 #3a1477,6px 6px 14px rgba(0,0,0,.7),0 0 30px rgba(61,255,160,.3);}
 .gate-tag{font-family:'Press Start 2P',monospace;color:var(--ink);font-size:9px;line-height:1.9;letter-spacing:1px;margin:26px 0 0;}
@@ -564,7 +574,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <div class="room-vig"></div>
     <div class="hud" id="hud">
       <button type="button" class="hud-card" id="hudCard" aria-expanded="false" aria-label="Il tuo profilo di gioco">
-        <span class="hud-port"><svg id="hudAv" viewBox="26 0 68 54"></svg><i class="hud-dot" id="hudDot"></i></span>
+        <span class="hud-port"><svg id="hudAv" viewBox="30 1 60 53"></svg><i class="hud-dot" id="hudDot"></i></span>
         <span class="hud-info">
           <span class="hud-nick" id="hudNick"></span>
           <span class="hud-row"><em>LIV <b id="roomLvl">1</b></em><span class="hud-xp"><i id="hudXpFill"></i></span></span>
@@ -584,48 +594,133 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       </div>
     </div>
     <span id="roomPlus" class="room-toast"></span>
-    <span class="room-note">Tocca il pavimento per camminare · clicca gli oggetti: computer = negozio, armadio = look, cassa = player</span>
+    <button type="button" class="room-tip" id="roomTip" aria-label="Suggerimento"><span class="tip-txt" id="tipTxt"></span><i class="tip-d"><b></b><b></b><b></b></i></button>
   </div>
 </div>
   <div class="panel avatar-area" id="avatarEditor">
     <div class="stage">
       <svg width="130" height="195" viewBox="0 0 120 180">
-        <rect x="40" y="8" width="40" height="36" rx="6" fill="#c9ccdb" stroke="#0a0a12" stroke-width="3"/>
-        <rect x="50" y="24" width="6" height="6" fill="#0a0a12"/>
-        <rect x="64" y="24" width="6" height="6" fill="#0a0a12"/>
-        <rect id="avArmL" x="18" y="48" width="16" height="46" rx="5" fill="#7b2fff" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avArmR" x="86" y="48" width="16" height="46" rx="5" fill="#7b2fff" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avShirt" x="34" y="46" width="52" height="56" rx="6" fill="#7b2fff" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avLegL" x="36" y="104" width="20" height="50" rx="4" fill="#3dffa0" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avLegR" x="64" y="104" width="20" height="50" rx="4" fill="#3dffa0" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avShoeL" x="33" y="154" width="26" height="16" rx="4" fill="#242430" stroke="#0a0a12" stroke-width="3"/>
-        <rect id="avShoeR" x="61" y="154" width="26" height="16" rx="4" fill="#242430" stroke="#0a0a12" stroke-width="3"/>
-        <g id="acc-hair">
-          <path id="hairShort" data-g="hair" data-attr="fill" d="M38 22 L38 9 L45 2 L52 9 L60 1 L68 9 L75 2 L82 9 L82 22 L76 22 L76 15 L44 15 L44 22 Z" fill="#242430" stroke="#0a0a12" stroke-width="3" stroke-linejoin="round"/>
-          <path id="hairLong" style="display:none" data-g="hair" data-attr="fill" d="M36 64 L36 9 L45 2 L52 9 L60 1 L68 9 L75 2 L84 9 L84 64 L76 64 L76 15 L44 15 L44 64 Z" fill="#242430" stroke="#0a0a12" stroke-width="3" stroke-linejoin="round"/>
-        </g>
-        <g id="acc-cap" style="display:none">
-          <rect data-g="cap" data-attr="fill" x="34" y="2" width="52" height="14" rx="4" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
-          <rect data-g="cap" data-attr="fill" x="78" y="12" width="20" height="8" rx="2" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
-        </g>
-        <g id="acc-glasses" style="display:none">
-          <rect data-g="glasses" data-attr="stroke" x="46" y="22" width="14" height="10" fill="none" stroke="#3dffa0" stroke-width="3"/>
-          <rect data-g="glasses" data-attr="stroke" x="64" y="22" width="14" height="10" fill="none" stroke="#3dffa0" stroke-width="3"/>
-          <line data-g="glasses" data-attr="stroke" x1="60" y1="27" x2="64" y2="27" stroke="#3dffa0" stroke-width="3"/>
-        </g>
-        <g id="acc-phones" style="display:none">
-          <path data-g="phones" data-attr="stroke" d="M28 28 Q60 -6 92 28" fill="none" stroke="#7b2fff" stroke-width="5"/>
-          <rect data-g="phones" data-attr="fill" x="20" y="22" width="14" height="22" rx="4" fill="#7b2fff" stroke="#0a0a12" stroke-width="2"/>
-          <rect data-g="phones" data-attr="fill" x="86" y="22" width="14" height="22" rx="4" fill="#7b2fff" stroke="#0a0a12" stroke-width="2"/>
+        <g class="av-all" stroke-linejoin="round" stroke-linecap="round" stroke="#15111a" stroke-width="1.5">
+          <!-- gamba sinistra -->
+          <g class="j j-legL" data-px="51" data-py="106">
+            <path data-g="pants" data-attr="fill" d="M43 104 L58 104 L57.5 138 L44.5 138 Z" fill="#242430"/>
+            <path d="M52 104 L58 104 L57.5 138 L53 138 Z" fill="#000" opacity=".25" stroke="none"/>
+            <g class="j j-shinL" data-px="51" data-py="138">
+              <path data-g="pants" data-attr="fill" d="M44.5 137 L57.5 137 L56.5 166 L46 166 Z" fill="#242430"/>
+              <path d="M52 137 L57.5 137 L56.5 166 L52.5 166 Z" fill="#000" opacity=".25" stroke="none"/>
+              <g class="j j-footL" data-px="51" data-py="166">
+                <path data-g="shoes" data-attr="fill" d="M44.5 165 L57 165 L61 171.5 Q61 174 58 174 L44 174 Q42 172 44.5 165 Z" fill="#242430"/>
+                <path d="M44 172 L60 172 L60 174 L44 174 Z" fill="#fff" opacity=".35" stroke="none"/>
+                <path d="M52 165 L57 165 L61 171.5 Q61 174 58 174 L53 174 Z" fill="#000" opacity=".22" stroke="none"/>
+              </g>
+            </g>
+          </g>
+          <!-- gamba destra -->
+          <g class="j j-legR" data-px="69" data-py="106">
+            <path data-g="pants" data-attr="fill" d="M62 104 L77 104 L75.5 138 L62.5 138 Z" fill="#242430"/>
+            <path d="M70 104 L77 104 L75.5 138 L71 138 Z" fill="#000" opacity=".25" stroke="none"/>
+            <g class="j j-shinR" data-px="69" data-py="138">
+              <path data-g="pants" data-attr="fill" d="M62.5 137 L75.5 137 L74 166 L63.5 166 Z" fill="#242430"/>
+              <path d="M70 137 L75.5 137 L74 166 L70.5 166 Z" fill="#000" opacity=".25" stroke="none"/>
+              <g class="j j-footR" data-px="69" data-py="166">
+                <path data-g="shoes" data-attr="fill" d="M63 165 L75.5 165 Q78 170 76 172.5 Q75 174 72 174 L62 174 Q59 174 59 171.5 Z" fill="#242430"/>
+                <path d="M60 172 L76 172 L76 174 L60 174 Z" fill="#fff" opacity=".35" stroke="none"/>
+                <path d="M70 165 L75.5 165 Q78 170 76 172.5 Q75 174 72 174 L69 174 Z" fill="#000" opacity=".22" stroke="none"/>
+              </g>
+            </g>
+          </g>
+          <!-- busto -->
+          <g class="j j-body" data-px="60" data-py="106">
+            <path data-g="pants" data-attr="fill" d="M43 102 L77 102 L78 113 L42 113 Z" fill="#242430"/>
+            <path data-g="shirt" data-attr="fill" d="M42 60 Q60 55 78 60 L80 72 L78 109 Q60 113 42 109 L40 72 Z" fill="#242430"/>
+            <path d="M67 58 L78 60 L80 72 L78 109 Q72 111 66 111 Z" fill="#000" opacity=".28" stroke="none"/>
+            <path d="M42 62 L41 106" stroke="#fff" stroke-opacity=".28" stroke-width="1" fill="none"/>
+            <path d="M60 78 L60 111" stroke="#000" stroke-opacity=".3" stroke-width=".9" fill="none"/>
+            <path d="M53 56 L60 76 L67 56 Z" fill="#f1e4df"/>
+            <path d="M60 64 L67 56 L60 76 Z" fill="#c9aea8" opacity=".5" stroke="none"/>
+            <path data-g="shirt" data-attr="fill" d="M53 55 L45 60 L55 79 L60 76 Z" fill="#242430"/>
+            <path data-g="shirt" data-attr="fill" d="M67 55 L75 60 L65 79 L60 76 Z" fill="#242430"/>
+            <path d="M53 55 L45 60 L55 79 M67 55 L75 60 L65 79" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".8"/>
+          </g>
+          <!-- braccio sinistro -->
+          <g class="j j-armL" data-px="42" data-py="63">
+            <path data-g="shirt" data-attr="fill" d="M36 63 Q36 57 42 57 Q47 58 47 64 L46 90 L35 90 Z" fill="#242430"/>
+            <path d="M36 63 L35 90" stroke="#fff" stroke-opacity=".28" stroke-width="1" fill="none"/>
+            <g class="j j-foreL" data-px="40.5" data-py="90">
+              <path data-g="shirt" data-attr="fill" d="M35 89 L46 89 L45.5 108 L36 108 Z" fill="#242430"/>
+              <path d="M36 105 L45.5 105" stroke="#fff" stroke-opacity=".3" stroke-width=".9" fill="none"/>
+              <path d="M37 108 L45 108 Q46 116 43 119 Q40 121 38 119 Q35.500 116 37 108 Z" fill="#f1e4df"/>
+              <path d="M42 108 L45 108 Q46 116 43 119 Z" fill="#c9aea8" opacity=".5" stroke="none"/>
+            </g>
+          </g>
+          <!-- braccio destro -->
+          <g class="j j-armR" data-px="78" data-py="63">
+            <path data-g="shirt" data-attr="fill" d="M84 63 Q84 57 78 57 Q73 58 73 64 L74 90 L85 90 Z" fill="#242430"/>
+            <path d="M80 59 L85 90 L82 90 Z" fill="#000" opacity=".28" stroke="none"/>
+            <g class="j j-foreR" data-px="79.5" data-py="90">
+              <path data-g="shirt" data-attr="fill" d="M85 89 L74 89 L74.500 108 L84 108 Z" fill="#242430"/>
+              <path d="M82 89 L85 89 L84 108 L81 108 Z" fill="#000" opacity=".28" stroke="none"/>
+              <path d="M83 108 L75 108 Q74 116 77 119 Q80 121 82 119 Q84.500 116 83 108 Z" fill="#f1e4df"/>
+              <path d="M80 108 L83 108 Q84.500 116 82 119 L79 119 Z" fill="#c9aea8" opacity=".5" stroke="none"/>
+            </g>
+          </g>
+          <!-- testa -->
+          <g class="j j-head" data-px="60" data-py="58">
+            <g id="hairLongBack" style="display:none">
+              <path data-g="hair" data-attr="fill" d="M40 30 Q34 3 60 3 Q86 3 80 30 L85 80 Q80 86 72 82 L69 52 L51 52 L48 82 Q40 86 35 80 Z" fill="#dfe2ec"/>
+              <path d="M73 20 L84 78 L72 81 L69 52 Z" fill="#000" opacity=".18" stroke="none"/>
+            </g>
+            <path d="M55 48 L65 48 L65 60 Q60 63 55 60 Z" fill="#f1e4df"/>
+            <path d="M60 50 L65 48 L65 60 Q62 62 60 62 Z" fill="#c9aea8" opacity=".55" stroke="none"/>
+            <path d="M42 33 Q41.500 30 44 30.500 L44.500 38 Q42 38 42 33 Z M78 33 Q78.500 30 76 30.500 L75.500 38 Q78 38 78 33 Z" fill="#f1e4df"/>
+            <path d="M44 25 Q44 11 60 10 Q76 11 76 25 L75 37 Q73.500 51 60 55 Q46.500 51 45 37 Z" fill="#f1e4df"/>
+            <path d="M68 14 Q76 14 76 25 L75 37 Q73.500 51 60 55 Q70 48 70 36 Z" fill="#c9aea8" opacity=".5" stroke="none"/>
+            <path d="M47 31.800 Q52 28.800 57.500 31.800 M62.500 31.800 Q68 28.800 73 31.800" fill="none" stroke="#120d12" stroke-width="2.3"/>
+            <ellipse cx="52.500" cy="33.700" rx="3" ry="2.100" fill="#e0472f" stroke="none"/>
+            <ellipse cx="67.500" cy="33.700" rx="3" ry="2.100" fill="#e0472f" stroke="none"/>
+            <ellipse cx="52.500" cy="33.800" rx="1.100" ry="1.400" fill="#2a0a0a" stroke="none"/>
+            <ellipse cx="67.500" cy="33.800" rx="1.100" ry="1.400" fill="#2a0a0a" stroke="none"/>
+            <circle cx="51.600" cy="33" r=".7" fill="#fff" stroke="none"/><circle cx="66.600" cy="33" r=".7" fill="#fff" stroke="none"/>
+            <path d="M60 37 L59 41.500 L61 41.500" fill="none" stroke-width=".8" stroke-opacity=".55"/>
+            <path d="M56.500 46 Q60 45 63.500 46 Q62 49.500 60 49.500 Q58 49.500 56.500 46 Z" fill="#9a4f55" stroke-width=".9"/>
+            <path d="M58 47 L62 47" stroke="#fff" stroke-width="1" stroke-opacity=".7" fill="none"/>
+            <g id="hairShort">
+              <path data-g="hair" data-attr="fill" d="M40 36 Q35 8 60 4 Q85 8 80 36 L79.500 44 Q77.500 37 75.500 31 Q72 27.500 69 24 Q66.500 29 64.500 31.500 Q62 33.500 61 39 Q60 40 59 39 Q58 33.500 56 29.500 Q53 25.500 50 27 Q47 28.500 45 33 Q44 38 43 44 L40.500 44 Z" fill="#dfe2ec" stroke-width="1.1"/>
+              <path d="M70 7 Q83 12 80 36 L79.500 44 Q77.500 37 75.500 31 Q73 27 71 22 Z" fill="#000" opacity=".16" stroke="none"/>
+              <path d="M50 9 Q44 18 45 30 M58 6 Q52 15 54 24 M66 6 Q62 14 64 23 M73 12 Q69 18 70 26" fill="none" stroke="#15111a" stroke-opacity=".45" stroke-width=".8"/>
+            </g>
+            <g id="hairLong" style="display:none">
+              <path data-g="hair" data-attr="fill" d="M40 40 Q35 8 60 4 Q85 8 80 40 L83 70 Q80 76 75 73 L74 46 Q73.500 36 75.500 31 Q72 27.500 69 24 Q66.500 29 64.500 31.500 Q62 33.500 61 39 Q60 40 59 39 Q58 33.500 56 29.500 Q53 25.500 50 27 Q47 28.500 45.500 33 Q46 40 46 46 L45 73 Q40 76 37 70 Z" fill="#dfe2ec" stroke-width="1.1"/>
+              <path d="M71 8 Q83 14 80 40 L83 70 Q80 76 75 73 L74 46 L73 30 Z" fill="#000" opacity=".16" stroke="none"/>
+              <path d="M50 9 Q44 18 45 30 M58 6 Q52 15 54 24 M66 6 Q62 14 64 23" fill="none" stroke="#15111a" stroke-opacity=".45" stroke-width=".8"/>
+            </g>
+            <g id="acc-cap" style="display:none">
+              <path data-g="cap" data-attr="fill" d="M40.500 21 Q40 3 60 2.500 Q80 3 79.500 21 L79.500 23 Q60 20 40.500 23 Z" fill="#ffffff"/>
+              <path data-g="cap" data-attr="fill" d="M76 19 L98 24 Q100 28 95 28.500 L76 26 Z" fill="#ffffff"/>
+              <path d="M66 4 Q79 6 79.500 21 L79.500 23 L70 21.500 Z" fill="#000" opacity=".2" stroke="none"/>
+            </g>
+            <g id="acc-glasses" style="display:none">
+              <rect data-g="glasses" data-attr="stroke" x="44.500" y="27.500" width="14" height="10" rx="3" fill="#fff" fill-opacity=".1" stroke="#3dffa0" stroke-width="1.7"/>
+              <rect data-g="glasses" data-attr="stroke" x="61.500" y="27.500" width="14" height="10" rx="3" fill="#fff" fill-opacity=".1" stroke="#3dffa0" stroke-width="1.7"/>
+              <path data-g="glasses" data-attr="stroke" d="M58.500 31 Q60 29.500 61.500 31 M44.500 31 L42 30 M75.500 31 L78 30" fill="none" stroke="#3dffa0" stroke-width="1.5"/>
+            </g>
+            <g id="acc-phones" style="display:none">
+              <path data-g="phones" data-attr="stroke" d="M41 33 Q40 2 60 1.500 Q80 2 79 33" fill="none" stroke="#7b2fff" stroke-width="3.400"/>
+              <rect data-g="phones" data-attr="fill" x="36.500" y="28" width="8" height="15" rx="3.500" fill="#7b2fff"/>
+              <rect data-g="phones" data-attr="fill" x="75.500" y="28" width="8" height="15" rx="3.500" fill="#7b2fff"/>
+              <rect x="75.500" y="28" width="8" height="15" rx="3.500" fill="#000" opacity=".25" stroke="none"/>
+            </g>
+          </g>
         </g>
       </svg>
     </div>
     <div class="ctrl">
       <h4>Capelli</h4>
       <div class="swatches" data-group="hair">
+        <div class="sw active" style="background:#dfe2ec" data-c="#dfe2ec"></div>
         <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
         <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
-        <div class="sw active" style="background:#242430" data-c="#242430"></div>
+        <div class="sw" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
         <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
@@ -633,16 +728,16 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <h4>Maglia</h4>
       <div class="swatches" data-group="shirt">
         <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
-        <div class="sw active" style="background:#7b2fff" data-c="#7b2fff"></div>
-        <div class="sw" style="background:#242430" data-c="#242430"></div>
+        <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
+        <div class="sw active" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
         <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
       <h4>Pantaloni</h4>
       <div class="swatches" data-group="pants">
-        <div class="sw active" style="background:#3dffa0" data-c="#3dffa0"></div>
+        <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
         <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
-        <div class="sw" style="background:#242430" data-c="#242430"></div>
+        <div class="sw active" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
         <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
@@ -732,8 +827,8 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 })();
 
 // avatar builder (corpo intero)
-var groupTargets = {shirt:['avShirt','avArmL','avArmR'], pants:['avLegL','avLegR'], shoes:['avShoeL','avShoeR']};
-var avState = {shirt:'#7b2fff', pants:'#3dffa0', shoes:'#242430', hair:'#242430', cap:'#ffffff', glasses:'#3dffa0', phones:'#7b2fff', hairStyle:'short', accs:[]};
+var groupTargets = {};
+var avState = {shirt:'#242430', pants:'#242430', shoes:'#242430', hair:'#dfe2ec', cap:'#ffffff', glasses:'#3dffa0', phones:'#7b2fff', hairStyle:'short', accs:[]};
 var klOnChange = function(){};
 var klLoggedIn = false;
 function isHex(c){ return /^#[0-9a-fA-F]{6}$/.test(c); }
@@ -742,6 +837,7 @@ function setHairStyle(s){
   avState.hairStyle = s;
   document.getElementById('hairShort').style.display = (s === 'short') ? 'block' : 'none';
   document.getElementById('hairLong').style.display = (s === 'long') ? 'block' : 'none';
+  document.getElementById('hairLongBack').style.display = (s === 'long') ? 'block' : 'none';
   document.querySelectorAll('[data-hair]').forEach(function(b){ b.classList.toggle('on', b.dataset.hair === s); });
 }
 function applyGroup(group, color){
@@ -1374,16 +1470,80 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var av = g.querySelector('.av');
     if(!av){
       av = el('g', {'class':'av'}, g);
-      el('ellipse', {cx:0, cy:0, rx:'16', ry:'7', fill:'rgba(0,0,0,.45)', 'class':'sh'}, g);
+      el('ellipse', {cx:0, cy:0, rx:'20', ry:'8', fill:'rgba(0,0,0,.45)', 'class':'sh'}, g);
       g.insertBefore(g.lastChild, av);
     }
-    av.innerHTML = html;
+    av.innerHTML = html; J = null;
     var hp = $('hudAv'); if(hp) hp.innerHTML = html;
     place();
   }
+  var J = null, danceBob = 0, dancing = false;
+  function joints(){
+    if(J) return J;
+    var av = $('roomAv').querySelector('.av'); if(!av) return null;
+    J = {};
+    ['head', 'armL', 'foreL', 'armR', 'foreR', 'legL', 'shinL', 'footL', 'legR', 'shinR', 'footR'].forEach(function(n){
+      var e = av.querySelector('.j-' + n); if(e) J[n] = {e:e, px:+e.getAttribute('data-px'), py:+e.getAttribute('data-py')};
+    });
+    return J;
+  }
+  function rot(n, a, dx, dy){
+    var j = J[n]; if(!j) return;
+    j.e.setAttribute('transform', ((dx || dy) ? 'translate(' + (dx || 0).toFixed(1) + ',' + (dy || 0).toFixed(1) + ') ' : '') + 'rotate(' + a.toFixed(1) + ' ' + j.px + ' ' + j.py + ')');
+  }
+  // posa lo scheletro: camminata, ballo (in dance zone con musica) o respiro
+  function pose(t){
+    if(!joints()) return;
+    var ts = t / 1000, k = window.klKick ? window.klKick() : 0;
+    var inDz = pos.x >= 2 && pos.x <= 6 && pos.y >= 2 && pos.y <= 6;
+    dancing = !target && inDz && !!window.klMusicOn;
+    if(target){
+      var w = Math.sin(walkT * 9);
+      rot('armL', 5 + 12 * w); rot('armR', -5 + 12 * w); rot('foreL', -6 - 6 * w); rot('foreR', 6 - 6 * w);
+      rot('legL', 7 * w, 0, -4 * Math.max(0, w)); rot('legR', 7 * w, 0, -4 * Math.max(0, -w));
+      rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0); rot('head', 2 * w);
+      danceBob = 0;
+    } else if(dancing){
+      var b = ts * 2.33 * Math.PI * 2, sn = Math.sin(b), c2 = Math.sin(b * 2);
+      rot('armL', 105 + 45 * sn + k * 12); rot('armR', -(105 - 45 * sn + k * 12));
+      rot('foreL', -35 + 30 * c2); rot('foreR', 35 - 30 * c2);
+      rot('legL', 9 * sn, 0, -5 * Math.max(0, sn)); rot('legR', 9 * sn, 0, -5 * Math.max(0, -sn));
+      rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0);
+      rot('head', 7 * c2 + k * 6);
+      danceBob = Math.abs(sn) * 3.5 + k * 2;
+    } else {
+      var br = Math.sin(ts * 2);
+      rot('armL', 4 + br * 1.2); rot('armR', -4 - br * 1.2); rot('foreL', -3); rot('foreR', 3);
+      rot('legL', 0); rot('legR', 0); rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0);
+      rot('head', Math.sin(ts * 1.3) * 1.5);
+      danceBob = 0;
+    }
+  }
+  // ----- fumetto suggerimento: si scrive da solo, poi si cancella e torna nuvoletta
+  (function(){
+    var tip = $('roomTip'), txt = $('tipTxt'); if(!tip) return;
+    var MSG = 'Tocca il pavimento per camminare. Clicca gli oggetti: computer = negozio, armadio = look, cassa = player.';
+    var timer = 0, shown = false;
+    function stop(){ clearTimeout(timer); txt.classList.remove('typing'); }
+    function close(){ stop(); tip.classList.remove('open'); txt.textContent = ''; }
+    function erase(){
+      var s2 = txt.textContent; txt.classList.add('typing');
+      if(s2.length > 0){ txt.textContent = s2.slice(0, -2); timer = setTimeout(erase, 14); } else close();
+    }
+    function type(i){
+      if(i === 0){ tip.classList.add('open'); txt.textContent = ''; }
+      txt.classList.add('typing');
+      if(i < MSG.length){ txt.textContent = MSG.slice(0, i + 1); timer = setTimeout(function(){ type(i + 1); }, 26 + (MSG[i] === ' ' ? 18 : 0)); }
+      else { txt.classList.remove('typing'); timer = setTimeout(erase, 9000); }
+    }
+    tip.addEventListener('click', function(e){ e.stopPropagation(); if(tip.classList.contains('open')) close(); else { stop(); type(0); } });
+    if(window.IntersectionObserver){
+      new IntersectionObserver(function(en){ if(en[0].isIntersecting && !shown){ shown = true; setTimeout(function(){ type(0); }, 700); } }, {threshold:.4}).observe(wrap);
+    }
+  })();
   function place(){
     var p = iso(pos.x, pos.y), g = $('roomAv'), av = g.querySelector('.av'), sh = g.querySelector('.sh');
-    var bob = target ? Math.abs(Math.sin(walkT * 9)) * 3 : 0, sc = 0.4;
+    var bob = (target ? Math.abs(Math.sin(walkT * 9)) * 3 : 0) + danceBob, sc = 0.5;
     if(sh){ sh.setAttribute('cx', p[0]); sh.setAttribute('cy', p[1]); }
     if(av) av.setAttribute('transform', 'translate(' + p[0] + ',' + (p[1] - bob) + ') scale(' + (sc * face) + ',' + sc + ') translate(-60,-176)');
   }
@@ -1397,6 +1557,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       else { pos.x += dx / d * step; pos.y += dy / d * step; var sd = (dx - dy); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; }
       place();
     }
+    pose(t); if(dancing) place();
     var spk = $('roomSpk');
     if(spk && window.klKick){
       var k = window.klKick();
