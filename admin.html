@@ -49,7 +49,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
   <p class="muted">Account: <span id="who"></span> · File audio consigliati: mp3 compressi, massimo 50 MB ciascuno.</p>
 
   <div class="panel">
-    <div class="field"><label for="fFile">File audio</label><input type="file" id="fFile" accept="audio/*"></div>
+    <div class="field"><label for="fFile">File audio o video (mp3, wav, mp4, webm)</label><input type="file" id="fFile" accept="audio/*,video/mp4,video/webm,video/quicktime"></div>
     <div class="field"><label for="fTitle">Titolo (se vuoto uso il nome del file)</label><input type="text" id="fTitle" maxlength="120"></div>
     <div class="field"><label for="fPl">Playlist (scegli una esistente o scrivine una nuova)</label><input type="text" id="fPl" list="plList" value="Beats" maxlength="40"></div>
     <datalist id="plList"></datalist>
@@ -166,7 +166,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     var msg = $('upMsg');
     var f = $('fFile').files[0];
     if(!f){ say(msg, 'Scegli prima un file audio.', true); return; }
-    if(f.type && f.type.indexOf('audio/') !== 0){ say(msg, 'Il file non sembra un audio.', true); return; }
+    if(f.type && f.type.indexOf('audio/') !== 0 && f.type.indexOf('video/') !== 0){ say(msg, 'Il file non sembra un audio o un video.', true); return; }
     if(f.size > 50 * 1024 * 1024){ say(msg, 'File oltre i 50 MB: comprimilo (mp3 128-192 kbps).', true); return; }
     var title = $('fTitle').value.trim() || f.name.replace(/\.[^.]+$/, '');
     var playlist = $('fPl').value.trim() || 'Beats';
