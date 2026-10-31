@@ -6,7 +6,7 @@
 <title>KENNYLAND</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=Cinzel+Decorative:wght@700&family=Pacifico&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0a12; --bg2:#12121e; --panel:#15151f;
@@ -47,6 +47,42 @@ html.bgc body{background-image:none;}
 .room-note{font-size:12px;color:var(--muted);}
 #roomPlus{color:var(--acid);font-weight:700;opacity:0;transition:opacity .4s;}
 #roomPlus.show{opacity:1;}
+:root{--red:#ff3b3b;}
+.stat3{display:grid;grid-template-columns:1fr 96px 96px;gap:8px;align-items:baseline;padding:8px 0;border-top:1px dashed var(--line);font-size:14px;}
+.stat3.head{border-top:none;color:var(--muted);font-size:10px;letter-spacing:.1em;padding:0 0 4px;font-family:'Press Start 2P',monospace;}
+.stat3.head b{color:var(--muted);font-size:9px;}
+.stat3 b{font-family:'Press Start 2P',monospace;font-size:11px;font-weight:400;color:var(--mag);text-align:right;overflow:hidden;text-overflow:ellipsis;}
+.stat b,.stat3 b,#dayCounter,.goal-tag,.room-hud b{transition:color .15s,text-shadow .15s;}
+.stat3 b:nth-child(2){color:var(--acid);}
+.stat3 b:nth-child(3){color:#b57bff;}
+.goal-fill-u{background:repeating-linear-gradient(45deg,#3dffa0 0 10px,#2fd987 10px 20px);}
+.goal-who{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;font-family:'Press Start 2P',monospace;font-size:9px;}
+.goal-who .gw-u{color:var(--acid);} .goal-who .gw-c{color:#b57bff;}
+.goal-list{margin-top:10px;}
+.goal-list .gl{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);padding:5px 0;border-top:1px dashed var(--line);}
+.goal-list .gl.done{color:var(--acid);}
+.lvl-wrap{margin:-2px 0 12px;}
+.lvl-bar{height:8px;background:var(--bg2);border:1px solid var(--line);position:relative;}
+.lvl-bar i{position:absolute;top:0;bottom:0;left:0;width:0;background:#7b2fff;transition:width .5s;}
+.lvl-txt{font-size:11px;color:var(--muted);margin-top:4px;}
+#shopPanel{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;}
+#shopPanel p{font-size:12px;color:var(--muted);margin:0 0 10px;}
+.shop-item{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);background:var(--bg2);padding:10px 12px;margin-bottom:8px;}
+.shop-item b{font-size:14px;} .shop-item .pr{color:var(--acid);font-size:13px;} .shop-item .lk{font-size:12px;color:var(--red);}
+.goal-row{padding:12px 0;border-top:1px dashed var(--line);}
+.goal-row:first-child{border-top:none;padding-top:0;}
+.goal-row .gt{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:14px;}
+.goal-row .gn{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--acid);font-weight:400;}
+.goal-row .gd{font-size:12px;color:var(--muted);margin:2px 0 8px;}
+.gbar{height:10px;background:var(--bg2);border:1px solid var(--line);position:relative;}
+.gbar i{position:absolute;top:0;bottom:0;left:0;background:#7b2fff;transition:width .6s;}
+.goal-row.done .gbar i{background:var(--acid);}
+#roomSign{animation:neonflick 5s infinite;}
+#roomSign .tube{transition:stroke .15s;}
+body.hot #roomSign .tube{stroke:var(--red);}
+@keyframes neonflick{0%,18%,22%,62%,64%,100%{opacity:1;}20%,63%{opacity:.55;}}
+@media (prefers-reduced-motion: reduce){#roomSign{animation:none;}}
+@media (max-width:520px){.stat3{grid-template-columns:1fr 62px 62px;font-size:12px;}.stat3 b{font-size:9px;}}
 #bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 .hud{font-family:'Press Start 2P',monospace;}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
@@ -81,7 +117,7 @@ h1 em{font-style:normal;color:var(--mag);}
 .w-purple{color:#b18cff;text-shadow:0 0 8px rgba(177,140,255,.5);}
 .goal-box{border:1px solid var(--line);background:var(--panel);padding:14px 16px;}
 .goal-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
-.goal-tag{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--acid);}
+.goal-tag{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--red);}
 .goal-title{font-weight:600;font-size:15px;}
 .goal-bar{position:relative;height:32px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;}
 .goal-fill{position:absolute;top:0;bottom:0;left:0;background:repeating-linear-gradient(45deg,#7b2fff 0 10px,#6522e0 10px 20px);animation:goalmove 1.2s linear infinite;}
@@ -150,11 +186,11 @@ nav .acct-drop a:hover{background:var(--bg2);}
 .cookie-note button{margin-top:8px;background:transparent;border:1px solid var(--acid);color:var(--acid);padding:5px 12px;font-family:'Space Grotesk',sans-serif;font-size:11px;cursor:pointer;}
 
 section{margin-top:56px;}
-.label{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;}
+.label{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--red);margin-bottom:16px;letter-spacing:1px;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media (max-width:560px){.grid2{grid-template-columns:1fr;}}
 .panel{border:1px solid var(--line);background:var(--panel);padding:20px;}
-.panel h3{margin:0 0 4px;font-size:15px;}
+.panel h3{margin:0 0 4px;font-size:15px;color:var(--red);}
 .panel p{color:var(--muted);font-size:13px;margin:0 0 16px;}
 .stat{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px dashed var(--line);}
 .stat:first-of-type{border-top:none;}
@@ -262,11 +298,13 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
   </div>
 </section>
 
-<!-- OBIETTIVO: per cambiarlo modifica il testo di goal-title e la percentuale in width -->
+<!-- OBIETTIVI: ora arrivano dalla tabella goals di Supabase (il testo qui sotto e' solo il valore di riserva) -->
 <section>
   <div class="goal-box">
-    <div class="goal-head"><span class="goal-tag">PROSSIMO OBIETTIVO</span><span class="goal-title">Dominio tutto nostro + email di accesso per tutti</span></div>
-    <div class="goal-bar"><div class="goal-fill" style="width:25%"></div><div class="goal-text">until the next update - let us cook!</div></div>
+    <div class="goal-head"><span class="goal-tag">PROSSIMO OBIETTIVO</span><span class="goal-title" id="goalTitle">Dominio tutto nostro + email di accesso per tutti</span></div>
+    <div class="goal-bar"><div class="goal-fill" id="goalFillC" style="width:25%"></div><div class="goal-fill goal-fill-u" id="goalFillU" style="width:0"></div><div class="goal-text">until the next update - let us cook!</div></div>
+    <div class="goal-who"><span class="gw-u" id="goalWhoU"></span><span class="gw-c" id="goalWhoC"></span></div>
+    <div class="goal-list" id="goalList"></div>
   </div>
 </section>
 
@@ -275,19 +313,22 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
   <div class="grid2">
     <div class="panel">
       <h3>Musica</h3>
-      <p>Dati live da Spotify / SoundCloud — arrivano nella prossima fase.</p>
-      <div class="stat soon"><span>Ascolti totali</span><b>—</b></div>
-      <div class="stat soon"><span>Follower Spotify</span><b>—</b></div>
-      <div class="stat soon"><span>Prossimo drop</span><b>—</b></div>
-      <div class="soonbar"></div>
+      <div class="stat3 head"><span></span><b class="colUser">TU</b><b>COMMUNITY</b></div>
+      <div class="stat3"><span>Click Spotify</span><b data-k="click_spotify" data-s="u">—</b><b data-k="click_spotify" data-s="t">0</b></div>
+      <div class="stat3"><span>Click SoundCloud</span><b data-k="click_soundcloud" data-s="u">—</b><b data-k="click_soundcloud" data-s="t">0</b></div>
+      <div class="stat3"><span>Click player KENNYLAND</span><b data-k="click_player" data-s="u">—</b><b data-k="click_player" data-s="t">0</b></div>
+      <div class="stat3"><span>Ascolti Spotify</span><b data-k="listen_spotify" data-s="u">—</b><b data-k="listen_spotify" data-s="t">0</b></div>
+      <div class="stat3"><span>Ascolti SoundCloud</span><b data-k="listen_soundcloud" data-s="u">—</b><b data-k="listen_soundcloud" data-s="t">0</b></div>
+      <div class="stat3"><span>Ascolti player KENNYLAND</span><b data-k="listen_player" data-s="u">—</b><b data-k="listen_player" data-s="t">0</b></div>
     </div>
     <div class="panel">
-      <h3>Hub</h3>
-      <p>Abitanti, monete e classifica — si accendono con l'Area Personale.</p>
-      <div class="stat"><span>Abitanti iscritti</span><b id="memberCount">0</b></div>
-      <div class="stat soon"><span>Online ora</span><b>0</b></div>
-      <div class="stat"><span>Click in KENNYLAND</span><b id="clickCount">0</b></div>
-      <div class="soonbar"></div>
+      <h3>Mondo</h3>
+      <div class="stat3 head"><span></span><b class="colUser">TU</b><b>COMMUNITY</b></div>
+      <div class="stat3"><span>Abitanti</span><b>—</b><b id="memberCount">0</b></div>
+      <div class="stat3"><span>Online ora</span><b>—</b><b id="onlineCount">0</b></div>
+      <div class="stat3"><span>Click nella Room</span><b data-k="click_room" data-s="u">—</b><b data-k="click_room" data-s="t">0</b></div>
+      <div class="stat3"><span>Monete generate</span><b data-k="coins_generated" data-s="u">—</b><b data-k="coins_generated" data-s="t">0</b></div>
+      <div class="stat3"><span>Monete spese</span><b data-k="coins_spent" data-s="u">—</b><b data-k="coins_spent" data-s="t">0</b></div>
     </div>
   </div>
 </section>
@@ -297,10 +338,11 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 <div id="roomWrap">
   <div class="panel">
     <div class="room-hud">
-      <div class="stat"><span>Monete <b id="roomCoins">0</b></span><span>Giorni di fila <b id="roomStreak">0</b></span><span id="roomPlus"></span></div>
+      <div class="stat"><span>Monete <b id="roomCoins">0</b></span><span>Giorni di fila <b id="roomStreak">0</b></span><span>Livello <b id="roomLvl">1</b></span><span id="roomPlus"></span></div>
       <button class="room-btn go" id="roomClaim" type="button" disabled>BONUS DEL GIORNO</button>
     </div>
-    <svg class="room-svg" id="roomSvg" viewBox="0 0 640 380" role="img" aria-label="La tua stanza">
+    <div class="lvl-wrap"><div class="lvl-bar"><i id="lvlFill"></i></div><div class="lvl-txt" id="lvlTxt"></div></div>
+    <svg class="room-svg" id="roomSvg" viewBox="0 -40 640 420" role="img" aria-label="La tua stanza">
       <g id="roomFloor"></g>
       <g id="roomWalls"></g>
       <g id="roomDeco"></g>
@@ -308,9 +350,10 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     </svg>
     <div class="room-foot">
       <button class="room-btn" id="roomLook" type="button">CAMBIA LOOK</button>
-      <button class="room-btn" type="button" disabled title="Presto">NEGOZIO — presto</button>
+      <button class="room-btn" id="roomShop" type="button">NEGOZIO</button>
       <span class="room-note">Tocca il pavimento per camminare. Vestiti e mobili per arredare la stanza arrivano presto.</span>
     </div>
+    <div id="shopPanel" style="display:none"></div>
   </div>
 </div>
   <div class="panel avatar-area" id="avatarEditor">
@@ -449,6 +492,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 // contatore click "scemo e divertente"
 (function(){
   var el = document.getElementById('clickCount');
+  if(!el) return;
   var n = parseInt(localStorage.getItem('kl_clicks2')||'0',10);
   el.textContent = n;
   document.addEventListener('click', function(){
@@ -651,7 +695,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     if(!sb) return;
     try{
       var r = await sb.from('profiles').select('id', {count:'exact', head:true});
-      if(!r.error && r.count !== null) document.getElementById('memberCount').textContent = r.count;
+      if(!r.error && r.count !== null){ document.getElementById('memberCount').textContent = r.count; window.klMembers = r.count; document.dispatchEvent(new Event('kl-members')); }
     }catch(e){}
   }
 
@@ -814,7 +858,9 @@ var klMusicOn = false;
 var klSources = {};
 var klAnalyser = null;
 function klMusic(on, key){
-  klSources[key || 'x'] = !!on;
+  var kk = key || 'x', was = !!klSources[kk];
+  klSources[kk] = !!on;
+  if(on && !was && window.klTrack){ var lm = {sc:'listen_soundcloud', sp:'listen_spotify'}[kk]; if(lm) klTrack(lm); }
   klMusicOn = Object.keys(klSources).some(function(k){ return klSources[k]; });
 }
 function klSetAnalyser(a){ klAnalyser = a || null; }
@@ -825,7 +871,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.documentElement.classList.add('bgc');
   var CELL = 28, W = 0, H = 0, cols = 0, rows = 0, nx = 0, ny = 0, VX = null, VY = null, sq = [];
-  var last = 0, lastSpawn = 0, nextBeat = 0, beatN = 0, lastOn = 0, dirty = true;
+  var last = 0, lastSpawn = 0, nextBeat = 0, stepN = 0, lastOn = 0, dirty = true, bigHits = 0, hot = false;
   var kick = 0, glitch = 0, fluxAvg = 0.02, prev = null, data = null, rippleT = -1e9, rx = 0, ry = 0;
   var ph1 = 0, ph2 = 0, gRows = [], bands = [0,0,0,0,0,0,0,0], bass = 0, high = 0;
   var EDGES = [0, 2, 4, 7, 12, 20, 36, 64, 128];
@@ -837,17 +883,18 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   }
   resize();
   window.addEventListener('resize', resize);
-  function spawn(n, a){
+  function spawn(n, a, red){
     for(var i = 0; i < n; i++){
       if(sq.length > 360) break;
       sq.push({x:Math.floor(Math.random() * cols), y:Math.floor(Math.random() * rows),
-        a:a * (0.6 + Math.random() * 0.4), c:(Math.random() < 0.5 ? '61,255,160' : '123,47,255')});
+        a:a * (0.6 + Math.random() * 0.4), c:(red && Math.random() < 0.55 ? '255,59,59' : (Math.random() < 0.5 ? '61,255,160' : '123,47,255'))});
     }
   }
   // un colpo (onset) di forza 0..1: accende quadretti, scuote le linee
   function hit(now, s){
     kick = Math.max(kick, s);
-    spawn(Math.round(8 + s * 90), 0.2 + s * 0.45);
+    if(s >= 0.55) bigHits++;
+    spawn(Math.round(8 + s * 90), 0.2 + s * 0.45, s > 0.75);
     rippleT = now; rx = rnd(0, W); ry = rnd(0, H);
     ph1 = rnd(0, 6.28); ph2 = rnd(0, 6.28);
     if(s > 0.7 || Math.random() < 0.3){
@@ -868,7 +915,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(!klMusicOn){
       nextBeat = 0; prev = null;
       if(now - lastSpawn > 160){ spawn(1, 0.16); lastSpawn = now; }
-    } else if(klAnalyser){
+    } else if(klAnalyser && klSources.mb){
       try{
         if(!data || data.length !== klAnalyser.frequencyBinCount){ data = new Uint8Array(klAnalyser.frequencyBinCount); prev = null; }
         klAnalyser.getByteFrequencyData(data);
@@ -892,18 +939,26 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
         spawn(Math.floor(bass * 3), 0.16);
       }catch(e){ klAnalyser = null; }
     } else {
-      if(!nextBeat) nextBeat = now;
-      if(now >= nextBeat){
-        beatN++;
-        hit(now, (beatN % 4 === 1) ? 1 : 0.55);
-        nextBeat += 60000 / KL_BPM;
-        if(nextBeat < now) nextBeat = now + 60000 / KL_BPM;
+      // ritmo preimpostato a 140 BPM (per SoundCloud e Spotify): kick, snare, hi-hat, accento ogni 4 battute
+      var STEP = 60000 / KL_BPM / 4;
+      if(!nextBeat){ nextBeat = now; stepN = 0; }
+      while(now >= nextBeat){
+        var st = stepN % 16, bar = Math.floor(stepN / 16), sv = 0;
+        if(st === 0) sv = (bar % 4 === 0) ? 1 : 0.88;
+        else if(st === 8) sv = 0.8;
+        else if(st === 4 || st === 12) sv = 0.65;
+        else if(st === 10 && Math.random() < 0.5) sv = 0.5;
+        else if(st % 2 === 0) sv = 0.3;
+        if(sv) hit(now, Math.min(1, sv * (0.92 + Math.random() * 0.16)));
+        stepN++; nextBeat += STEP;
+        if(nextBeat < now - 400) nextBeat = now + STEP;
       }
       bass = kick * 0.6; high = 0.2 + 0.2 * Math.sin(now * 0.01);
     }
     kick *= Math.exp(-dt / 150); if(kick < 0.01) kick = 0;
     glitch *= Math.exp(-dt / 110); if(glitch < 0.02) glitch = 0;
     var moving = kick > 0 || glitch > 0;
+    if(!hot && kick > 0.6){ hot = true; document.body.classList.add('hot'); } else if(hot && kick < 0.3){ hot = false; document.body.classList.remove('hot'); }
     if(!moving && !sq.length && !dirty) return;
     dirty = false;
     // posizioni dei vertici: dritti quando e' calmo, deformati quando c'e' un colpo
@@ -942,7 +997,9 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     }
     // linee della griglia
     var k2 = Math.min(1, kick * 0.6 + glitch * 0.3);
-    ctx.strokeStyle = 'rgb(' + Math.round(42 + 19 * k2) + ',' + Math.round(42 + 213 * k2 * 0.8) + ',' + Math.round(58 + 102 * k2 * 0.8) + ')';
+    var cr = 42 + 19 * k2, cg = 42 + 213 * k2 * 0.8, cb = 58 + 102 * k2 * 0.8;
+    if(kick > 0.55){ var rt = Math.min(1, (kick - 0.55) / 0.35); cr += (255 - cr) * rt; cg += (59 - cg) * rt; cb += (59 - cb) * rt; }
+    ctx.strokeStyle = 'rgb(' + Math.round(cr) + ',' + Math.round(cg) + ',' + Math.round(cb) + ')';
     ctx.lineWidth = 1;
     var off = moving ? 0 : 0.5;
     ctx.beginPath();
@@ -957,6 +1014,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     ctx.stroke();
   }
   window.klKick = function(){ return kick; };
+  window.klHits = function(){ return bigHits; };
   requestAnimationFrame(frame);
 })();
 
@@ -969,7 +1027,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   var origLabel = label ? label.textContent : '';
   var N = 8, OX = 320, OY = 60, TW = 32, TH = 16, WALL = 130;
   var sb = null, user = null, nick = '', wallet = null, active = false;
-  var pos = {x:4, y:4}, target = null, face = 1, rafId = 0, lastT = 0, walkT = 0;
+  var pos = {x:4, y:4}, target = null, face = 1, rafId = 0, lastT = 0, walkT = 0, dzT = 0;
   function iso(x, y){ return [OX + (x - y) * TW, OY + (x + y) * TH]; }
   function el(name, attrs, parent){
     var e = document.createElementNS(NS, name);
@@ -978,32 +1036,76 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     return e;
   }
   function pts(arr){ return arr.map(function(p){ return p[0] + ',' + p[1]; }).join(' '); }
+  var dz = [], SPK = iso(7.3, 0.9);
+  function box(parent, x, y, w, d, z0, h, top, left, right){
+    function P(px, py, hz){ var q = iso(px, py); return [q[0], q[1] - hz]; }
+    el('polygon', {points:pts([P(x + w, y, z0), P(x + w, y + d, z0), P(x + w, y + d, h), P(x + w, y, h)]), fill:right, stroke:'#2a2a3a'}, parent);
+    el('polygon', {points:pts([P(x, y + d, z0), P(x + w, y + d, z0), P(x + w, y + d, h), P(x, y + d, h)]), fill:left, stroke:'#2a2a3a'}, parent);
+    el('polygon', {points:pts([P(x, y, h), P(x + w, y, h), P(x + w, y + d, h), P(x, y + d, h)]), fill:top, stroke:'#2a2a3a'}, parent);
+  }
   function build(){
+    if(!svg.querySelector('defs')){
+      var df = el('defs', {});
+      var f = el('filter', {id:'neonGlow', x:'-30%', y:'-60%', width:'160%', height:'220%'}, df);
+      el('feGaussianBlur', {stdDeviation:'3', result:'b'}, f);
+      var mg = el('feMerge', {}, f);
+      el('feMergeNode', {'in':'b'}, mg); el('feMergeNode', {'in':'b'}, mg); el('feMergeNode', {'in':'SourceGraphic'}, mg);
+      svg.insertBefore(df, svg.firstChild);
+    }
     var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco');
-    fl.innerHTML = ''; wl.innerHTML = ''; dc.innerHTML = '';
+    fl.innerHTML = ''; wl.innerHTML = ''; dc.innerHTML = ''; dz = [];
     var top = iso(0, 0), lft = iso(0, N), rgt = iso(N, 0);
     el('polygon', {points:pts([top, [top[0], top[1] - WALL], [lft[0], lft[1] - WALL], lft]), fill:'#14142a', stroke:'#2a2a3a'}, wl);
     el('polygon', {points:pts([top, [top[0], top[1] - WALL], [rgt[0], rgt[1] - WALL], rgt]), fill:'#1b1233', stroke:'#2a2a3a'}, wl);
     for(var i = 0; i < N; i++){
       for(var j = 0; j < N; j++){
-        el('polygon', {points:pts([iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1)]),
-          fill:((i + j) % 2 ? '#101020' : '#161628'), stroke:'#2a2a3a', 'stroke-width':'1'}, fl);
+        var inZone = (i >= 2 && i <= 5 && j >= 2 && j <= 5);
+        var tile = el('polygon', {points:pts([iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1)]),
+          fill:(inZone ? 'rgba(123,47,255,0.16)' : ((i + j) % 2 ? '#101020' : '#161628')), stroke:(inZone ? '#7b2fff' : '#2a2a3a'), 'stroke-width':(inZone ? '1.2' : '1')}, fl);
+        if(inZone) dz.push({el:tile, i:i, j:j});
       }
     }
-    // tappeto
-    el('polygon', {points:pts([iso(2.5, 2.5), iso(5.5, 2.5), iso(5.5, 5.5), iso(2.5, 5.5)]), fill:'rgba(123,47,255,.28)', stroke:'#7b2fff', 'stroke-width':'1.5'}, dc);
-    // insegna al neon con il nickname sulla parete sinistra
-    var st = iso(0, 6.6);
-    var t = el('text', {x:0, y:0, 'font-family':'Press Start 2P, monospace', 'font-size':'11', fill:'#3dffa0',
-      transform:'matrix(1,-0.5,0,1,' + st[0] + ',' + (st[1] - 70) + ')'}, dc);
-    t.setAttribute('id', 'roomSign');
-    t.textContent = (nick || '').toUpperCase().slice(0, 14) + ' ROOM';
-    // cassa che pulsa con la musica
-    var s = iso(7, 1.2);
-    var g = el('g', {id:'roomSpk', transform:'translate(' + s[0] + ',' + s[1] + ')'}, dc);
-    el('polygon', {points:'-16,0 0,8 16,0 16,-34 0,-26 -16,-34', fill:'#1a1a2e', stroke:'#2a2a3a'}, g);
-    el('circle', {cx:'-6', cy:'-12', r:'5', fill:'none', stroke:'#3dffa0', 'stroke-width':'1.5', id:'roomSpkC'}, g);
-    el('circle', {cx:'6', cy:'-10', r:'4', fill:'none', stroke:'#7b2fff', 'stroke-width':'1.5'}, g);
+    // insegna neon stile lounge bar sulla parete sinistra
+    var c = iso(0, 4), text = (nick || '') + ' Room';
+    var size = Math.max(14, Math.min(26, Math.floor(180 / (text.length * 0.6))));
+    var sg = el('g', {id:'roomSign', transform:'matrix(1,-0.5,0,1,' + c[0] + ',' + (c[1] - 66) + ')'}, dc);
+    var glow = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Pacifico, cursive', 'font-size':size, fill:'none', stroke:'#3dffa0', 'stroke-width':'3', filter:'url(#neonGlow)', opacity:'.8'}, sg);
+    glow.textContent = text;
+    var tube = el('text', {x:0, y:0, 'text-anchor':'middle', 'font-family':'Pacifico, cursive', 'font-size':size, fill:'rgba(61,255,160,.12)', stroke:'#c8ffe6', 'stroke-width':'1', 'class':'tube'}, sg);
+    tube.textContent = text;
+    var uw = Math.min(110, text.length * size * 0.26);
+    var ul = el('path', {d:'M' + (-uw) + ',10 L' + uw + ',10', stroke:'#b57bff', 'stroke-width':'2.5', 'stroke-linecap':'round', filter:'url(#neonGlow)'}, sg);
+    // tavolo, portatile e cassa di base (vecchi e rovinati: quelli belli sono nel negozio)
+    box(dc, 3.3, 0.3, 2.3, 1.1, 0, 28, '#2d1f4d', '#1a1230', '#150e26');
+    drawLaptop(dc, 'old');
+    var g = el('g', {id:'roomSpk', transform:'translate(' + SPK[0] + ',' + SPK[1] + ')'}, dc);
+    drawSpeaker(g, 'old');
+  }
+  function Pz(px, py, hz){ var q = iso(px, py); return [q[0], q[1] - hz]; }
+  function drawLaptop(dc, kind){
+    if(kind === 'pro'){
+      box(dc, 4.0, 0.55, 0.95, 0.55, 28, 31, '#3a3a4d', '#25253a', '#1c1c2d');
+      el('polygon', {points:pts([Pz(4.0, 0.55, 31), Pz(4.95, 0.55, 31), Pz(4.95, 0.55, 53), Pz(4.0, 0.55, 53)]), fill:'#0c0c16', stroke:'#3dffa0', 'stroke-width':'1.2'}, dc);
+      return;
+    }
+    box(dc, 4.1, 0.6, 0.8, 0.5, 28, 30.5, '#8a8776', '#5f5d50', '#4a483d');
+    el('polygon', {points:pts([Pz(4.1, 0.6, 30.5), Pz(4.9, 0.6, 30.5), Pz(4.9, 0.6, 48), Pz(4.1, 0.6, 48)]), fill:'#3a3a35', stroke:'#8a8776', 'stroke-width':'2'}, dc);
+    el('polygon', {points:pts([Pz(4.17, 0.6, 32.5), Pz(4.83, 0.6, 32.5), Pz(4.83, 0.6, 45.5), Pz(4.17, 0.6, 45.5)]), fill:'#15171a'}, dc);
+    el('polyline', {points:pts([Pz(4.3, 0.6, 45.5), Pz(4.5, 0.6, 40), Pz(4.45, 0.6, 38), Pz(4.7, 0.6, 32.5)]), fill:'none', stroke:'#6b6f74', 'stroke-width':'1'}, dc);
+    el('polygon', {points:pts([Pz(4.62, 0.6, 41), Pz(4.78, 0.6, 41), Pz(4.78, 0.6, 44), Pz(4.62, 0.6, 44)]), fill:'#b8372f', opacity:'.8'}, dc);
+  }
+  function drawSpeaker(g, kind){
+    if(kind === 'pro'){
+      el('polygon', {points:'-16,0 0,8 16,0 16,-34 0,-26 -16,-34', fill:'#1a1a2e', stroke:'#2a2a3a'}, g);
+      el('circle', {cx:'-6', cy:'-12', r:'5', fill:'none', stroke:'#3dffa0', 'stroke-width':'1.5'}, g);
+      el('circle', {cx:'6', cy:'-10', r:'4', fill:'none', stroke:'#7b2fff', 'stroke-width':'1.5'}, g);
+      return;
+    }
+    el('polygon', {points:'-14,0 0,7 14,0 14,-28 0,-21 -14,-28', fill:'#33332e', stroke:'#55554a'}, g);
+    el('polygon', {points:'-14,-20 -3,-14 -3,-9 -14,-15', fill:'#9b8b5a', opacity:'.8'}, g);
+    el('circle', {cx:'-5', cy:'-9', r:'4.5', fill:'none', stroke:'#6a6a60', 'stroke-width':'1.5'}, g);
+    el('circle', {cx:'6', cy:'-8', r:'3.5', fill:'none', stroke:'#6a6a60', 'stroke-width':'1.2', 'stroke-dasharray':'3 2'}, g);
+    el('polyline', {points:'8,-27 6,-20 9,-16', fill:'none', stroke:'#16160f', 'stroke-width':'1'}, g);
   }
   // copia dell'avatar dell'editor (senza id duplicati)
   function cloneAvatar(){
@@ -1039,13 +1141,25 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var spk = $('roomSpk');
     if(spk && window.klKick){
       var k = window.klKick();
-      var p = iso(7, 1.2);
-      spk.setAttribute('transform', 'translate(' + p[0] + ',' + p[1] + ') scale(' + (1 + k * 0.12) + ')');
+      spk.setAttribute('transform', 'translate(' + SPK[0] + ',' + SPK[1] + ') scale(' + (1 + k * 0.06) + ')');
+    }
+    if(t - dzT > 40){
+      dzT = t;
+      var on = window.klMusicOn, kk = window.klKick ? window.klKick() : 0, step = window.klHits ? window.klHits() : 0;
+      for(var n = 0; n < dz.length; n++){
+        var c = dz[n], f;
+        if(on){
+          var col = ((c.i + c.j + step) % 2) ? '61,255,160' : '123,47,255';
+          if(kk > 0.8 && ((c.i * 7 + c.j * 3 + step) % 5 === 0)) col = '255,59,59';
+          f = 'rgba(' + col + ',' + (0.22 + 0.65 * Math.max(kk, 0.2)).toFixed(2) + ')';
+        } else f = 'rgba(123,47,255,0.16)';
+        c.el.setAttribute('fill', f);
+      }
     }
   }
   svg.addEventListener('click', function(e){
     var r = svg.getBoundingClientRect();
-    var px = (e.clientX - r.left) / r.width * 640, py = (e.clientY - r.top) / r.height * 380;
+    var px = (e.clientX - r.left) / r.width * 640, py = (e.clientY - r.top) / r.height * 420 - 40;
     var u = (px - OX) / TW, v = (py - OY) / TH;
     var x = (u + v) / 2, y = (v - u) / 2;
     if(x < 0 || y < 0 || x > N || y > N) return;
@@ -1085,6 +1199,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       setTimeout(function(){ p.classList.remove('show'); }, 2400);
     }catch(e){}
     setCoins();
+    if(window.klStatsRefresh) klStatsRefresh();
   });
   $('roomLook').addEventListener('click', function(){
     var open = editor.style.display !== 'none';
@@ -1110,7 +1225,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     $('roomLook').textContent = 'CAMBIA LOOK';
     build(); cloneAvatar(); watch();
     if(!rafId) rafId = requestAnimationFrame(loop);
-    loadWallet();
+    loadWallet(); paintLevel();
   }
   function leave(){
     active = false;
@@ -1123,7 +1238,188 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     ['menuCoins', 'menuCoins2'].forEach(function(id){ var e = $(id); if(e) e.textContent = 0; });
   }
   document.addEventListener('kl-login', function(e){ if(e.detail && e.detail.sb) enter(e.detail); });
+  // ----- livello e negozio -----
+  var LV = [0, 15, 40, 80, 140, 220, 330, 470, 650, 900], BUY_LEVEL = 5, ITEMS = [
+    {name:'Portatile nuovo', price:100}, {name:'Cassa nuova', price:100}];
+  function calcLevel(){
+    var U = window.klUserStats ? window.klUserStats() : {};
+    function c(k, m){ return Math.min(U[k] || 0, m); }
+    var music = c('click_spotify', 40) + c('click_soundcloud', 40) + c('click_player', 40) + 5 * (c('listen_spotify', 60) + c('listen_soundcloud', 60) + c('listen_player', 60));
+    var world = c('click_room', 100) + Math.floor(c('coins_generated', 500) / 5);
+    var tot = music + world, lvl = 1;
+    for(var i = 0; i < LV.length; i++){ if(tot >= LV[i]) lvl = i + 1; }
+    return {lvl:lvl, music:music, world:world, tot:tot, cur:LV[lvl - 1], next:(lvl < LV.length ? LV[lvl] : null)};
+  }
+  window.klLevelInfo = calcLevel;
+  function renderShop(){
+    var box = $('shopPanel');
+    if(!box || box.style.display === 'none') return;
+    var L = calcLevel(), g = window.klGoals && window.klGoals.shop, open = !!(g && g.done);
+    box.innerHTML = '';
+    var p = document.createElement('p');
+    p.textContent = 'Il negozio apre quando la community arriva a ' + (g ? g.target : 10) + ' abitanti. Per comprare serve il livello ' + BUY_LEVEL + ': sale con ascolti e click di MUSICA e MONDO. Gli oggetti che hai in stanza ora sono quelli di partenza.';
+    box.appendChild(p);
+    ITEMS.forEach(function(it){
+      var row = document.createElement('div'); row.className = 'shop-item';
+      var n = document.createElement('b'); n.textContent = it.name;
+      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = it.price + ' monete';
+      var lk = document.createElement('span'); lk.className = 'lk';
+      lk.textContent = !open ? 'bloccato: serve la community a ' + (g ? g.target : 10) + ' abitanti' : (L.lvl < BUY_LEVEL ? 'bloccato: livello ' + BUY_LEVEL + ' (tu ' + L.lvl + ')' : 'acquisto in arrivo');
+      row.appendChild(n); row.appendChild(pr); row.appendChild(lk); box.appendChild(row);
+    });
+  }
+  function paintLevel(){
+    if(!active) return;
+    var L = calcLevel();
+    $('roomLvl').textContent = L.lvl;
+    $('lvlFill').style.width = (L.next ? Math.round((L.tot - L.cur) / (L.next - L.cur) * 100) : 100) + '%';
+    $('lvlTxt').textContent = 'MUSICA ' + L.music + ' · MONDO ' + L.world + (L.next ? ' · prossimo livello a ' + L.next : ' · livello massimo');
+    renderShop();
+  }
+  $('roomShop').addEventListener('click', function(){
+    var box = $('shopPanel'); box.style.display = (box.style.display === 'none') ? 'block' : 'none'; renderShop();
+  });
+  document.addEventListener('kl-stats', paintLevel);
+  document.addEventListener('kl-goals', renderShop);
   document.addEventListener('kl-logout', leave);
+})();
+
+// ===== statistiche: tu / totale =====
+(function(){
+  var sb = window.klSb, uid = null, T = {}, U = {}, q = {}, timer = 0;
+  window.klTotals = T;
+  function fmt(n){ return Number(n || 0).toLocaleString('it-IT'); }
+  function paint(){
+    var els = document.querySelectorAll('[data-k]');
+    for(var i = 0; i < els.length; i++){
+      var e = els[i], k = e.getAttribute('data-k');
+      e.textContent = (e.getAttribute('data-s') === 'u') ? (uid ? fmt(U[k]) : '—') : fmt(T[k]);
+    }
+  }
+  async function refresh(){
+    if(!sb) return;
+    try{
+      var r = await sb.from('stats_total').select('key,value');
+      if(!r.error && r.data){ r.data.forEach(function(x){ T[x.key] = Number(x.value); }); }
+      if(uid){
+        var u = await sb.from('user_stats').select('key,value');
+        if(!u.error && u.data){ U = {}; u.data.forEach(function(x){ U[x.key] = Number(x.value); }); }
+      }
+    }catch(e){}
+    paint();
+    document.dispatchEvent(new Event('kl-stats'));
+  }
+  async function flush(){
+    timer = 0;
+    var o = q; q = {};
+    if(!sb) return;
+    for(var k in o){
+      var n = o[k];
+      while(n > 0){
+        var c = Math.min(n, 20); n -= c;
+        try{ await sb.rpc('track', {p_key:k, p_n:c}); }catch(e){}
+      }
+    }
+  }
+  window.klTrack = function(k){
+    q[k] = (q[k] || 0) + 1;
+    T[k] = (T[k] || 0) + 1;
+    if(uid) U[k] = (U[k] || 0) + 1;
+    paint();
+    document.dispatchEvent(new Event('kl-stats'));
+    if(!timer) timer = setTimeout(flush, 4000);
+  };
+  window.klStatsRefresh = refresh;
+  window.klUserStats = function(){ return U; };
+  function colName(n){ var els = document.querySelectorAll('.colUser'); for(var i = 0; i < els.length; i++){ els[i].textContent = n ? n.toUpperCase().slice(0, 9) : 'TU'; els[i].title = n || ''; } }
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && timer){ clearTimeout(timer); flush(); } });
+  document.addEventListener('kl-login', function(e){ uid = e.detail && e.detail.user ? e.detail.user.id : null; window.klNick = (e.detail && e.detail.nick) || ''; colName(window.klNick); U = {}; paint(); refresh(); });
+  document.addEventListener('kl-logout', function(){ uid = null; window.klNick = ''; colName(''); U = {}; paint(); document.dispatchEvent(new Event('kl-stats')); });
+  // click sui link e nelle aree
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var a = t.closest ? t.closest('a[href]') : null;
+    if(a){
+      var h = a.getAttribute('href') || '';
+      if(h.indexOf('spotify.com') >= 0) klTrack('click_spotify');
+      else if(h.indexOf('soundcloud.com') >= 0) klTrack('click_soundcloud');
+    }
+    if(t.closest){
+      if(t.closest('#memberPlayer')) klTrack('click_player');
+      if(t.closest('#roomWrap')) klTrack('click_room');
+    }
+  });
+  // click dentro i player incorporati (iframe): il browser ci avvisa solo del primo click che li mette a fuoco
+  window.addEventListener('blur', function(){
+    setTimeout(function(){
+      var ae = document.activeElement;
+      if(!ae || ae.tagName !== 'IFRAME') return;
+      if(ae.id === 'scPlayer') klTrack('click_soundcloud');
+      else if(ae.closest && ae.closest('#spotifyWrap')) klTrack('click_spotify');
+    }, 0);
+  });
+  // quante persone sono online adesso
+  try{
+    var ch = sb.channel('kl-online', {config:{presence:{key:'v' + Math.random().toString(36).slice(2)}}});
+    ch.on('presence', {event:'sync'}, function(){
+      var n = Object.keys(ch.presenceState()).length;
+      var el = document.getElementById('onlineCount'); if(el) el.textContent = fmt(n);
+    });
+    ch.subscribe(function(st){ if(st === 'SUBSCRIBED'){ try{ ch.track({t:Date.now()}); }catch(e){} } });
+  }catch(e){}
+  refresh();
+  setInterval(refresh, 30000);
+})();
+
+// ===== obiettivi: tu / community =====
+(function(){
+  var sb = window.klSb, goals = [];
+  var $ = function(id){ return document.getElementById(id); };
+  if(!sb || !$('goalTitle')) return;
+  window.klGoals = {};
+  function keys(g){ return (g.stat_key || '').split(',').filter(Boolean); }
+  function com(g){
+    if(g.kind === 'members') return window.klMembers || 0;
+    var T = window.klTotals || {};
+    return keys(g).reduce(function(a, k){ return a + (T[k] || 0); }, 0);
+  }
+  function usr(g){
+    if(!window.klLoggedIn) return null;
+    if(g.kind === 'members') return 1;
+    var U = window.klUserStats ? window.klUserStats() : {};
+    return keys(g).reduce(function(a, k){ return a + (U[k] || 0); }, 0);
+  }
+  function render(){
+    if(!goals.length) return;
+    window.klGoals = {};
+    goals.forEach(function(g){ if(g.key) window.klGoals[g.key] = {done:com(g) >= g.target, target:g.target}; });
+    var cur = goals.filter(function(g){ return com(g) < g.target })[0] || goals[goals.length - 1];
+    var c = com(cur), u = usr(cur), cp = Math.min(100, c / cur.target * 100);
+    $('goalTitle').textContent = cur.title;
+    $('goalFillC').style.width = cp + '%';
+    $('goalFillU').style.width = (u == null ? 0 : Math.min(cp, u / cur.target * 100)) + '%';
+    var who = (window.klNick || 'TU').toUpperCase();
+    $('goalWhoU').textContent = u == null ? 'entra per contare anche tu' : who + ': ' + u;
+    $('goalWhoC').textContent = 'COMMUNITY: ' + Math.min(c, cur.target) + ' / ' + cur.target;
+    var list = $('goalList'); list.innerHTML = '';
+    goals.forEach(function(g){
+      var gc = com(g), done = gc >= g.target;
+      var row = document.createElement('div'); row.className = 'gl' + (done ? ' done' : '');
+      var a = document.createElement('span'); a.textContent = (done ? '✓ ' : '') + g.title;
+      var b = document.createElement('span'); b.textContent = done ? 'sbloccato' : Math.min(gc, g.target) + ' / ' + g.target;
+      row.appendChild(a); row.appendChild(b); list.appendChild(row);
+    });
+    document.dispatchEvent(new Event('kl-goals'));
+  }
+  async function load(){
+    try{
+      var r = await sb.from('goals').select('*').eq('active', true).order('position');
+      if(r.error || !r.data || !r.data.length) return;
+      goals = r.data; render();
+    }catch(e){}
+  }
+  ['kl-members', 'kl-stats', 'kl-login', 'kl-logout'].forEach(function(ev){ document.addEventListener(ev, render); });
+  load();
 })();
 
 // il player SoundCloud avvisa quando parte o si ferma
@@ -1302,7 +1598,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(!audio.src){ step(1); return; }
     if(audio.paused){ audio.play(); } else { audio.pause(); }
   });
-  audio.addEventListener('play', function(){ setPlayIcon(true); klMusic(true, 'mb'); if(actx && actx.state === 'suspended'){ actx.resume(); } });
+  audio.addEventListener('play', function(){ setPlayIcon(true); klMusic(true, 'mb'); if(window.klTrack) klTrack('listen_player'); if(actx && actx.state === 'suspended'){ actx.resume(); } });
   audio.addEventListener('playing', function(){ buildGraph(); if(actx && actx.state === 'suspended'){ actx.resume(); } });
   audio.addEventListener('error', function(){
     if(fellBack || graphReady || !audio.src){ nowEl.textContent = 'Non riesco a riprodurre il brano'; return; }
