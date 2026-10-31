@@ -114,6 +114,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a>
     <a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a>
     <a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a>
+    <a href="#" id="logoutLink" style="display:none">Esci</a>
   </nav>
 </header>
 
@@ -243,7 +244,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <p id="modalText">Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.</p>
     <input type="text" id="inputNick" placeholder="Nickname" maxlength="20" autocomplete="nickname">
     <input type="email" id="inputEmail" placeholder="Email" autocomplete="email">
-    <label id="consentRow"><input type="checkbox" id="inputConsent" style="width:auto;margin:2px 0 0"><span>Acconsento all'uso della mia email per accedere a KENNYLAND.</span></label>
+    <label id="consentRow"><input type="checkbox" id="inputConsent" style="width:auto;margin:2px 0 0"><span>Ho almeno 14 anni e acconsento all'uso della mia email per accedere a KENNYLAND.</span></label>
     <p class="msg" id="modalMsg"></p>
     <button id="modalSubmit" class="btn">Invia il link</button>
     <button id="modalClose" class="btn alt" type="button">Chiudi</button>
@@ -349,6 +350,19 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
   var user = null, profile = null, mode = 'signup', handling = false;
   var cameFromLink = /access_token|code=|type=magiclink/.test(location.hash + location.search);
 
+  var logoutLink = document.getElementById('logoutLink');
+  function resetUi(){
+    enterBtn.textContent = 'ENTRA';
+    document.getElementById('welcomeLine').style.display = 'none';
+    logoutLink.style.display = 'none';
+  }
+  logoutLink.addEventListener('click', async function(e){
+    e.preventDefault();
+    try{ if(sb) await sb.auth.signOut(); }catch(err){}
+    user = null; profile = null;
+    resetUi();
+    hint.textContent = 'Sei uscito. Rientra per salvare il tuo avatar sul profilo.';
+  });
   function say(t){ msg.textContent = t || ''; }
   function validNick(n){ return /^[A-Za-z0-9_.-]{3,20}$/.test(n); }
   function toAvatar(){ return JSON.parse(JSON.stringify(avState)); }
@@ -398,6 +412,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
 
   function afterLogin(scroll){
     enterBtn.textContent = 'SEI DENTRO';
+    logoutLink.style.display = 'inline-block';
     var w = document.getElementById('welcomeLine');
     w.style.display = 'block';
     w.textContent = 'bentornato, ' + profile.nickname;
@@ -412,7 +427,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     handling = true;
     try{
       user = session ? session.user : null;
-      if(!user){ profile = null; return; }
+      if(!user){ profile = null; resetUi(); return; }
       var r = await sb.from('profiles').select('nickname,avatar').eq('id', user.id).maybeSingle();
       profile = r.data || null;
       if(!profile){
@@ -453,7 +468,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
       }
       var email = emailInput.value.trim();
       if(!/^\S+@\S+\.\S+$/.test(email)){ say("Inserisci un'email valida."); return; }
-      if(!consent.checked){ say("Serve il consenso all'uso dell'email."); return; }
+      if(!consent.checked){ say("Serve confermare età e consenso."); return; }
       try{ localStorage.setItem('kl_pending_nick', nick); }catch(e){}
       var r = await sb.auth.signInWithOtp({email:email, options:{emailRedirectTo: location.origin + location.pathname}});
       if(r.error){ say('Non riesco a inviare il link: ' + r.error.message); return; }
