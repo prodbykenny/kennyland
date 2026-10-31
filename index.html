@@ -472,7 +472,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <div class="lock-text" id="lockText">click me!</div>
     </div>
     <div class="mp deck" id="memberPlayer" style="display:none">
-      <div class="deck-top"><span class="viz-brand">KL-METER <i>MK1</i></span><span class="viz-led" id="vizLed"></span><div class="mp-tabs" id="mpTabs"></div></div>
+      <div class="deck-top"><span class="viz-brand">KENNYMETER <i>MK-01</i></span><span class="viz-led" id="vizLed"></span><div class="mp-tabs" id="mpTabs"></div></div>
       <div class="deck-stage" id="deckStage">
         <video id="mpVideo" playsinline preload="none" crossorigin="anonymous"></video>
         <img id="stageImg" alt="" hidden>
@@ -1477,7 +1477,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var hp = $('hudAv'); if(hp) hp.innerHTML = html;
     place();
   }
-  var J = null, danceBob = 0, dancing = false;
+  var J = null, danceBob = 0, walkBob = 0, dancing = false;
   function joints(){
     if(J) return J;
     var av = $('roomAv').querySelector('.av'); if(!av) return null;
@@ -1496,27 +1496,37 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     if(!joints()) return;
     var ts = t / 1000, k = window.klKick ? window.klKick() : 0;
     var inDz = pos.x >= 2 && pos.x <= 6 && pos.y >= 2 && pos.y <= 6;
-    dancing = !target && inDz && !!window.klMusicOn;
-    if(target){
+    dancing = !target && inDz && !!window.klMusicOn && !!(window.klOwned && window.klOwned.dance_base);
+    if(target && window.klOwned && window.klOwned.walk_sway){
       var w = Math.sin(walkT * 9);
       rot('armL', 5 + 12 * w); rot('armR', -5 + 12 * w); rot('foreL', -6 - 6 * w); rot('foreR', 6 - 6 * w);
       rot('legL', 7 * w, 0, -4 * Math.max(0, w)); rot('legR', 7 * w, 0, -4 * Math.max(0, -w));
       rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0); rot('head', 2 * w);
-      danceBob = 0;
-    } else if(dancing){
+      danceBob = 0; walkBob = 3;
+    } else if(target){
+      // camminata classica: passo coordinato, piedi che restano a terra, braccia opposte alle gambe
+      var ph = walkT * 7, wl = Math.sin(ph), wr = Math.sin(ph + Math.PI);
+      rot('legL', 5 * wl); rot('legR', 5 * wr);
+      rot('shinL', -9 * Math.max(0, wl)); rot('shinR', 9 * Math.max(0, wr));
+      rot('footL', 0); rot('footR', 0);
+      rot('armL', 3 + 5 * wr); rot('armR', -3 + 5 * wl); rot('foreL', -4); rot('foreR', 4);
+      rot('head', 0.8 * wl);
+      danceBob = 0; walkBob = 1.2 * Math.abs(Math.cos(ph));
+    } else if(dancing && window.klOwned && window.klOwned.dance_base){
       var b = ts * 2.33 * Math.PI * 2, sn = Math.sin(b), c2 = Math.sin(b * 2);
       rot('armL', 105 + 45 * sn + k * 12); rot('armR', -(105 - 45 * sn + k * 12));
       rot('foreL', -35 + 30 * c2); rot('foreR', 35 - 30 * c2);
       rot('legL', 9 * sn, 0, -5 * Math.max(0, sn)); rot('legR', 9 * sn, 0, -5 * Math.max(0, -sn));
       rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0);
       rot('head', 7 * c2 + k * 6);
-      danceBob = Math.abs(sn) * 3.5 + k * 2;
+      danceBob = Math.abs(sn) * 3.5 + k * 2; walkBob = 0;
     } else {
       var br = Math.sin(ts * 2);
       rot('armL', 4 + br * 1.2); rot('armR', -4 - br * 1.2); rot('foreL', -3); rot('foreR', 3);
       rot('legL', 0); rot('legR', 0); rot('shinL', 0); rot('shinR', 0); rot('footL', 0); rot('footR', 0);
-      rot('head', Math.sin(ts * 1.3) * 1.5);
-      danceBob = 0;
+      if(window.klMusicOn){ var bb = ts * 2.33 * Math.PI * 2; rot('head', 4.5 * Math.sin(bb) + k * 3, 0, 0); }
+      else rot('head', Math.sin(ts * 1.3) * 1.5);
+      danceBob = 0; walkBob = 0;
     }
   }
   // ----- fumetto suggerimento: si scrive da solo, poi si cancella e torna nuvoletta
@@ -1543,7 +1553,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   })();
   function place(){
     var p = iso(pos.x, pos.y), g = $('roomAv'), av = g.querySelector('.av'), sh = g.querySelector('.sh');
-    var bob = (target ? Math.abs(Math.sin(walkT * 9)) * 3 : 0) + danceBob, sc = 0.5;
+    var bob = (target ? walkBob : 0) + danceBob, sc = 0.5;
     if(sh){ sh.setAttribute('cx', p[0]); sh.setAttribute('cy', p[1]); }
     if(av) av.setAttribute('transform', 'translate(' + p[0] + ',' + (p[1] - bob) + ') scale(' + (sc * face) + ',' + sc + ') translate(-60,-176)');
   }
@@ -1754,8 +1764,11 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     {id:'clothes', name:'Vestiti', items:[], soon:'Maglie, cappelli e occhiali firmati KENNYLAND.'},
     {id:'floor', name:'Pavimenti', items:[], soon:'Cambia il pavimento della stanza.'},
     {id:'walls', name:'Pareti', items:[], soon:'Cambia colori e carta da parati.'},
-    {id:'dance', name:'Balli', items:[], soon:'Animazioni da ballare nella Dance Zone.'}
+    {id:'dance', name:'Balli', items:[{id:'dance_base', name:'Ballo base', price:100, kind:'dance', desc:'Braccia in aria e passo a tempo quando suona la musica nella Dance Zone. Senza questo, il tuo avatar scuote solo la testa.'}]},
+    {id:'walk', name:'Camminate', items:[{id:'walk_sway', name:'Camminata oscillante', price:100, kind:'walk', desc:'Braccia che dondolano e passo molleggiato. La camminata di base resta quella classica.'}]}
   ];
+  // contenuti sbloccati (per ora nessun acquisto: si attiveranno con il negozio vero)
+  window.klOwned = window.klOwned || {};
   var shopCat = 'tech', shopSel = null, shopBuilt = false;
   function shopState(){
     var L = calcLevel(), g = window.klGoals && window.klGoals.shop;
@@ -1764,7 +1777,13 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   function preview(kind){
     var s = document.createElementNS(NS, 'svg');
     var g = el('g', {}, s);
-    if(kind === 'laptop'){
+    if(kind === 'dance' || kind === 'walk'){
+      s.setAttribute('viewBox', '0 0 60 60');
+      var L = {fill:'none', stroke:'#b18cff', 'stroke-width':'3', 'stroke-linecap':'round', 'stroke-linejoin':'round'};
+      el('circle', {cx:30, cy:12, r:5, fill:'#3dffa0'}, g);
+      if(kind === 'dance'){ el('path', Object.assign({d:'M30 18 L30 36 M30 24 L16 10 M30 24 L44 12 M30 36 L21 54 M30 36 L40 52'}, L), g); }
+      else { el('path', Object.assign({d:'M30 18 L30 36 M30 24 L21 33 M30 24 L40 31 M30 36 L22 54 M30 36 L39 54'}, L), g); el('path', {d:'M12 56 L48 56', stroke:'#3dffa0', 'stroke-width':'2', 'stroke-dasharray':'3 4'}, g); }
+    } else if(kind === 'laptop'){
       s.setAttribute('viewBox', '385 70 105 100');
       box(g, 3.9, 0.45, 1.15, 0.75, 0, 28, '#2d1f4d', '#1a1230', '#150e26');
       drawLaptop(g, 'pro');
@@ -2165,7 +2184,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   }
 })();
 
-// ===== KL-METER: stage quadrato (video / hero) + fila di visualizer =====
+// ===== KENNYMETER MK-01: stage + fila di visualizer (video / hero) + fila di visualizer =====
 (function(){
   var strip = document.getElementById('deckStrip'), msg = document.getElementById('vizMsg'), led = document.getElementById('vizLed');
   var hero = document.getElementById('heroCv'), stage = document.getElementById('deckStage');
