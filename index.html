@@ -122,6 +122,11 @@ html.bgc body{background-image:none;}
 .trk-s{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:2px 5px;flex:none;}
 .trk-n{font-family:'Press Start 2P',monospace;font-size:11px;font-weight:400;min-width:24px;text-align:right;color:var(--acid);}
 #trkAll .trk-n{color:#b57bff;}
+.poll-lock{margin-top:8px;border:1px dashed #3a2a66;background:rgba(123,47,255,.06);padding:16px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.poll-t{font-family:'Press Start 2P',monospace;font-size:9px;line-height:1.6;color:#b57bff;}
+.poll-bar{width:80%;height:7px;background:#000;border:1px solid var(--line);position:relative;}
+.poll-bar i{position:absolute;inset:0 auto 0 0;width:0;background:#7b2fff;transition:width .5s;}
+.poll-n{font-size:12px;color:var(--muted);} .poll-n b{font-family:'Press Start 2P',monospace;font-size:10px;font-weight:400;color:var(--acid);}
 .trk-e{font-size:13px;color:var(--muted);padding:6px 0;}
 @media (max-width:520px){.stat3{grid-template-columns:1fr 62px 62px;font-size:12px;}.stat3 b{font-size:9px;}}
 
@@ -212,7 +217,7 @@ html.bgc body{background-image:none;}
 .deck-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 24px;border-bottom:1px solid #2a2a3a;background:linear-gradient(#1a1a2e,#10101c);}
 .deck-top .mp-tabs{padding:0;margin-left:auto;}
 .deck-stage{position:relative;aspect-ratio:16/9;margin:10px;background:#05050a;border:2px solid #1c1c30;border-radius:5px;overflow:hidden;box-shadow:inset 0 0 24px rgba(0,0,0,.9);}
-.deck-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;background:#000;}
+.deck-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000;}
 .deck-stage.isvid video{display:block;} .deck-stage.isvid #heroCv,.deck-stage.isvid #stageImg{display:none;}
 #stageImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%;will-change:transform,filter;}
 #stageImg:not([hidden]){animation:kenb 24s ease-in-out infinite alternate;}
@@ -223,7 +228,7 @@ html.bgc body{background-image:none;}
 .cat-btn:hover{border-color:var(--acid);color:var(--acid);}
 .deck-stage .mp-list{position:absolute;top:0;bottom:0;right:0;width:min(330px,70%);max-height:none;padding:46px 0 8px;background:rgba(7,7,13,.88);backdrop-filter:blur(8px);border-left:1px solid #7b2fff;z-index:5;transform:translateX(102%);transition:transform .3s;overflow-y:auto;}
 .deck-stage.catopen .mp-list{transform:none;}
-@media (max-width:560px){.deck-stage{aspect-ratio:4/3;}.deck-stage .mp-list{width:100%;}}
+@media (max-width:560px){.deck-stage .mp-list{width:100%;}}
 .deck-strip{display:flex;gap:6px;padding:0 10px 10px;background:#07070d;overflow-x:auto;scrollbar-width:thin;}
 .deck-strip .mod{flex:1 0 104px;min-width:104px;}
 .mod{position:relative;border:2px solid #1c1c30;border-radius:5px;overflow:hidden;background:#07070d;box-shadow:inset 0 0 14px rgba(0,0,0,.9);}
@@ -496,8 +501,8 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <div class="stat3"><span class="ic"><svg width="13" height="13" aria-hidden="true"><use href="#i-spk"/></svg>Player KENNYLAND</span><b data-k="listen_player" data-s="u">—</b><b data-k="listen_player" data-s="t">0</b></div>
       <div class="stat3 tot"><span>Ascolti totali</span><b data-k="listen_all" data-s="u">—</b><b data-k="listen_all" data-s="t">0</b></div>
       <div class="trk-h">TRACCE ASCOLTATE</div>
-      <div class="trk-sub" id="trkMeHead">LE TUE</div><div id="trkMe" class="trk-list"></div>
-      <div class="trk-sub c">COMMUNITY · PIÙ ASCOLTATE</div><div id="trkAll" class="trk-list"></div>
+      <div class="trk-sub" id="trkMeHead">LE TUE</div><div id="trkMe" class="trk-list"><div class="trk-e">Entra per tracciare i tuoi ascolti.</div></div>
+      <div class="trk-sub c">COMMUNITY · PIÙ ASCOLTATE</div><div id="trkAll" class="trk-list"><div class="trk-e">Ancora nessun ascolto.</div></div>
     </div>
     <div class="panel">
       <h3>Mondo</h3>
@@ -507,6 +512,13 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <div class="stat3"><span>Cambi outfit</span><b data-k="outfit_change" data-s="u">—</b><b data-k="outfit_change" data-s="t">0</b></div>
       <div class="stat3"><span>Monete generate</span><b data-k="coins_generated" data-s="u">—</b><b data-k="coins_generated" data-s="t">0</b></div>
       <div class="stat3"><span>Monete spese</span><b data-k="coins_spent" data-s="u">—</b><b data-k="coins_spent" data-s="t">0</b></div>
+      <div class="trk-h">SONDAGGIO</div>
+      <div class="poll-lock" id="pollLock">
+        <svg class="poll-ico" viewBox="0 0 48 56" width="30" height="35" aria-hidden="true"><path d="M14 24 V16 a10 10 0 0 1 20 0 V24" fill="none" stroke="#b57bff" stroke-width="5" stroke-linecap="round"/><rect x="6" y="24" width="36" height="28" rx="4" fill="#15151f" stroke="#b57bff" stroke-width="4"/><circle cx="24" cy="38" r="4" fill="#b57bff"/></svg>
+        <div class="poll-t">UNLOCK WITH THE COMMUNITY!</div>
+        <div class="poll-bar"><i id="pollFill"></i></div>
+        <div class="poll-n"><b id="pollNow">0</b> / 25 abitanti</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1729,7 +1741,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   var SRC = {spotify:'SPOTIFY', soundcloud:'SOUNDCLOUD', player:'PLAYER'};
   function paintTracks(list, box, who){
     box.innerHTML = '';
-    if(!list.length){ var e = document.createElement('div'); e.className = 'trk-e'; e.textContent = who ? 'Ancora nessun brano: premi play su un player.' : 'Ancora nessun ascolto.'; box.appendChild(e); return; }
+    if(!list.length){ var e = document.createElement('div'); e.className = 'trk-e'; e.textContent = who ? (uid ? 'Ancora nessun brano: premi play su un player.' : 'Entra per tracciare i tuoi ascolti.') : 'Ancora nessun ascolto.'; box.appendChild(e); return; }
     list.forEach(function(x){
       var r = document.createElement('div'); r.className = 'trk';
       var t = document.createElement('span'); t.className = 'trk-t'; t.textContent = x.title;
@@ -1747,13 +1759,14 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       var me = r.data.filter(function(x){ return x.scope === 'u'; }), all = r.data.filter(function(x){ return x.scope === 't'; });
       var mb = document.getElementById('trkMe'), ab = document.getElementById('trkAll'), hd = document.getElementById('trkMeHead');
       if(!mb || !ab) return;
-      hd.style.display = mb.style.display = uid ? '' : 'none';
       if(uid) paintTracks(me, mb, true);
       paintTracks(all, ab, false);
     }catch(e){}
   }
   // registra quale brano e' stato ascoltato e da dove
   var lastLog = {};
+  function pollPaint(){ var n = window.klMembers || 0, e = document.getElementById('pollNow'), f = document.getElementById('pollFill'); if(e) e.textContent = n; if(f) f.style.width = Math.min(100, Math.round(n / 25 * 100)) + '%'; }
+  document.addEventListener('kl-members', pollPaint); document.addEventListener('kl-stats', pollPaint); pollPaint();
   window.klLogListen = function(src, title){
     if(!uid || !sb || !title) return;
     title = String(title).slice(0, 80);
@@ -2208,24 +2221,36 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       api.createController(holder, {uri:'spotify:artist:1A4ZZ7547fH0sEMwOqFc9y', width:'100%', height:152}, function(ctrl){
         done = true;
         if(plain.parentNode) plain.parentNode.removeChild(plain);
-        var spWas = true, spUri = '', spNames = {};
-        function spLog(uri){
-          if(spNames[uri]){ klLogListen('spotify', spNames[uri]); return; }
-          var done2 = false;
-          function put(t){ if(done2) return; done2 = true; spNames[uri] = t; klLogListen('spotify', t); }
+        var spWas = true, spUri = '', spNames = {}, spTimer = 0;
+        function spTitle(uri, cb){
+          if(spNames[uri]){ cb(spNames[uri]); return; }
+          var url = uri.replace(/^spotify:(\w+):(.+)$/, 'https://open.spotify.com/$1/$2');
           try{
-            fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(uri)).then(function(r){ return r.json(); })
-              .then(function(j){ put(j && j.title ? j.title : 'Brano Spotify'); }).catch(function(){ put('Brano Spotify'); });
-          }catch(err){ put('Brano Spotify'); }
+            fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url)).then(function(r){ return r.json(); })
+              .then(function(j){ if(j && j.title){ spNames[uri] = j.title; cb(j.title); } }).catch(function(){});
+          }catch(err){}
         }
+        function spTrack(uri){
+          if(!/^spotify:(track|episode):/.test(uri || '')) return false;
+          clearTimeout(spTimer); spTimer = 0;
+          spTitle(uri, function(t){ klLogListen('spotify', t); });
+          return true;
+        }
+        ctrl.addListener('playback_started', function(e){ var d = e && e.data; spTrack(d && (d.playingURI || d.playing_uri)); });
         ctrl.addListener('playback_update', function(e){
           var d = e && e.data;
           var playing = !!(d && !d.isPaused);
           klMusic(playing, 'sp');
           if(playing && window.klLogListen){
-            var uri = d.playingURI || d.uri || '';
-            if(spWas || (uri && uri !== spUri)){ spUri = uri; spLog(uri ? uri.replace(/^spotify:(\w+):(.+)$/, 'https://open.spotify.com/$1/$2') : 'https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y'); }
-          }
+            var uri = d.playingURI || '';
+            if(uri !== spUri || spWas){
+              spUri = uri;
+              if(!spTrack(uri) && !spTimer){
+                // se Spotify non dice quale brano suona, dopo qualche secondo registriamo un ascolto generico
+                spTimer = setTimeout(function(){ spTimer = 0; klLogListen('spotify', 'Brano Spotify'); }, 8000);
+              }
+            }
+          } else if(spTimer){ clearTimeout(spTimer); spTimer = 0; }
           spWas = !playing;
         });
       });
@@ -2252,6 +2277,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   function isVid(p){ return /\.(mp4|webm|mov|m4v)$/i.test(p || ''); }
   var catBtn = document.getElementById('mpCat');
   catBtn.addEventListener('click', function(e){ e.stopPropagation(); var o = !stageEl.classList.contains('catopen'); stageEl.classList.toggle('catopen', o); catBtn.setAttribute('aria-expanded', o ? 'true' : 'false'); });
+  audio.addEventListener('loadedmetadata', function(){ var r = audio.videoWidth / (audio.videoHeight || 1); audio.style.objectFit = (r > 1.45 && r < 2.2) ? 'cover' : 'contain'; });
   stageEl.addEventListener('click', function(){ if(stageEl.classList.contains('isvid')){ if(audio.paused) audio.play(); else audio.pause(); } });
   var fellBack = false, graphReady = false, actx = null;
   var vol = document.getElementById('mpVol'), muteBtn = document.getElementById('mpMute');
