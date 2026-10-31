@@ -32,7 +32,8 @@ body{
   background-size:28px 28px;
   background-attachment:fixed;
 }
-.wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px;}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:28px 20px 80px;}
+#bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 .hud{font-family:'Press Start 2P',monospace;}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
 .logo{font-family:'Press Start 2P',monospace;font-size:14px;letter-spacing:1px;}
@@ -61,7 +62,18 @@ h1 em{font-style:normal;color:var(--mag);}
 .hero-gate{text-align:center;padding:50px 20px 46px;}
 .gate-frame{display:block;margin:14px 0 26px;}
 .gate-title{font-family:'Cinzel Decorative',serif;font-size:clamp(36px,8vw,76px);letter-spacing:3px;color:var(--ink);text-shadow:0 0 20px rgba(61,255,160,.35),0 0 40px rgba(123,47,255,.25);margin:0;}
-.gate-tag{font-family:'Press Start 2P',monospace;color:var(--muted);font-size:10px;line-height:1.8;margin:26px 0 0;}
+.gate-tag{font-family:'Press Start 2P',monospace;color:var(--ink);font-size:9px;line-height:1.9;letter-spacing:1px;margin:26px 0 0;}
+.w-green{color:#3dffa0;text-shadow:0 0 8px rgba(61,255,160,.5);}
+.w-purple{color:#b18cff;text-shadow:0 0 8px rgba(177,140,255,.5);}
+.goal-box{border:1px solid var(--line);background:var(--panel);padding:14px 16px;}
+.goal-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.goal-tag{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--acid);}
+.goal-title{font-weight:600;font-size:15px;}
+.goal-bar{position:relative;height:32px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;}
+.goal-fill{position:absolute;top:0;bottom:0;left:0;background:repeating-linear-gradient(45deg,#7b2fff 0 10px,#6522e0 10px 20px);animation:goalmove 1.2s linear infinite;}
+@keyframes goalmove{to{background-position:28.28px 0;}}
+.goal-text{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-family:'Press Start 2P',monospace;font-size:9px;color:#fff;text-shadow:0 0 4px #000,0 0 4px #000;padding:0 8px;text-align:center;}
+@media (prefers-reduced-motion: reduce){.goal-fill{animation:none;}}
 .enter-btn{font-family:'Press Start 2P',monospace;font-size:15px;padding:18px 46px;background:var(--acid);color:var(--bg);border:none;cursor:pointer;letter-spacing:2px;box-shadow:0 0 0 2px var(--line),0 0 26px rgba(61,255,160,.4);}
 .enter-btn:hover{background:var(--mag);box-shadow:0 0 0 2px var(--line),0 0 26px rgba(255,62,165,.5);}
 .modal-overlay{position:fixed;inset:0;background:rgba(10,10,18,.86);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
@@ -73,6 +85,26 @@ h1 em{font-style:normal;color:var(--mag);}
 .modal .btn{width:100%;margin-bottom:8px;text-align:center;}
 .modal label{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px;align-items:flex-start;line-height:1.4;}
 .modal .msg{font-size:12px;color:var(--mag);min-height:16px;margin:0 0 10px;}
+.cookie-note{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:300px;background:var(--panel);border:1px solid var(--line);padding:10px 12px;font-size:11px;line-height:1.45;color:var(--muted);z-index:40;display:none;}
+.acct{position:relative;display:inline-flex;align-items:center;gap:8px;margin-left:8px;}
+.coin-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);padding:7px 10px;font-size:13px;font-weight:600;}
+.coin-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffd23d;box-shadow:0 0 0 2px #7a6200 inset;}
+.acct-btn{background:transparent;border:1px solid var(--acid);color:var(--acid);padding:8px 14px;font-size:13px;font-family:'Space Grotesk',sans-serif;cursor:pointer;font-weight:600;}
+.acct-drop{display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:240px;background:var(--panel);border:1px solid var(--line);z-index:30;padding:6px 0;}
+.acct.open .acct-drop{display:block;}
+.acct-row{display:flex;justify-content:space-between;gap:12px;padding:7px 12px;font-size:12px;border-bottom:1px dashed var(--line);}
+.acct-k{color:var(--muted);}
+.acct-row b{font-weight:600;word-break:break-all;text-align:right;}
+nav .acct-drop a{display:block;border:none;margin:0;padding:9px 12px;font-size:13px;}
+nav .acct-drop a:hover{background:var(--bg2);}
+.sw-custom{position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000;background:conic-gradient(#ff2e3c,#ffd23d,#3dffa0,#00d4ff,#7b2fff,#ff3ea5,#ff2e3c);overflow:hidden;}
+.sw-custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;}
+.tab{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;}
+.tab.active{border-color:var(--acid);color:var(--acid);}
+.acc-row{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.45;}
+.danger{border:1px solid var(--mag);color:var(--mag);background:transparent;padding:9px 16px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;}
+.cookie-note button{margin-top:8px;background:transparent;border:1px solid var(--acid);color:var(--acid);padding:5px 12px;font-family:'Space Grotesk',sans-serif;font-size:11px;cursor:pointer;}
 
 section{margin-top:56px;}
 .label{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;}
@@ -106,6 +138,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 </style>
 </head>
 <body>
+<canvas id="bgCanvas"></canvas>
 <div class="wrap">
 
 <header>
@@ -114,7 +147,17 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a>
     <a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a>
     <a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a>
-    <a href="#" id="logoutLink" style="display:none">Esci</a>
+    <div class="acct" id="acctMenu" style="display:none">
+      <span class="coin-chip" title="Le monete arrivano presto"><i class="coin-dot"></i><b id="menuCoins">0</b></span>
+      <button type="button" class="acct-btn" id="acctBtn">IL TUO ACCOUNT ▾</button>
+      <div class="acct-drop">
+        <div class="acct-row"><span class="acct-k">Nickname</span><b id="menuNick"></b></div>
+        <div class="acct-row"><span class="acct-k">Email</span><b id="menuEmail"></b></div>
+        <div class="acct-row"><span class="acct-k">Monete</span><b id="menuCoins2">0</b></div>
+        <a href="#accountSection" id="menuSettings">Impostazioni</a>
+        <a href="#" id="logoutLink">Esci</a>
+      </div>
+    </div>
   </nav>
 </header>
 
@@ -124,7 +167,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
     <div class="gate-title">KENNYLAND</div>
   </div>
   <button class="enter-btn" id="enterBtn">ENTRA</button>
-  <p class="gate-tag">new world for you, new live for us</p>
+  <p class="gate-tag">NEW <span class="w-green">WORLD</span> FOR YOU NEW <span class="w-purple">LIFE</span> FOR US</p>
   <p class="gate-tag" id="welcomeLine" style="display:none;margin-top:14px"></p>
 </div>
 
@@ -135,8 +178,16 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
       <iframe style="border-radius:8px" src="https://open.spotify.com/embed/artist/1A4ZZ7547fH0sEMwOqFc9y?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     </div>
     <div class="panel" style="padding:10px">
-      <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/escaape&color=%233dffa0&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
+      <iframe id="scPlayer" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/escaape&color=%233dffa0&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
     </div>
+  </div>
+</section>
+
+<!-- OBIETTIVO: per cambiarlo modifica il testo di goal-title e la percentuale in width -->
+<section>
+  <div class="goal-box">
+    <div class="goal-head"><span class="goal-tag">PROSSIMO OBIETTIVO</span><span class="goal-title">Dominio tutto nostro + email di accesso per tutti</span></div>
+    <div class="goal-bar"><div class="goal-fill" style="width:25%"></div><div class="goal-text">until the next update - let us cook!</div></div>
   </div>
 </section>
 
@@ -177,29 +228,43 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
         <rect id="avLegR" x="64" y="104" width="20" height="50" rx="4" fill="#3dffa0" stroke="#0a0a12" stroke-width="3"/>
         <rect id="avShoeL" x="33" y="154" width="26" height="16" rx="4" fill="#242430" stroke="#0a0a12" stroke-width="3"/>
         <rect id="avShoeR" x="61" y="154" width="26" height="16" rx="4" fill="#242430" stroke="#0a0a12" stroke-width="3"/>
+        <g id="acc-hair">
+          <path id="hairShort" data-g="hair" data-attr="fill" d="M38 22 L38 9 L45 2 L52 9 L60 1 L68 9 L75 2 L82 9 L82 22 L76 22 L76 15 L44 15 L44 22 Z" fill="#242430" stroke="#0a0a12" stroke-width="3" stroke-linejoin="round"/>
+          <path id="hairLong" style="display:none" data-g="hair" data-attr="fill" d="M36 64 L36 9 L45 2 L52 9 L60 1 L68 9 L75 2 L84 9 L84 64 L76 64 L76 15 L44 15 L44 64 Z" fill="#242430" stroke="#0a0a12" stroke-width="3" stroke-linejoin="round"/>
+        </g>
         <g id="acc-cap" style="display:none">
-          <rect class="acc-fill" x="34" y="2" width="52" height="14" rx="4" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
-          <rect class="acc-fill" x="78" y="12" width="20" height="8" rx="2" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
+          <rect data-g="cap" data-attr="fill" x="34" y="2" width="52" height="14" rx="4" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
+          <rect data-g="cap" data-attr="fill" x="78" y="12" width="20" height="8" rx="2" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
         </g>
         <g id="acc-glasses" style="display:none">
-          <rect class="acc-stroke" x="46" y="22" width="14" height="10" fill="none" stroke="#ffffff" stroke-width="3"/>
-          <rect class="acc-stroke" x="64" y="22" width="14" height="10" fill="none" stroke="#ffffff" stroke-width="3"/>
-          <line class="acc-stroke" x1="60" y1="27" x2="64" y2="27" stroke="#ffffff" stroke-width="3"/>
+          <rect data-g="glasses" data-attr="stroke" x="46" y="22" width="14" height="10" fill="none" stroke="#3dffa0" stroke-width="3"/>
+          <rect data-g="glasses" data-attr="stroke" x="64" y="22" width="14" height="10" fill="none" stroke="#3dffa0" stroke-width="3"/>
+          <line data-g="glasses" data-attr="stroke" x1="60" y1="27" x2="64" y2="27" stroke="#3dffa0" stroke-width="3"/>
         </g>
         <g id="acc-phones" style="display:none">
-          <path class="acc-stroke" d="M28 28 Q60 -6 92 28" fill="none" stroke="#ffffff" stroke-width="5"/>
-          <rect class="acc-fill" x="20" y="22" width="14" height="22" rx="4" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
-          <rect class="acc-fill" x="86" y="22" width="14" height="22" rx="4" fill="#ffffff" stroke="#0a0a12" stroke-width="2"/>
+          <path data-g="phones" data-attr="stroke" d="M28 28 Q60 -6 92 28" fill="none" stroke="#7b2fff" stroke-width="5"/>
+          <rect data-g="phones" data-attr="fill" x="20" y="22" width="14" height="22" rx="4" fill="#7b2fff" stroke="#0a0a12" stroke-width="2"/>
+          <rect data-g="phones" data-attr="fill" x="86" y="22" width="14" height="22" rx="4" fill="#7b2fff" stroke="#0a0a12" stroke-width="2"/>
         </g>
       </svg>
     </div>
     <div class="ctrl">
+      <h4>Capelli</h4>
+      <div class="swatches" data-group="hair">
+        <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
+        <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
+        <div class="sw active" style="background:#242430" data-c="#242430"></div>
+        <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
+      </div>
+      <div class="toggles"><button class="tgl on" data-hair="short">Corti</button><button class="tgl" data-hair="long">Lunghi</button></div>
       <h4>Maglia</h4>
       <div class="swatches" data-group="shirt">
         <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
         <div class="sw active" style="background:#7b2fff" data-c="#7b2fff"></div>
         <div class="sw" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
       <h4>Pantaloni</h4>
       <div class="swatches" data-group="pants">
@@ -207,6 +272,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
         <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
         <div class="sw" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
       <h4>Scarpe</h4>
       <div class="swatches" data-group="shoes">
@@ -214,37 +280,65 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
         <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
         <div class="sw active" style="background:#242430" data-c="#242430"></div>
         <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
       <h4>Accessori</h4>
-      <div class="toggles">
-        <button class="tgl" data-acc="acc-cap">Cappello</button>
-        <button class="tgl" data-acc="acc-glasses">Occhiali</button>
-        <button class="tgl" data-acc="acc-phones">Cuffie</button>
-      </div>
-      <div class="swatches" data-group="accessori">
+      <div class="toggles"><button class="tgl" data-acc="acc-cap">Cappello</button></div>
+      <div class="swatches" data-group="cap">
         <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
         <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
         <div class="sw" style="background:#242430" data-c="#242430"></div>
         <div class="sw active" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
+      </div>
+      <div class="toggles"><button class="tgl" data-acc="acc-glasses">Occhiali</button></div>
+      <div class="swatches" data-group="glasses">
+        <div class="sw active" style="background:#3dffa0" data-c="#3dffa0"></div>
+        <div class="sw" style="background:#7b2fff" data-c="#7b2fff"></div>
+        <div class="sw" style="background:#242430" data-c="#242430"></div>
+        <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
+      </div>
+      <div class="toggles"><button class="tgl" data-acc="acc-phones">Cuffie</button></div>
+      <div class="swatches" data-group="phones">
+        <div class="sw" style="background:#3dffa0" data-c="#3dffa0"></div>
+        <div class="sw active" style="background:#7b2fff" data-c="#7b2fff"></div>
+        <div class="sw" style="background:#242430" data-c="#242430"></div>
+        <div class="sw" style="background:#ffffff" data-c="#ffffff"></div>
+        <label class="sw sw-custom" title="Scegli un colore tuo">?<input type="color" value="#ff8800"></label>
       </div>
       <button class="savebtn" id="saveAvatar">Salva il mio avatar</button>
-      <p class="hint" id="saveHint">Salvato solo su questo dispositivo per ora — nella Fase 2 diventa il tuo profilo pubblico in KENNYLAND, con le monete per sbloccare nuovi vestiti.</p>
+      <p class="hint" id="saveHint"></p>
     </div>
+  </div>
+</section>
+
+<section id="accountSection" style="display:none">
+  <div class="label">IL TUO ACCOUNT</div>
+  <div class="panel">
+    <p id="accNick" style="margin:0 0 14px;font-size:13px;color:var(--muted)"></p>
+    <label class="acc-row"><input type="checkbox" id="accNews" style="width:auto;margin-top:2px"><span>Avvisami via email quando esce un nuovo drop. (Se togli la spunta, un sub-bass resta solo in studio a fissare il muro.)</span></label>
+    <button class="danger" id="deleteAccount" type="button">Elimina il mio account</button>
+    <p class="hint" id="accMsg"></p>
   </div>
 </section>
 
 <footer>
   <span>KENNYLAND · costruito in pubblico, un pezzo alla volta</span>
-  <span>Fase 2: accesso, monete, classifica</span>
+  <span><a href="privacy.html" style="color:var(--muted)">Privacy</a></span>
 </footer>
+
+<div class="cookie-note" id="cookieNote">I player Spotify e SoundCloud incorporati possono usare cookie di terze parti. Il sito usa solo memoria tecnica del browser (accesso, avatar, contatori) e nessun cookie di profilazione proprio.<br><button id="cookieOk" type="button">Ok</button></div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
+    <div class="tabs" id="modalTabs"><button type="button" class="tab" id="tabLogin">Accedi</button><button type="button" class="tab active" id="tabSignup">Registrati</button></div>
     <h3 id="modalTitle">Benvenuto in KENNYLAND</h3>
     <p id="modalText">Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.</p>
     <input type="text" id="inputNick" placeholder="Nickname" maxlength="20" autocomplete="nickname">
     <input type="email" id="inputEmail" placeholder="Email" autocomplete="email">
-    <label id="consentRow"><input type="checkbox" id="inputConsent" style="width:auto;margin:2px 0 0"><span>Ho almeno 14 anni e acconsento all'uso della mia email per accedere a KENNYLAND.</span></label>
+    <label id="consentRow"><input type="checkbox" id="inputConsent" style="width:auto;margin:2px 0 0"><span>Ho almeno 14 anni e acconsento all'uso della mia email per accedere a KENNYLAND. <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--acid)">Informativa privacy</a></span></label>
+    <label id="newsRow"><input type="checkbox" id="inputNews" style="width:auto;margin:2px 0 0"><span>Avvisami via email quando esce un nuovo drop! (se non mi clicchi sei un bufu!)</span></label>
     <p class="msg" id="modalMsg"></p>
     <button id="modalSubmit" class="btn">Invia il link</button>
     <button id="modalClose" class="btn alt" type="button">Chiudi</button>
@@ -254,6 +348,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 // Giorno 1: contatore giorni dalla nascita dell'hub
 (function(){
@@ -275,59 +370,92 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 
 // avatar builder (corpo intero)
 var groupTargets = {shirt:['avShirt','avArmL','avArmR'], pants:['avLegL','avLegR'], shoes:['avShoeL','avShoeR']};
-var avState = {shirt:'#7b2fff', pants:'#3dffa0', shoes:'#242430', accessori:'#ffffff', accs:[]};
+var avState = {shirt:'#7b2fff', pants:'#3dffa0', shoes:'#242430', hair:'#242430', cap:'#ffffff', glasses:'#3dffa0', phones:'#7b2fff', hairStyle:'short', accs:[]};
+var klOnChange = function(){};
+var klLoggedIn = false;
+function isHex(c){ return /^#[0-9a-fA-F]{6}$/.test(c); }
+function setHairStyle(s){
+  s = (s === 'long') ? 'long' : 'short';
+  avState.hairStyle = s;
+  document.getElementById('hairShort').style.display = (s === 'short') ? 'block' : 'none';
+  document.getElementById('hairLong').style.display = (s === 'long') ? 'block' : 'none';
+  document.querySelectorAll('[data-hair]').forEach(function(b){ b.classList.toggle('on', b.dataset.hair === s); });
+}
 function applyGroup(group, color){
+  if(!isHex(color)) return;
   avState[group] = color;
-  if(group==='accessori'){
-    document.querySelectorAll('.acc-fill').forEach(function(el){el.setAttribute('fill', color);});
-    document.querySelectorAll('.acc-stroke').forEach(function(el){el.setAttribute('stroke', color);});
-  } else {
-    groupTargets[group].forEach(function(id){document.getElementById(id).setAttribute('fill', color);});
-  }
+  (groupTargets[group] || []).forEach(function(id){ document.getElementById(id).setAttribute('fill', color); });
+  document.querySelectorAll('[data-g="'+group+'"]').forEach(function(el){ el.setAttribute(el.dataset.attr || 'fill', color); });
+}
+function klApplyAvatar(a){
+  if(!a) return;
+  if(a.accessori){ ['cap','glasses','phones'].forEach(function(k){ if(!a[k]) a[k] = a.accessori; }); }
+  ['shirt','pants','shoes','hair','cap','glasses','phones'].forEach(function(g){
+    if(a[g] && isHex(a[g])){
+      applyGroup(g, a[g]);
+      var box = document.querySelector('.swatches[data-group="'+g+'"]');
+      if(box){
+        var matched = false;
+        box.querySelectorAll('.sw:not(.sw-custom)').forEach(function(s){ var m = (s.dataset.c === a[g]); if(m) matched = true; s.classList.toggle('active', m); });
+        var cs = box.querySelector('.sw-custom');
+        if(cs){ cs.classList.toggle('active', !matched); if(!matched){ cs.style.background = a[g]; cs.querySelector('input').value = a[g]; } }
+      }
+    }
+  });
+  setHairStyle(a.hairStyle);
+  var accs = a.accs || [];
+  ['acc-cap','acc-glasses','acc-phones'].forEach(function(id){
+    var on = accs.indexOf(id) > -1;
+    document.getElementById(id).style.display = on ? 'block' : 'none';
+    document.querySelector('[data-acc="'+id+'"]').classList.toggle('on', on);
+  });
+  avState.accs = accs.slice();
 }
 document.querySelectorAll('.swatches').forEach(function(box){
   var group = box.dataset.group;
-  box.querySelectorAll('.sw').forEach(function(s){
+  box.querySelectorAll('.sw:not(.sw-custom)').forEach(function(s){
     s.addEventListener('click', function(){
       box.querySelectorAll('.sw').forEach(function(x){x.classList.remove('active');});
       s.classList.add('active');
       applyGroup(group, s.dataset.c);
+      klOnChange();
     });
   });
+  var cs = box.querySelector('.sw-custom');
+  if(cs){
+    var pick = cs.querySelector('input');
+    pick.addEventListener('input', function(){
+      box.querySelectorAll('.sw').forEach(function(x){x.classList.remove('active');});
+      cs.classList.add('active');
+      cs.style.background = pick.value;
+      applyGroup(group, pick.value);
+    });
+    pick.addEventListener('change', function(){ klOnChange(); });
+  }
 });
-document.querySelectorAll('.tgl').forEach(function(btn){
+document.querySelectorAll('.tgl[data-acc]').forEach(function(btn){
   btn.addEventListener('click', function(){
     var el = document.getElementById(btn.dataset.acc);
     var on = el.style.display !== 'none';
     el.style.display = on ? 'none' : 'block';
     btn.classList.toggle('on', !on);
-    if(!on) applyGroup('accessori', avState.accessori);
+    avState.accs = Array.prototype.map.call(document.querySelectorAll('.tgl[data-acc].on'), function(b){ return b.dataset.acc; });
+    klOnChange();
   });
 });
+document.querySelectorAll('[data-hair]').forEach(function(b){
+  b.addEventListener('click', function(){ setHairStyle(b.dataset.hair); klOnChange(); });
+});
 try{
-  var saved = JSON.parse(localStorage.getItem('kl_avatar') || 'null');
-  if(saved){
-    ['shirt','pants','shoes','accessori'].forEach(function(g){
-      if(saved[g]){
-        applyGroup(g, saved[g]);
-        document.querySelector('.swatches[data-group="'+g+'"]').querySelectorAll('.sw').forEach(function(s){
-          s.classList.toggle('active', s.dataset.c===saved[g]);
-        });
-      }
-    });
-    (saved.accs||[]).forEach(function(id){
-      document.getElementById(id).style.display='block';
-      document.querySelector('[data-acc="'+id+'"]').classList.add('on');
-    });
-  }
+  klApplyAvatar(JSON.parse(localStorage.getItem('kl_avatar') || 'null'));
 }catch(e){}
 document.getElementById('saveAvatar').addEventListener('click', function(){
   var accs = [];
-  document.querySelectorAll('.tgl.on').forEach(function(b){accs.push(b.dataset.acc);});
+  document.querySelectorAll('.tgl[data-acc].on').forEach(function(b){accs.push(b.dataset.acc);});
   avState.accs = accs;
   try{
     localStorage.setItem('kl_avatar', JSON.stringify(avState));
-    document.getElementById('saveHint').textContent = 'Salvato ✓ — resta qui ad ogni visita, pronto per quando apriamo gli accessi pubblici.';
+    document.getElementById('saveHint').textContent = (klLoggedIn ? 'Salvataggio sul profilo...' : 'Salvato su questo dispositivo ✓ Entra per tenerlo sul tuo profilo.');
   }catch(e){
     document.getElementById('saveHint').textContent = 'Non sono riuscito a salvarlo su questo dispositivo — riprova.';
   }
@@ -353,8 +481,11 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
   var logoutLink = document.getElementById('logoutLink');
   function resetUi(){
     enterBtn.textContent = 'ENTRA';
+    klLoggedIn = false;
     document.getElementById('welcomeLine').style.display = 'none';
-    logoutLink.style.display = 'none';
+    document.getElementById('acctMenu').style.display = 'none';
+    document.getElementById('acctMenu').classList.remove('open');
+    document.getElementById('accountSection').style.display = 'none';
   }
   logoutLink.addEventListener('click', async function(e){
     e.preventDefault();
@@ -367,35 +498,59 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
   function validNick(n){ return /^[A-Za-z0-9_.-]{3,20}$/.test(n); }
   function toAvatar(){ return JSON.parse(JSON.stringify(avState)); }
 
+  var saveTimer = null;
+  klOnChange = function(){
+    if(!sb || !user || !profile) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async function(){
+      try{
+        var r = await sb.from('profiles').update({avatar: toAvatar()}).eq('id', user.id);
+        hint.textContent = r.error ? 'Non sono riuscito a salvare sul profilo, riprova.' : 'Salvato sul tuo profilo ✓';
+      }catch(e){}
+    }, 900);
+  };
+
+  async function setNews(v){
+    try{
+      var r = await sb.from('profile_prefs').upsert({id:user.id, news_optin:v, news_optin_at: v ? new Date().toISOString() : null});
+      return !r.error;
+    }catch(e){ return false; }
+  }
+  async function syncPrefs(){
+    try{
+      var pend = null;
+      try{ pend = localStorage.getItem('kl_pending_news'); }catch(e){}
+      if(pend === '1'){
+        if(await setNews(true)){ try{ localStorage.removeItem('kl_pending_news'); }catch(e){} }
+      } else if(pend === '0'){
+        try{ localStorage.removeItem('kl_pending_news'); }catch(e){}
+      }
+      var r = await sb.from('profile_prefs').select('news_optin').eq('id', user.id).maybeSingle();
+      document.getElementById('accNews').checked = !!(r.data && r.data.news_optin);
+    }catch(e){}
+  }
+
   function openModal(m){
     mode = m; say('');
-    var only = (m === 'nickonly');
+    var only = (m === 'nickonly'), login = (m === 'login');
+    document.getElementById('modalTabs').style.display = only ? 'none' : 'flex';
+    document.getElementById('tabLogin').classList.toggle('active', login);
+    document.getElementById('tabSignup').classList.toggle('active', m === 'signup');
+    nickInput.style.display = login ? 'none' : 'block';
     emailInput.style.display = only ? 'none' : 'block';
-    document.getElementById('consentRow').style.display = only ? 'none' : 'flex';
-    document.getElementById('modalTitle').textContent = only ? 'Scegli il tuo nickname' : 'Benvenuto in KENNYLAND';
+    document.getElementById('consentRow').style.display = (only || login) ? 'none' : 'flex';
+    document.getElementById('newsRow').style.display = login ? 'none' : 'flex';
+    document.getElementById('modalTitle').textContent = only ? 'Scegli il tuo nickname' : (login ? 'Bentornato in KENNYLAND' : 'Benvenuto in KENNYLAND');
     document.getElementById('modalText').textContent = only
       ? 'Accesso confermato: manca solo il nome con cui ti vedranno gli altri.'
-      : 'Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.';
-    submitBtn.textContent = only ? 'Conferma' : 'Invia il link';
+      : (login ? 'Scrivi la tua email: ti mandiamo un nuovo link per rientrare.'
+               : 'Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.');
+    submitBtn.textContent = only ? 'Conferma' : (login ? 'Mandami il link' : 'Invia il link');
     submitBtn.style.display = 'block';
     overlay.classList.add('show');
   }
 
-  function applyAvatar(a){
-    ['shirt','pants','shoes','accessori'].forEach(function(g){
-      if(a[g]){
-        applyGroup(g, a[g]);
-        var box = document.querySelector('.swatches[data-group="'+g+'"]');
-        box.querySelectorAll('.sw').forEach(function(s){ s.classList.toggle('active', s.dataset.c === a[g]); });
-      }
-    });
-    ['acc-cap','acc-glasses','acc-phones'].forEach(function(id){
-      var on = (a.accs || []).indexOf(id) > -1;
-      document.getElementById(id).style.display = on ? 'block' : 'none';
-      document.querySelector('[data-acc="'+id+'"]').classList.toggle('on', on);
-    });
-    avState.accs = a.accs || [];
-  }
+  function applyAvatar(a){ klApplyAvatar(a); }
 
   async function nickTaken(n){
     var r = await sb.from('profiles').select('id', {count:'exact', head:true}).ilike('nickname', n.replace(/_/g, '\\_'));
@@ -411,13 +566,20 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
   }
 
   function afterLogin(scroll){
-    enterBtn.textContent = 'SEI DENTRO';
-    logoutLink.style.display = 'inline-block';
+    enterBtn.textContent = 'Benvenut! :):';
+    klLoggedIn = true;
+    try{ localStorage.setItem('kl_has_account', '1'); }catch(e){}
+    document.getElementById('acctMenu').style.display = 'inline-flex';
+    document.getElementById('menuNick').textContent = profile.nickname;
+    document.getElementById('menuEmail').textContent = (user && user.email) || '';
+    document.getElementById('accountSection').style.display = 'block';
+    document.getElementById('accNick').textContent = 'Account di ' + profile.nickname + '.';
+    syncPrefs();
     var w = document.getElementById('welcomeLine');
     w.style.display = 'block';
     w.textContent = 'bentornato, ' + profile.nickname;
     if(profile.avatar && Object.keys(profile.avatar).length){ applyAvatar(profile.avatar); }
-    hint.textContent = 'Sei dentro come ' + profile.nickname + ': il tuo avatar si salva sul tuo profilo.';
+    hint.textContent = 'Il tuo avatar si salva da solo sul tuo profilo ✓';
     refreshMembers();
     if(scroll){ document.getElementById('avatarSection').scrollIntoView({behavior:'smooth'}); }
   }
@@ -447,21 +609,38 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
 
   enterBtn.addEventListener('click', function(){
     if(user && profile){ document.getElementById('avatarSection').scrollIntoView({behavior:'smooth'}); return; }
-    openModal('signup');
+    var had = false; try{ had = !!localStorage.getItem('kl_has_account'); }catch(e){}
+    openModal(had ? 'login' : 'signup');
   });
   document.getElementById('modalClose').addEventListener('click', function(){ overlay.classList.remove('show'); });
 
+  document.getElementById('tabLogin').addEventListener('click', function(){ openModal('login'); });
+  document.getElementById('tabSignup').addEventListener('click', function(){ openModal('signup'); });
+
   submitBtn.addEventListener('click', async function(){
     if(!sb){ say('Servizio non raggiungibile, riprova più tardi.'); return; }
-    var nick = nickInput.value.trim();
-    if(!validNick(nick)){ say('Nickname: da 3 a 20 caratteri tra lettere, numeri, _ . -'); return; }
     submitBtn.disabled = true; say('Un attimo...');
     try{
-      if(await nickTaken(nick)){ say('Nickname già preso, scegline un altro.'); return; }
+      if(mode === 'login'){
+        var le = emailInput.value.trim();
+        if(!/^\S+@\S+\.\S+$/.test(le)){ say("Inserisci un'email valida."); return; }
+        var lr = await sb.auth.signInWithOtp({email:le, options:{shouldCreateUser:false, emailRedirectTo: location.origin + location.pathname}});
+        if(lr.error){
+          say(/signups not allowed|not found/i.test(lr.error.message) ? "Non trovo questa email. Se è la prima volta, passa a Registrati." : 'Non riesco a inviare il link: ' + lr.error.message);
+          return;
+        }
+        say('Link inviato! Controlla la tua email (anche lo spam) e clicca per rientrare.');
+        submitBtn.style.display = 'none';
+        return;
+      }
+      var nick = nickInput.value.trim();
+      if(!validNick(nick)){ say('Nickname: da 3 a 20 caratteri tra lettere, numeri, _ . -'); return; }
+      if(await nickTaken(nick)){ say(mode === 'signup' ? 'Nickname già preso. Se è il tuo, passa ad Accedi.' : 'Nickname già preso, scegline un altro.'); return; }
       if(mode === 'nickonly'){
         var ins = await sb.from('profiles').insert({id:user.id, nickname:nick, avatar:toAvatar()});
         if(ins.error){ say(ins.error.code === '23505' ? 'Nickname già preso, scegline un altro.' : 'Errore nel salvataggio, riprova.'); return; }
         profile = {nickname:nick, avatar:toAvatar()};
+        if(document.getElementById('inputNews').checked){ await setNews(true); }
         overlay.classList.remove('show');
         afterLogin(true);
         return;
@@ -469,7 +648,7 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
       var email = emailInput.value.trim();
       if(!/^\S+@\S+\.\S+$/.test(email)){ say("Inserisci un'email valida."); return; }
       if(!consent.checked){ say("Serve confermare età e consenso."); return; }
-      try{ localStorage.setItem('kl_pending_nick', nick); }catch(e){}
+      try{ localStorage.setItem('kl_pending_nick', nick); localStorage.setItem('kl_pending_news', document.getElementById('inputNews').checked ? '1' : '0'); }catch(e){}
       var r = await sb.auth.signInWithOtp({email:email, options:{emailRedirectTo: location.origin + location.pathname}});
       if(r.error){ say('Non riesco a inviare il link: ' + r.error.message); return; }
       say('Link inviato! Controlla la tua email (anche lo spam) e clicca per entrare.');
@@ -489,12 +668,119 @@ document.getElementById('saveAvatar').addEventListener('click', function(){
     }
   });
 
+  var acctMenu = document.getElementById('acctMenu');
+  document.getElementById('acctBtn').addEventListener('click', function(e){ e.stopPropagation(); acctMenu.classList.toggle('open'); });
+  document.addEventListener('click', function(e){ if(!acctMenu.contains(e.target)) acctMenu.classList.remove('open'); });
+  document.getElementById('menuSettings').addEventListener('click', function(e){
+    e.preventDefault();
+    acctMenu.classList.remove('open');
+    document.getElementById('accountSection').scrollIntoView({behavior:'smooth'});
+  });
+  document.getElementById('accNews').addEventListener('change', async function(){
+    var el = this;
+    var ok = await setNews(el.checked);
+    document.getElementById('accMsg').textContent = ok ? 'Preferenza salvata.' : 'Non sono riuscito a salvare, riprova.';
+    if(!ok){ el.checked = !el.checked; }
+  });
+  document.getElementById('deleteAccount').addEventListener('click', async function(){
+    if(!sb || !user) return;
+    if(!confirm("Eliminare il tuo account? Profilo, avatar e preferenze spariscono per sempre.")) return;
+    var m = document.getElementById('accMsg');
+    try{
+      var r = await sb.rpc('delete_my_account');
+      if(r.error){ m.textContent = "Non sono riuscito a eliminare l'account, riprova."; return; }
+      try{ await sb.auth.signOut({scope:'local'}); }catch(e){}
+      user = null; profile = null;
+      resetUi();
+      hint.textContent = 'Account eliminato. Ci mancherai, sub-bass incluso.';
+      refreshMembers();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }catch(e){
+      m.textContent = "Non sono riuscito a eliminare l'account, riprova.";
+    }
+  });
+
   if(sb){
     sb.auth.onAuthStateChange(function(ev, session){
       setTimeout(function(){ handleSession(session); }, 0);
     });
     refreshMembers();
   }
+})();
+
+// avviso cookie (piccolo, chiudibile)
+(function(){
+  var n = document.getElementById('cookieNote');
+  var seen = false;
+  try{ seen = !!localStorage.getItem('kl_cookie_ok'); }catch(e){}
+  if(!seen) n.style.display = 'block';
+  document.getElementById('cookieOk').addEventListener('click', function(){
+    n.style.display = 'none';
+    try{ localStorage.setItem('kl_cookie_ok', '1'); }catch(e){}
+  });
+})();
+
+// ===== sfondo a quadretti animato + modalita' musica =====
+var KL_BPM = 140;
+var klMusicOn = false;
+function klMusic(on){ klMusicOn = !!on; }
+(function(){
+  var cv = document.getElementById('bgCanvas');
+  var ctx = (cv && cv.getContext) ? cv.getContext('2d') : null;
+  if(!ctx) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var CELL = 28, W = 0, H = 0, cols = 0, rows = 0, sq = [], last = 0, lastSpawn = 0, nextBeat = 0, beatN = 0;
+  function resize(){ W = window.innerWidth; H = window.innerHeight; cv.width = W; cv.height = H; cols = Math.ceil(W / CELL); rows = Math.ceil(H / CELL); }
+  resize();
+  window.addEventListener('resize', resize);
+  function spawn(n, amax){
+    for(var i = 0; i < n; i++){
+      if(sq.length > 260) break;
+      sq.push({x:Math.floor(Math.random() * cols), y:Math.floor(Math.random() * rows), a:amax * (0.5 + Math.random() * 0.5), c:(Math.random() < 0.5 ? '61,255,160' : '123,47,255')});
+    }
+  }
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(document.hidden) return;
+    if(now - last < 33) return;
+    var dt = Math.min(now - last, 100);
+    last = now;
+    if(!klMusicOn){
+      nextBeat = 0;
+      if(now - lastSpawn > 160){ spawn(1, 0.16); lastSpawn = now; }
+    } else {
+      if(!nextBeat) nextBeat = now;
+      if(now >= nextBeat){
+        beatN++;
+        var strong = (beatN % 4 === 1);
+        spawn(strong ? 70 : 28, strong ? 0.5 : 0.32);
+        nextBeat += 60000 / KL_BPM;
+        if(nextBeat < now) nextBeat = now + 60000 / KL_BPM;
+      }
+    }
+    ctx.clearRect(0, 0, W, H);
+    for(var i = sq.length - 1; i >= 0; i--){
+      var s = sq[i];
+      s.a -= dt * (klMusicOn ? 0.0009 : 0.00006);
+      if(s.a <= 0.01){ sq.splice(i, 1); continue; }
+      ctx.fillStyle = 'rgba(' + s.c + ',' + s.a.toFixed(3) + ')';
+      ctx.fillRect(s.x * CELL + 1, s.y * CELL + 1, CELL - 1, CELL - 1);
+    }
+  }
+  requestAnimationFrame(frame);
+})();
+
+// il player SoundCloud avvisa quando parte o si ferma
+(function(){
+  try{
+    var f = document.getElementById('scPlayer');
+    if(window.SC && SC.Widget && f){
+      var wdg = SC.Widget(f);
+      wdg.bind(SC.Widget.Events.PLAY, function(){ klMusic(true); });
+      wdg.bind(SC.Widget.Events.PAUSE, function(){ klMusic(false); });
+      wdg.bind(SC.Widget.Events.FINISH, function(){ klMusic(false); });
+    }
+  }catch(e){}
 })();
 </script>
 </body>
