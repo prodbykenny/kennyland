@@ -419,17 +419,15 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 .chat-hint{padding:0 14px 10px;font-size:12px;color:var(--muted);min-height:18px;background:var(--panel);} .chat-hint.bad{color:var(--red);}
 @media (max-width:560px){.chat-form{flex-wrap:wrap;}.chat-in.nick{width:100%;}.chat-send{padding:10px 18px;}}
 /* ===== BACHECA ===== */
-.board-frame{position:relative;border:9px solid #8d93a0;border-color:#c9ced8 #7c8290 #5d626e #aeb4c0;border-radius:6px;box-shadow:0 0 0 2px #14151c,0 16px 40px rgba(0,0,0,.7),inset 0 0 14px rgba(0,0,0,.35);background:#eceff3;margin-bottom:22px;}
-.board-frame::after{content:"";position:absolute;left:8%;right:8%;bottom:-23px;height:14px;background:linear-gradient(#aeb4c0,#6a707d);border-radius:0 0 6px 6px;box-shadow:0 4px 8px rgba(0,0,0,.5);}
-.board-top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 18px;border-bottom:2px dashed rgba(40,50,80,.22);}
-.board-top p{margin:0;font-size:13px;color:#2b3042;max-width:52ch;font-weight:500;}
-.board-add{background:#0a0a12;border:1px solid #0a0a12;color:#3dffa0;padding:11px 18px;cursor:pointer;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;font-size:13px;box-shadow:3px 3px 0 #b6bcc9;}
-.board-add:hover{background:#3dffa0;color:#0a0a12;}
+.board-frame{position:relative;border:1px solid #3a2a66;background:#0a0414;box-shadow:0 0 40px rgba(123,47,255,.25),inset 0 0 110px rgba(0,0,0,.55);margin-bottom:6px;}
+.board-top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;background:rgba(10,10,18,.94);border-bottom:1px solid #7b2fff;box-shadow:0 0 14px rgba(123,47,255,.35);font-family:'Press Start 2P',monospace;}
+.board-top p{margin:0;font-size:8px;line-height:1.8;color:var(--muted);max-width:60ch;}
+.board-add{background:transparent;border:1px solid var(--acid);color:var(--acid);padding:10px 14px;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:.05em;}
+.board-add:hover{background:var(--acid);color:var(--bg);}
 .cork{min-height:260px;padding:30px 20px 34px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:30px 24px;align-items:start;background:
- url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260'%3E%3Cg fill='none' stroke='%23312e6a' stroke-opacity='.10' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M20 40 q60 -26 130 4 M30 56 q50 8 110 -2'/%3E%3Cpath d='M300 190 l40 -30 l6 28 M300 210 q40 14 90 -8'/%3E%3Cpath d='M240 36 l34 0 l0 30 l-34 0 z M250 50 l12 8 l12 -16'/%3E%3Cpath d='M40 200 q20 -40 50 -8 q24 28 50 -14'/%3E%3C/g%3E%3C/svg%3E") 0 0/420px 260px,
- linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 48%,transparent 56%),
- linear-gradient(#eef1f5,#e3e7ed);}
-.cork .chat-e{grid-column:1/-1;text-align:center;font-family:'Playfair Display','Times New Roman',serif;font-weight:900;text-transform:uppercase;letter-spacing:.2em;font-size:18px;color:#c4262e;padding:40px 10px;transform:rotate(-1.5deg);text-shadow:1px 1px 0 rgba(196,38,46,.25);}
+ linear-gradient(rgba(123,47,255,.07) 1px,transparent 1px) 0 0/28px 28px,
+ linear-gradient(90deg,rgba(123,47,255,.07) 1px,transparent 1px) 0 0/28px 28px,#0a0414;}
+.cork .chat-e{grid-column:1/-1;text-align:center;font-family:'Press Start 2P',monospace;font-size:10px;line-height:2;letter-spacing:.04em;color:var(--acid);padding:44px 10px;}
 .note{position:relative;background:#fbf7e8;color:#2a2418;padding:20px 16px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.18),5px 9px 14px rgba(0,0,0,.42);transform:rotate(var(--r,0deg));transform-origin:50% 8px;transition:transform .2s;font-family:'Caveat',cursive;background-image:linear-gradient(transparent 27px,rgba(120,150,200,.22) 28px);background-size:100% 28px;}
 .note:hover{transform:rotate(0) scale(1.03);z-index:3;}
 .note::before{content:"";position:absolute;top:-11px;left:50%;margin-left:-11px;width:22px;height:14px;border-radius:7px 7px 3px 3px;background:linear-gradient(#ff7b7b,#c41e1e 60%,#7c0d0d);box-shadow:0 3px 4px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.5);}
@@ -591,7 +589,7 @@ footer{margin-top:70px;border-top:1px solid var(--line);padding-top:20px;color:v
 <section id="boardSec">
   <div class="label">BACHECA</div>
   <div class="board-frame">
-    <div class="board-top"><p>Un foglio, una calamita. Promuovi la tua musica, cerca o offri una mano, trova qualcuno con cui collaborare.</p><button type="button" class="board-add" id="boardAdd">AFFIGGI UN FOGLIO</button></div>
+    <div class="board-top"><p>PROMUOVI LA TUA MUSICA, CERCA O OFFRI UNA MANO, TROVA CHI COLLABORA.</p><button type="button" class="board-add" id="boardAdd">AFFIGGI UN FOGLIO</button></div>
     <div class="cork" id="cork"><div class="chat-e">Caricamento…</div></div>
   </div>
 </section>
@@ -2873,7 +2871,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     try{
       var r = await sb.rpc('board_list'); if(r.error || !r.data) return;
       cork.innerHTML = '';
-      if(!r.data.length){ var e = document.createElement('div'); e.className = 'chat-e'; e.textContent = 'Lavagna vuota · scrivi tu per primo'; cork.appendChild(e); return; }
+      if(!r.data.length){ var e = document.createElement('div'); e.className = 'chat-e'; e.textContent = 'La lavagna è vuota - lascia un post-it!'; cork.appendChild(e); return; }
       r.data.forEach(function(n){
         var c = document.createElement('div'); c.className = 'note' + (n.id % 3 === 0 ? ' v' : ''); c.style.setProperty('--r', (((n.id * 37) % 9) - 4) * 0.8 + 'deg');
         var k = KIND[n.kind] || KIND.altro, kk = document.createElement('span'); kk.className = 'n-kind'; kk.textContent = k[0]; kk.style.background = k[1]; c.appendChild(kk);
