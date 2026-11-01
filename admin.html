@@ -58,6 +58,25 @@ button.del{border-color:var(--mag);color:var(--mag);}
   </div>
 
   <div id="lists"></div>
+  <h2 style="margin-top:34px">PIAZZA · DJ</h2>
+  <div class="panel" id="djPanel">
+    <p class="muted" id="djNow">Caricamento…</p>
+    <div class="field"><label for="djFile">Carica un audio per la piazza (mp3, wav, m4a, ogg · max 50 MB)</label><input type="file" id="djFile" accept="audio/*"></div>
+    <div class="field"><label for="djUrl">Oppure link diretto a un file audio (https, che finisce in .mp3 / .wav / .m4a)</label><input type="text" id="djUrl" placeholder="https://…"></div>
+    <div class="field"><label for="djTitle">Titolo mostrato sullo schermo del palco</label><input type="text" id="djTitle" maxlength="80"></div>
+    <button class="main" id="djPlay" type="button">Avvia / cambia brano</button>
+    <button type="button" id="djRestart">Riparti da capo</button>
+    <button type="button" class="del" id="djStop">Stop</button>
+    <div class="msg" id="djMsg"></div>
+    <h3 style="margin-top:18px">File caricati per la piazza</h3>
+    <div id="djFiles"></div>
+  </div>
+  <h2 style="margin-top:34px">STUDIO · CODICE PORTA</h2>
+  <div class="panel">
+    <div class="field"><label for="stCode">Codice attuale (3-12 lettere o numeri, senza spazi)</label><input type="text" id="stCode" maxlength="12"></div>
+    <button class="main" id="stSave" type="button">Salva codice</button>
+    <div class="msg" id="stMsg"></div>
+  </div>
   <h2 style="margin-top:34px">CHATLAND · moderazione</h2>
   <div id="modChat"></div>
   <h2 style="margin-top:34px">BACHECA · moderazione</h2>
@@ -112,6 +131,59 @@ button.del{border-color:var(--mag);color:var(--mag);}
     if(!b.children.length) b.innerHTML = '<p class="muted">Nessun foglio.</p>';
   }
 
+
+  // ---- piazza: DJ e codice studio ----
+  var djCh = null;
+  function djPing(){
+    try{
+      if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'dj', payload:{}}); }); }
+      else djCh.send({type:'broadcast', event:'dj', payload:{}});
+    }catch(e){}
+  }
+  async function djRefresh(){
+    var r = await sb.rpc('dj_state'); var row = r && r.data && r.data[0];
+    $('djNow').textContent = row && row.playing ? '▶ In onda: ' + (row.title || row.url) : '■ Fermo. La piazza è in silenzio.';
+    if(row && row.url && !$('djUrl').value) $('djUrl').value = row.url;
+    if(row && row.title && !$('djTitle').value) $('djTitle').value = row.title;
+    var box = $('djFiles'); box.innerHTML = '';
+    var l = await sb.storage.from('dj').list('', {limit:100, sortBy:{column:'created_at', order:'desc'}});
+    ((l && l.data) || []).filter(function(f){ return f.name && f.id; }).forEach(function(f){
+      var url = sb.storage.from('dj').getPublicUrl(f.name).data.publicUrl;
+      var row2 = document.createElement('div'); row2.style.cssText = 'padding:7px 0;border-bottom:1px solid #22243a;display:flex;gap:10px;align-items:center;flex-wrap:wrap;';
+      var nm = document.createElement('span'); nm.style.cssText = 'flex:1;min-width:180px;font-size:13px;word-break:break-all;'; nm.textContent = f.name; row2.appendChild(nm);
+      row2.appendChild(btn('Usa', '', function(){ $('djUrl').value = url; $('djTitle').value = f.name.replace(/^\d+-/, '').replace(/\.[a-z0-9]+$/i, ''); }));
+      row2.appendChild(btn('Elimina', 'del', async function(){ if(confirm('Eliminare ' + f.name + '?')){ await sb.storage.from('dj').remove([f.name]); djRefresh(); } }));
+      box.appendChild(row2);
+    });
+  }
+  async function djSet(playing, restart){
+    var msg = $('djMsg'), url = $('djUrl').value.trim();
+    if(playing && !url){ say(msg, 'Metti un file o un link prima.', true); return; }
+    var r = await sb.rpc('dj_set', {p_url:url, p_title:$('djTitle').value.trim(), p_playing:playing, p_restart:!!restart});
+    if(r.error){ say(msg, 'Errore: ' + r.error.message, true); return; }
+    say(msg, playing ? 'In onda ✓' : 'Fermato ✓'); djPing(); djRefresh();
+  }
+  $('djPlay').addEventListener('click', function(){ djSet(true, false); });
+  $('djRestart').addEventListener('click', function(){ djSet(true, true); });
+  $('djStop').addEventListener('click', function(){ djSet(false, false); });
+  $('djFile').addEventListener('change', async function(){
+    var f = $('djFile').files[0]; if(!f) return;
+    var msg = $('djMsg');
+    if(f.size > 50 * 1024 * 1024){ say(msg, 'File troppo grande (max 50 MB sul piano gratuito).', true); return; }
+    say(msg, 'Carico…');
+    var safe = f.name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(-60), path = Date.now() + '-' + safe;
+    var up = await sb.storage.from('dj').upload(path, f, {contentType:f.type || 'audio/mpeg', upsert:false});
+    if(up.error){ say(msg, 'Caricamento non riuscito: ' + up.error.message, true); return; }
+    $('djUrl').value = sb.storage.from('dj').getPublicUrl(path).data.publicUrl;
+    if(!$('djTitle').value) $('djTitle').value = f.name.replace(/\.[a-z0-9]+$/i, '');
+    say(msg, 'Caricato ✓ Premi «Avvia / cambia brano» per metterlo in onda.'); djRefresh();
+  });
+  async function stLoad(){ var r = await sb.rpc('studio_get_code'); if(!r.error) $('stCode').value = r.data || ''; }
+  $('stSave').addEventListener('click', async function(){
+    var r = await sb.rpc('studio_set_code', {p_code:$('stCode').value.trim()});
+    say($('stMsg'), r.error ? 'Codice non valido (3-12 lettere o numeri).' : 'Codice salvato ✓', !!r.error);
+  });
+
   async function init(){
     var s = await sb.auth.getSession();
     var session = s && s.data && s.data.session;
@@ -121,7 +193,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('who').textContent = session.user.email || '';
     show('panel');
     await load();
-    loadMod();
+    loadMod(); djRefresh(); stLoad();
   }
 
   async function load(){
