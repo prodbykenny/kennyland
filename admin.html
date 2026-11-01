@@ -58,6 +58,10 @@ button.del{border-color:var(--mag);color:var(--mag);}
   </div>
 
   <div id="lists"></div>
+  <h2 style="margin-top:34px">CHATLAND · moderazione</h2>
+  <div id="modChat"></div>
+  <h2 style="margin-top:34px">BACHECA · moderazione</h2>
+  <div id="modBoard"></div>
 </div>
 </div>
 
@@ -84,6 +88,30 @@ button.del{border-color:var(--mag);color:var(--mag);}
   }
   function maxPos(){ return tracks.reduce(function(m, t){ return Math.max(m, t.position || 0); }, 0); }
 
+
+  function modRow(root, head, text, hidden, btns){
+    var row = document.createElement('div'); row.style.cssText = 'padding:9px 0;border-bottom:1px solid var(--line,#22243a);display:flex;gap:10px;align-items:center;flex-wrap:wrap;' + (hidden ? 'opacity:.5;' : '');
+    var t = document.createElement('div'); t.style.cssText = 'flex:1;min-width:200px;font-size:13px;word-break:break-word;';
+    var b = document.createElement('b'); b.textContent = head + ' '; t.appendChild(b); t.appendChild(document.createTextNode(text));
+    row.appendChild(t); btns.forEach(function(x){ row.appendChild(x); }); root.appendChild(row);
+  }
+  async function loadMod(){
+    var c = $('modChat'), b = $('modBoard'); c.innerHTML = ''; b.innerHTML = '';
+    var r = await sb.rpc('chat_admin_list', {p_limit:100});
+    ((r && r.data) || []).forEach(function(m){
+      var bs = [btn(m.hidden ? 'Mostra' : 'Nascondi', '', async function(){ await sb.rpc('chat_admin_hide', {p_id:m.id, p_hidden:!m.hidden}); loadMod(); })];
+      if(!m.registered) bs.push(btn('Blocca dispositivo', 'del', async function(){ if(confirm('Bloccare questo dispositivo dalla chat?')){ await sb.rpc('chat_admin_ban', {p_device:m.device}); loadMod(); } }));
+      modRow(c, new Date(m.created_at).toLocaleString('it-IT') + ' · ' + m.nick + (m.registered ? '' : ' (ospite)') + ':', m.body, m.hidden, bs);
+    });
+    if(!c.children.length) c.innerHTML = '<p class="muted">Nessun messaggio.</p>';
+    var q = await sb.rpc('board_admin_list');
+    ((q && q.data) || []).forEach(function(n){
+      modRow(b, n.nick + ' · ' + n.kind.toUpperCase() + ' · ' + n.title + ' —', n.body + (n.link ? ' [' + n.link + ']' : ''), n.hidden,
+        [btn(n.hidden ? 'Mostra' : 'Nascondi', '', async function(){ await sb.rpc('board_admin_hide', {p_id:n.id, p_hidden:!n.hidden}); loadMod(); })]);
+    });
+    if(!b.children.length) b.innerHTML = '<p class="muted">Nessun foglio.</p>';
+  }
+
   async function init(){
     var s = await sb.auth.getSession();
     var session = s && s.data && s.data.session;
@@ -93,6 +121,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('who').textContent = session.user.email || '';
     show('panel');
     await load();
+    loadMod();
   }
 
   async function load(){
