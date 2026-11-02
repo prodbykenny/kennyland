@@ -2485,10 +2485,6 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     });
     textY(dc, 'KENNYLAND STUDIOS', 6.75, 0.02, 98, 9, {fill:'#d4af37', 'font-family':'Playfair Display, serif', 'font-weight':'900'});
     // ON AIR + porta verso la piazza (parete destra)
-    var oa = Pz(10.4, 0.04, 120), og = el('g', {transform:'matrix(1,0.5,0,1,' + oa[0] + ',' + oa[1] + ')'}, dc);
-    el('rect', {x:-24, y:-11, width:48, height:20, rx:4, fill:'#2a0508', stroke:'#ff3b3b', 'stroke-width':2, filter:'url(#neonGlow)'}, og);
-    var ot = el('text', {x:0, y:3, 'text-anchor':'middle', 'font-family':'Playfair Display, serif', 'font-weight':'900', 'font-size':'12', 'letter-spacing':'2', fill:'#ff3b3b'}, og); ot.textContent = 'ON AIR';
-    anim.push(function(t){ og.setAttribute('opacity', ((window.klRecOn ? 1 : 0.55) + 0.3 * Math.sin(t / 500)).toFixed(2)); });
     var dr = el('g', {'class':'obj'}, dc); el('title', {}, dr).textContent = 'Porta: torna in piazza';
     faceY(dr, 18.2, 19.5, 0.02, 0, 86, {fill:'#2b2d36', stroke:'#8a8fa8', 'stroke-width':2.4});
     faceY(dr, 18.35, 19.35, 0.02, 0, 76, {fill:'rgba(177,140,255,.14)', stroke:'#b57bff', 'stroke-width':1, filter:'url(#neonGlow)'});
@@ -2577,7 +2573,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     for(i = 0; i < 6; i++) for(j = 0; j < 2; j++){ var rq = Pz(11.88 + i * 0.18, 8.79, 38 + j * 6); el('circle', {cx:rq[0], cy:rq[1], r:1.4, fill:'#c8cde0'}, mp); }
     for(i = 0; i < 4; i++){ var cq = Pz(11.9 + i * 0.28, 8.8, 44), cq2 = Pz(12.3 + (i % 2) * 0.4, 8.8, 40); el('path', {d:'M' + cq[0] + ',' + cq[1] + ' Q' + ((cq[0] + cq2[0]) / 2) + ',' + (cq[1] + 12) + ' ' + cq2[0] + ',' + cq2[1], stroke:['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][i], 'stroke-width':1.6, fill:'none'}, mp); }
     // ----- strumenti sparsi: chitarra elettrica, basso, acustica, ampli
-    [[0.9, 15.0, '#c0392b'], [1.6, 15.2, '#1f6ed8']].forEach(function(g2, k){
+    [[2.6, 18.5, '#c0392b'], [3.4, 18.6, '#1f6ed8']].forEach(function(g2, k){
       var gt = sprite(g2[0] - 0.2, g2[1] - 0.2, 0.5, 0.5);
       var gb = Pz(g2[0], g2[1], 0), gtp = Pz(g2[0] - 0.1, g2[1], 66 + k * 6);
       el('line', {x1:gb[0], y1:gb[1], x2:gtp[0], y2:gtp[1], stroke:'#2a2438', 'stroke-width':2.4}, gt);
@@ -2586,38 +2582,46 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       el('rect', {x:gtp[0] - 1.6, y:gtp[1] - 6, width:3.2, height:42 + k * 6, fill:'#6a4a2a', stroke:'#14101c', 'stroke-width':.6}, gt);
       el('rect', {x:gtp[0] - 3.2, y:gtp[1] - 12, width:6.4, height:8, rx:1.5, fill:'#2a1d14', stroke:'#14101c', 'stroke-width':.6}, gt);
     });
-    var ac = sprite(2.4, 16.1, 0.6, 0.6);
-    var ab = Pz(2.7, 16.4, 0), at = Pz(2.8, 16.4, 62);
+    var ac = sprite(1.0, 18.8, 0.6, 0.6);
+    var ab = Pz(1.3, 19.1, 0), at = Pz(1.4, 19.1, 62);
     el('path', {d:'M' + (ab[0] - 11) + ',' + (ab[1] - 4) + ' q-3,-18 11,-20 q14,2 11,20 q-11,9 -22,0 z', fill:'#a86a32', stroke:'#14101c', 'stroke-width':1.1}, ac);
     el('circle', {cx:ab[0], cy:ab[1] - 14, r:4, fill:'#150e08'}, ac); el('rect', {x:at[0] - 1.6, y:at[1] - 14, width:3.2, height:46, fill:'#c89a5a', stroke:'#14101c', 'stroke-width':.6}, ac);
     var amS = sprite(0.4, 17.4, 1.4, 0.9), am = el('g', {transform:'translate(-531.2,-86.4)'}, amS); solid(0.4, 17.4, 1.4, 0.9);
     bx(am, 11.4, 11.6, 1.3, 0.8, 0, 50, '#19151f'); faceY(am, 11.5, 12.6, 12.401, 6, 44, {fill:'#2a2438', stroke:'#555a70', 'stroke-width':1});
     for(i = 0; i < 4; i++){ var aq = Pz(11.65 + i * 0.25, 12.41, 40); el('circle', {cx:aq[0], cy:aq[1], r:1.6, fill:'#c8cde0'}, am); }
     // ----- divano, tavolino, sgabelli
-    var sfS = sprite(6.2, 12.7, 3.4, 1.7, 'sit:sofa0', 'Siediti'), sf = el('g', {transform:'translate(-96,48)'}, sfS); solid(6.2, 12.7, 3.4, 1.7);
+    var sfS = sprite(6.2, 12.7, 3.4, 1.7, 'sit:sofa0', 'Siediti'), sf = el('g', {transform:'translate(-96,48)'}, sfS); solid(6.2, 12.7, 3.4, 1.25);
     bx(sf, 6.3, 9.8, 3.2, 1.5, 0, 20, '#5a1a2a');
     bx(sf, 6.3, 9.8, 3.2, 0.45, 20, 56, '#6a2234');
     bx(sf, 6.3, 9.8, 0.35, 1.5, 20, 40, '#6a2234'); bx(sf, 9.15, 9.8, 0.35, 1.5, 20, 40, '#6a2234');
     addSeat(SCN_STUDIO, 'sofa0', 7.1, 13.4, 1, {x:7.1, y:14.8}); addSeat(SCN_STUDIO, 'sofa1', 8.7, 13.4, -1, {x:8.7, y:14.8});
     SCN_STUDIO.stand['sit:sofa0'] = {x:7.1, y:14.8};
-    var tblS = sprite(7.3, 15.1, 1.4, 0.8), tbl = el('g', {transform:'translate(-96,48)'}, tblS); solid(7.3, 15.1, 1.4, 0.8);
+    var tblS = sprite(9.9, 13.5, 1.4, 0.8), tbl = el('g', {transform:'translate(38.4,64)'}, tblS); solid(9.9, 13.5, 1.4, 0.8);
     bx(tbl, 7.35, 12.15, 1.3, 0.7, 0, 16, '#14141e'); ellTop(tbl, 7.9, 12.5, 0.22, 17, {fill:'#2a2438', stroke:'#c8cde0'});
     // ----- cabina di registrazione (live room) in vetro
     var by0 = 5.0, by1 = 12.6, bx1 = 4.4;
-    for(i = 0; i < 4; i++) faceX(dc, 0.04, 5.3 + i * 1.8, 6.9 + i * 1.8, 20, 100, {fill:i % 2 ? '#241c2e' : '#2a2236', stroke:'#0d0b14', 'stroke-width':1});
+    for(i = 0; i < 5; i++){
+      var pa = 5.25 + i * 1.5;
+      faceX(dc, 0.04, pa, pa + 1.3, 18, 98, {fill:i % 2 ? '#1b262d' : '#233038', stroke:'#6a4a2a', 'stroke-width':2});
+      for(j = 1; j < 6; j++) seg(dc, 0.05, pa + 0.04, 18 + j * 13.3, 0.05, pa + 1.26, 18 + j * 13.3, .9, 'rgba(255,255,255,.12)');
+      faceX(dc, 0.05, pa + 0.15, pa + 1.15, 102, 112, {fill:'#6a4a2a', stroke:'#2a1c10', 'stroke-width':.8});
+    }
     var bw = sprite(0.3, by0 - 0.05, 4.2, 0.22); solid(0, 5, 5, 1);
     bx(bw, 0.3, by0, 4.1, 0.15, 0, 104, '#1f1b2b');
-    for(i = 0; i < 6; i++) faceY(bw, 0.4 + i * 0.65, 0.95 + i * 0.65, by0 + 0.151, 14, 88, {fill:i % 2 ? '#2a2438' : '#322b44', stroke:'#0d0b14', 'stroke-width':.8});
+    for(i = 0; i < 6; i++){
+      faceY(bw, 0.4 + i * 0.65, 0.95 + i * 0.65, by0 + 0.151, 14, 88, {fill:i % 2 ? '#1b262d' : '#233038', stroke:'#6a4a2a', 'stroke-width':1.4});
+      for(j = 1; j < 5; j++) seg(bw, 0.45 + i * 0.65, by0 + 0.152, 14 + j * 14.8, 0.9 + i * 0.65, by0 + 0.152, 14 + j * 14.8, .8, 'rgba(255,255,255,.12)');
+    }
     // drum kit
-    var dk = sprite(0.8, 6.2, 1.8, 1.6); solid(0.8, 6.2, 1.8, 1.6);
+    var dkS = sprite(1.8, 15.0, 1.8, 1.6), dk = el('g', {transform:'translate(-249.6,156.8)'}, dkS); solid(1.8, 15.0, 1.8, 1.6);
+    poly(fl, [iso(0.4, 14.2), iso(4.6, 14.2), iso(4.6, 17.2), iso(0.4, 17.2)], {fill:'#16101e', stroke:'#7b2fff', 'stroke-width':1.6});
+    poly(fl, [iso(0.7, 14.5), iso(4.3, 14.5), iso(4.3, 16.9), iso(0.7, 16.9)], {fill:'none', stroke:'#b57bff', 'stroke-width':.8, opacity:.5});
     ellTop(dk, 1.7, 7.0, 0.55, 0.5, {fill:'#0a0812', stroke:'#2a2438'});
     var kd = Pz(1.7, 7.3, 18); el('ellipse', {cx:kd[0], cy:kd[1], rx:20, ry:20, fill:'#7a1020', stroke:'#c8cde0', 'stroke-width':2}, dk); el('ellipse', {cx:kd[0], cy:kd[1], rx:12, ry:12, fill:'#14081a', stroke:'#c8cde0', 'stroke-width':1}, dk);
     [[1.3, 6.6, 40], [2.0, 6.6, 42]].forEach(function(t2){ var tq = Pz(t2[0], t2[1], t2[2]); el('ellipse', {cx:tq[0], cy:tq[1], rx:10, ry:6, fill:'#1f1f30', stroke:'#c8cde0', 'stroke-width':1.4}, dk); rod(dk, t2[0], t2[1], 22, t2[2], 1.6, '#8a8fa8'); });
     [[0.9, 7.1, 70], [2.4, 6.5, 74]].forEach(function(c2){ var cq2 = Pz(c2[0], c2[1], c2[2]); el('ellipse', {cx:cq2[0], cy:cq2[1], rx:14, ry:5, fill:'#d4af37', stroke:'#8a6a1a'}, dk); rod(dk, c2[0], c2[1], 0, c2[2], 1.4, '#8a8fa8'); });
     var sn = Pz(1.0, 7.6, 34); el('ellipse', {cx:sn[0], cy:sn[1], rx:11, ry:6, fill:'#d9dbe8', stroke:'#8a8fa8', 'stroke-width':1.4}, dk); rod(dk, 1.0, 7.6, 0, 34, 1.4, '#8a8fa8');
     // ampli + chitarra elettrica nella live room
-    var lamp = sprite(0.4, 9.4, 0.9, 1.0); solid(0.4, 9.4, 0.9, 1.0);
-    bx(lamp, 0.45, 9.45, 0.8, 0.9, 0, 56, '#19151f'); faceY(lamp, 0.5, 1.2, 10.351, 8, 46, {fill:'#2a2438', stroke:'#555a70', 'stroke-width':1});
     // microfono a condensatore con pop filter e shock mount
     var vm = sprite(2.2, 9.1, 0.8, 0.8, 'booth', 'Microfono: registra la tua voce'); solid(2.3, 9.3, 0.4, 0.4);
     ellTop(vm, 2.5, 9.5, 0.24, 0, {fill:'#0a0812', stroke:'#555a70'});
@@ -2640,19 +2644,49 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     faceX(gl1, 4.4, 10.0, by1, 0, 104, {fill:'rgba(180,210,255,.08)', stroke:'rgba(200,220,255,.55)', 'stroke-width':2});
     faceX(gl1, 4.4, 8.0, 10.0, 96, 104, {fill:'rgba(200,220,255,.3)', stroke:'rgba(200,220,255,.7)', 'stroke-width':1.4});
     seg(gl1, 4.4, 8.0, 0, 4.4, 8.0, 104, 3, '#8a8fa8'); seg(gl1, 4.4, 10.0, 0, 4.4, 10.0, 104, 3, '#8a8fa8');
-    var bsign = faceX(gl1, 4.41, 8.3, 9.7, 108, 122, {fill:'#2a0508', stroke:'#ff3b3b', 'stroke-width':1.4, filter:'url(#neonGlow)'});
-    textX(gl1, 'REC', 4.42, 9.0, 111, 9, {fill:'#ff3b3b'});
+    var bsign = faceX(gl1, 4.41, 8.1, 9.9, 106, 124, {fill:'#2a0508', stroke:'#ff3b3b', 'stroke-width':1.6, filter:'url(#neonGlow)'});
+    textX(gl1, 'ON AIR', 4.42, 9.0, 111, 9, {fill:'#ff3b3b'});
     anim.push(function(t){ bsign.setAttribute('opacity', window.klRecOn ? '1' : '0.5'); });
+    seg(gl1, 4.4, by0 + 0.1, 104, 4.4, by1, 104, 3.4, '#8a8fa8'); seg(gl1, 4.4, by0 + 0.1, 52, 4.4, 8.0, 52, 2, '#8a8fa8'); seg(gl1, 4.4, 10.0, 52, 4.4, by1, 52, 2, '#8a8fa8');
+    seg(gl1, 4.4, 6.6, 0, 4.4, 6.6, 104, 2.2, '#8a8fa8'); seg(gl1, 4.4, 11.3, 0, 4.4, 11.3, 104, 2.2, '#8a8fa8');
+    faceY(gl1, 4.4, 5.4, 8.0, 0, 96, {fill:'rgba(180,210,255,.18)', stroke:'rgba(220,235,255,.85)', 'stroke-width':2});
+    seg(gl1, 5.3, 8.0, 40, 5.3, 8.0, 56, 3, '#c8cde0');
+    // filtro riflessioni dietro il microfono
+    faceX(vm, 1.7, 8.9, 10.1, 36, 118, {fill:'#1b262d', stroke:'#6a4a2a', 'stroke-width':2});
+    for(j = 1; j < 7; j++) seg(vm, 1.71, 8.95, 36 + j * 11.7, 1.71, 10.05, 36 + j * 11.7, .8, 'rgba(255,255,255,.14)');
     var gl2 = sprite(0.3, 12.5, 4.2, 0.2); solid(0, 12, 5, 1);
     faceY(gl2, 0.3, 4.4, 12.6, 0, 104, {fill:'rgba(180,210,255,.07)', stroke:'rgba(200,220,255,.55)', 'stroke-width':2});
     seg(gl2, 0.3, 12.6, 0, 0.3, 12.6, 104, 3, '#8a8fa8'); seg(gl2, 4.4, 12.6, 0, 4.4, 12.6, 104, 3, '#8a8fa8');
-    textY(gl2, 'LIVE ROOM', 2.4, 12.62, 112, 9, {fill:'#b57bff'});
+    textY(gl2, 'VOCAL BOOTH', 2.4, 12.62, 112, 8, {fill:'#b57bff'});
     // luci da studio con faretti rossi/blu sulla console
     [[5.2, 0.9, '#ff2d55'], [8.6, 0.9, '#2d7bff']].forEach(function(l2){
       var lq = Pz(l2[0], l2[1], 136), lg = sprite(l2[0] - 0.2, l2[1] - 0.2, 0.4, 0.4);
       el('rect', {x:lq[0] - 6, y:lq[1], width:12, height:9, rx:2, fill:'#15111f', stroke:'#555a70'}, lg);
       el('polygon', {points:lq[0] + ',' + (lq[1] + 9) + ' ' + (lq[0] - 28) + ',' + (lq[1] + 120) + ' ' + (lq[0] + 28) + ',' + (lq[1] + 120), fill:l2[2] === '#ff2d55' ? 'rgba(255,45,85,.10)' : 'rgba(45,123,255,.10)'}, lg);
     });
+    // ----- pianoforte a coda professionale
+    var gpS = sprite(6.0, 15.9, 3.4, 2.7, 'sit:gpiano', 'Pianoforte a coda: siediti'), gp = el('g', {transform:'translate(32,16)'}, gpS); solid(6.0, 15.9, 3.4, 2.7);
+    var GP = [[5.0, 15.9], [7.6, 15.9], [8.4, 16.4], [8.4, 17.2], [7.4, 17.9], [5.0, 17.9]];
+    [[5.25, 17.75], [7.95, 17.0], [5.3, 16.25]].forEach(function(q){ rod(gp, q[0], q[1], 0, 24, 4.5, '#0b0b12'); });
+    poly(gp, [Pz(5.0, 17.9, 24), Pz(7.4, 17.9, 24), Pz(7.4, 17.9, 38), Pz(5.0, 17.9, 38)], {fill:'#08080e', stroke:'#2a2a3a', 'stroke-width':.8});
+    poly(gp, [Pz(7.4, 17.9, 24), Pz(8.4, 17.2, 24), Pz(8.4, 17.2, 38), Pz(7.4, 17.9, 38)], {fill:'#0b0b14', stroke:'#2a2a3a', 'stroke-width':.8});
+    poly(gp, [Pz(8.4, 17.2, 24), Pz(8.4, 16.4, 24), Pz(8.4, 16.4, 38), Pz(8.4, 17.2, 38)], {fill:'#0e0e18', stroke:'#2a2a3a', 'stroke-width':.8});
+    poly(gp, GP.map(function(q){ return Pz(q[0], q[1], 38); }), {fill:'#12121c', stroke:'#3a3a52', 'stroke-width':1});
+    el('path', {d:'M' + Pz(5.4, 16.3, 38.4).join(',') + ' L' + Pz(7.3, 16.3, 38.4).join(',') + ' L' + Pz(7.9, 16.8, 38.4).join(',') , stroke:'rgba(255,255,255,.14)', 'stroke-width':1.4, fill:'none'}, gp);
+    // tastiera
+    bx(gp, 5.0, 17.9, 1.95, 0.55, 30, 34, '#0b0b12');
+    for(i = 0; i < 14; i++) flat(gp, [[5.05 + i * 0.135, 17.95], [5.17 + i * 0.135, 17.95], [5.17 + i * 0.135, 18.42], [5.05 + i * 0.135, 18.42]], 34.3, {fill:'#f4f1ff', stroke:'#8a8fa8', 'stroke-width':.3});
+    for(i = 0; i < 13; i++) if([0, 1, 3, 4, 5, 7, 8, 10, 11, 12].indexOf(i) >= 0) flat(gp, [[5.13 + i * 0.135, 17.95], [5.2 + i * 0.135, 17.95], [5.2 + i * 0.135, 18.25], [5.13 + i * 0.135, 18.25]], 34.7, {fill:'#08080e'});
+    textY(gp, 'KENNYLAND', 5.98, 17.91, 30, 4.5, {fill:'#d4af37'});
+    // leggio e coperchio aperto
+    poly(gp, [Pz(5.35, 17.7, 38), Pz(6.7, 17.7, 38), Pz(6.7, 17.55, 54), Pz(5.35, 17.55, 54)], {fill:'#0a0a10', stroke:'#2a2a3a', 'stroke-width':.8});
+    poly(gp, [Pz(5.0, 15.9, 38), Pz(7.6, 15.9, 38), Pz(8.0, 16.9, 72), Pz(5.3, 16.9, 72)], {fill:'rgba(14,14,24,.94)', stroke:'#3a3a52', 'stroke-width':1});
+    seg(gp, 7.2, 16.5, 38, 7.5, 16.7, 62, 2.2, '#8a8fa8');
+    // panca
+    var pbS = sprite(6.6, 18.65, 1.3, 0.7, 'sit:gpiano', 'Siediti al pianoforte'), pb = el('g', {transform:'translate(32,16)'}, pbS); solid(6.6, 18.6, 1.3, 0.35);
+    bx(pb, 5.65, 18.7, 1.2, 0.6, 0, 20, '#14101c'); bx(pb, 5.62, 18.67, 1.26, 0.66, 20, 24, '#241a30');
+    addSeat(SCN_STUDIO, 'gpiano', 7.25, 19.0, 1, {x:7.25, y:19.6}); SCN_STUDIO.stand['sit:gpiano'] = {x:7.25, y:19.6};
+
     // ----- zona relax a destra: tappeto, pouf e tavolino
     poly(fl, [iso(12.4, 9.6), iso(18.6, 9.6), iso(18.6, 15.4), iso(12.4, 15.4)], {fill:'#16202e', stroke:'#2d7bff', 'stroke-width':1.5, opacity:.9});
     poly(fl, [iso(12.7, 9.9), iso(18.3, 9.9), iso(18.3, 15.1), iso(12.7, 15.1)], {fill:'none', stroke:'#4aa8ff', 'stroke-width':.8, opacity:.5});
