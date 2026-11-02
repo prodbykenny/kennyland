@@ -21,6 +21,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .right a:hover,.right button:hover,.btns button:hover{border-color:var(--acid);color:var(--acid)}
 .coin{background:var(--panel);border:1px solid var(--line);padding:8px 11px;font:700 12px 'Space Grotesk',sans-serif;color:#ffd23d}
 .btns{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap}
+#chat[hidden]{display:none}
 #chat{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:6px}
 #chat input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--violet);color:var(--ink);padding:11px 12px;font:500 14px 'Space Grotesk',sans-serif}
 #chat button{background:var(--panel);border:1px solid var(--violet);color:var(--acid);width:46px;font-size:18px;cursor:pointer}
@@ -90,6 +91,10 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
 .acc{margin-top:10px;border-top:1px solid #1d1432;padding-top:8px;color:var(--muted)} .acc div{margin-bottom:4px} .acc b{color:var(--ink);word-break:break-all} .acc label{display:flex;gap:6px;align-items:flex-start;margin:8px 0;cursor:pointer} .acc input{width:auto!important;margin-top:2px} .acc a{color:var(--acid);cursor:pointer;display:inline-block;margin-right:12px} .acc .dng{background:none;border:0;color:#ff6b6b;cursor:pointer;font:inherit;padding:0;text-decoration:underline}
 .soc{display:flex;gap:10px;font-size:11px;align-items:center} .soc a{border:0!important;background:none!important;padding:0!important;color:var(--muted)!important;font-weight:600!important} .cnt{display:flex;gap:8px;font:700 11px 'Space Grotesk',sans-serif;color:var(--muted)} .cnt b{color:var(--ink)}
 #coinbox{display:none!important}
+.lg-tabs{display:flex;gap:6px;margin-bottom:12px} .lg-t{flex:1;background:#150a26;border:1px solid var(--line);color:var(--muted);padding:8px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer} .lg-t.on{background:#7b2fff;color:#fff;border-color:#b57bff}
+.lg-in{display:block;width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:11px 12px;margin-bottom:10px;font:500 14px 'Space Grotesk',sans-serif}
+.lg-ck{display:flex!important;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);margin-bottom:10px;cursor:pointer} .lg-ck input{width:auto!important;margin:2px 0 0!important;flex:none} .lg-ck a{color:var(--acid)}
+#gEnter{background:var(--acid);color:#04140c;border:0;padding:8px 14px;margin-left:8px;font:900 12px 'Playfair Display',serif;letter-spacing:.1em;cursor:pointer}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -124,7 +129,7 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
 <div id="banner"></div><div id="toast"></div><div id="log"></div>
 <button class="deco dnc" id="bDance" type="button" hidden>💃 Balla</button><button class="deco" id="bDeco" type="button" hidden>🛋 Arredamento</button><div class="btns" id="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
 <form id="chat" autocomplete="off" hidden><input id="msg" maxlength="140" placeholder="Scrivi in piazza…" aria-label="Messaggio in gioco"><button type="submit" aria-label="Invia">↵</button></form>
-<div id="guest" hidden>Stai guardando la piazza da spettatore. <a href="index.html">Entra dal sito</a> per muoverti e scrivere.</div>
+<div id="guest" hidden>Stai guardando la piazza da spettatore. <button type="button" id="gEnter">ENTRA</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -1677,13 +1682,76 @@ var CH = (function(){
 })();
 window.klMission = CH.mission;
 
+// ======================= ACCESSO / REGISTRAZIONE (link via email, niente password) =======================
+var AUTH = (function(){
+  var ov = null, mode = 'signup', DEF_AV = {shirt:'#ffffff', pants:'#ffffff', shoes:'#ffffff', hair:'#ffffff', cap:'#ffffff', glasses:'#3dffa0', phones:'#7b2fff', hairStyle:'short', barefoot:true, outer:false, accs:[]};
+  function validNick(n){ return /^[A-Za-z0-9_.-]{3,20}$/.test(n); }
+  async function nickTaken(n){ var r = await sb.from('profiles').select('id', {count:'exact', head:true}).ilike('nickname', n.replace(/_/g, '\\_')); return (r.count || 0) > 0; }
+  async function setNews(v){ try{ var r = await sb.from('profile_prefs').upsert({id:ME.uid, news_optin:v, news_optin_at:v ? new Date().toISOString() : null}); return !(r && r.error); }catch(e){ return false; } }
+  function close(){ if(ov && ov.parentNode) ov.parentNode.removeChild(ov); ov = null; }
+  function open(m){
+    mode = m || 'signup'; if(!sb) return toast('Servizio non disponibile.');
+    var only = mode === 'nickonly', login = mode === 'login';
+    if(!ov){ ov = document.createElement('div'); ov.className = 'mod'; document.body.appendChild(ov); ov.addEventListener('click', function(e){ if(e.target === ov && mode !== 'nickonly') close(); }); }
+    ov.innerHTML = '<div class="card"><button type="button" class="x" aria-label="Chiudi"' + (only ? ' style="display:none"' : '') + '>✕</button>' +
+      (only ? '' : '<div class="lg-tabs"><button type="button" class="lg-t' + (login ? '' : ' on') + '" data-m="signup">Registrati</button><button type="button" class="lg-t' + (login ? ' on' : '') + '" data-m="login">Accedi</button></div>') +
+      '<h4>' + (only ? 'Scegli il tuo nickname' : login ? 'Bentornato in KENNYLAND' : 'Benvenuto in KENNYLAND') + '</h4>' +
+      '<p>' + (only ? 'Accesso confermato: manca solo il nome con cui ti vedranno gli altri.' : login ? 'Scrivi la tua email: ti mandiamo un nuovo link per rientrare.' : 'Scegli un nickname e inserisci la tua email: ti mandiamo un link per entrare, niente password.') + '</p>' +
+      (login ? '' : '<input id="lgNick" class="lg-in" maxlength="20" placeholder="Nickname" autocomplete="nickname">') + (only ? '' : '<input id="lgMail" class="lg-in" type="email" placeholder="La tua email" autocomplete="email">') +
+      ((only || login) ? '' : '<label class="lg-ck"><input type="checkbox" id="lgCons"><span>Ho almeno 14 anni e acconsento all\'uso della mia email per accedere a KENNYLAND. <a href="privacy.html" target="_blank" rel="noopener">Informativa privacy</a></span></label>') +
+      (login ? '' : '<label class="lg-ck"><input type="checkbox" id="lgNews"><span>Avvisami via email quando esce un nuovo drop! (se non mi clicchi sei un bufu!)</span></label>') +
+      '<div class="wmsg" id="lgMsg"></div><button type="button" class="go" id="lgGo">' + (only ? 'Conferma' : login ? 'Mandami il link' : 'Invia il link') + '</button></div>';
+    var x = ov.querySelector('.x'); if(x) x.onclick = close;
+    Array.prototype.forEach.call(ov.querySelectorAll('.lg-t'), function(b){ b.onclick = function(){ open(b.getAttribute('data-m')); }; });
+    ov.querySelector('#lgGo').onclick = submit;
+  }
+  async function submit(){
+    var go = ov.querySelector('#lgGo'), msg = function(t){ ov.querySelector('#lgMsg').textContent = t || ''; }; go.disabled = true; msg('Un attimo...');
+    var $v = function(id){ var e = ov.querySelector('#' + id); return e ? e.value.trim() : ''; }, redir = location.origin + location.pathname;
+    try{
+      if(mode === 'login'){
+        var le = $v('lgMail'); if(!/^\S+@\S+\.\S+$/.test(le)){ msg("Inserisci un'email valida."); return; }
+        var lr = await sb.auth.signInWithOtp({email:le, options:{shouldCreateUser:false, emailRedirectTo:redir}});
+        if(lr.error){ msg(/signups not allowed|not found/i.test(lr.error.message) ? 'Non trovo questa email. Se è la prima volta, passa a Registrati.' : 'Non riesco a inviare il link: ' + lr.error.message); return; }
+        msg('Link inviato! Controlla la tua email (anche lo spam) e clicca per rientrare.'); go.style.display = 'none'; return;
+      }
+      var nick = $v('lgNick'); if(!validNick(nick)){ msg('Nickname: da 3 a 20 caratteri tra lettere, numeri, _ . -'); return; }
+      if(await nickTaken(nick)){ msg(mode === 'signup' ? 'Nickname già preso. Se è il tuo, passa ad Accedi.' : 'Nickname già preso, scegline un altro.'); return; }
+      if(mode === 'nickonly'){
+        var ins = await sb.from('profiles').insert({id:ME.uid, nickname:nick, avatar:DEF_AV});
+        if(ins.error){ msg(ins.error.code === '23505' ? 'Nickname già preso, scegline un altro.' : 'Errore nel salvataggio, riprova.'); return; }
+        var nw = ov.querySelector('#lgNews'); if(nw && nw.checked) await setNews(true);
+        location.reload(); return;
+      }
+      var email = $v('lgMail'); if(!/^\S+@\S+\.\S+$/.test(email)){ msg("Inserisci un'email valida."); return; }
+      if(!ov.querySelector('#lgCons').checked){ msg('Serve confermare età e consenso.'); return; }
+      try{ localStorage.setItem('kl_pending_nick', nick); localStorage.setItem('kl_pending_news', ov.querySelector('#lgNews').checked ? '1' : '0'); }catch(e){}
+      var r = await sb.auth.signInWithOtp({email:email, options:{emailRedirectTo:redir}});
+      if(r.error){ msg('Non riesco a inviare il link: ' + r.error.message); return; }
+      msg('Link inviato! Controlla la tua email (anche lo spam) e clicca per entrare.'); go.style.display = 'none';
+    }catch(e){ msg('Qualcosa non ha funzionato, riprova.'); }
+    finally{ go.disabled = false; }
+  }
+  // dopo il click sul link: profilo mancante -> usa il nickname salvato, altrimenti chiedilo
+  async function afterSession(uid){
+    var pend = null; try{ pend = localStorage.getItem('kl_pending_nick'); }catch(e){}
+    if(pend && validNick(pend)){
+      var ins = await sb.from('profiles').insert({id:uid, nickname:pend, avatar:DEF_AV});
+      if(!ins.error){ try{ localStorage.removeItem('kl_pending_nick'); }catch(e){} var pn = null; try{ pn = localStorage.getItem('kl_pending_news'); }catch(e){} ME.uid = uid; if(pn === '1') await setNews(true); try{ localStorage.removeItem('kl_pending_news'); }catch(e){} location.reload(); return; }
+    }
+    ME.uid = uid; open('nickonly');
+  }
+  return {open:open, afterSession:afterSession};
+})();
+
 // ---- avvio: sessione condivisa con il sito (stesso dominio), profilo, canale
 (async function(){
   if(!sb){ toast('Servizio non disponibile.'); return; }
   var ses = null; try{ var r = await sb.auth.getSession(); ses = r && r.data && r.data.session; }catch(e){}
+  var noProfile = false;
   if(ses && ses.user){
     ME.uid = ses.user.id;
-    try{ var p = await sb.from('profiles').select('nickname,avatar').eq('id', ME.uid).maybeSingle(); ME.nick = cleanNick(p && p.data && p.data.nickname); ME.av = (p && p.data && p.data.avatar) || null; }catch(e){}
+    try{ var p = await sb.from('profiles').select('nickname,avatar').eq('id', ME.uid).maybeSingle(); ME.nick = cleanNick(p && p.data && p.data.nickname); ME.av = (p && p.data && p.data.avatar) || null; if(p && !p.error && !p.data) noProfile = true; }catch(e){}
     if(!ME.av){ try{ ME.av = JSON.parse(localStorage.getItem('kl_avatar') || 'null'); }catch(e){} }
     try{ var ad = await sb.rpc('is_kl_admin'); ME.owner = !!(ad && ad.data === true); }catch(e){}
     try{ var w = await sb.from('wallets').select('coins').eq('user_id', ME.uid).maybeSingle(); if(w && w.data) $('coins').textContent = w.data.coins; }catch(e){}
@@ -1691,7 +1759,8 @@ window.klMission = CH.mission;
   }
   CH.init();
   if(ME.ready){ meLabel = {el:mkLabel(ME.nick, ME.owner), bt:0}; $('who').textContent = ME.nick; $('coinbox').hidden = false; $('chat').hidden = false; ME.A.g.position.set(ME.x, 0, ME.z); }
-  else { scene.remove(ME.A.g); $('guest').hidden = false; }
+  else { scene.remove(ME.A.g); $('guest').hidden = false; $('gEnter').onclick = function(){ var had = false; try{ had = !!localStorage.getItem('kl_has_account'); }catch(e){} AUTH.open(noProfile ? 'nickonly' : (had ? 'login' : 'signup')); }; if(noProfile) AUTH.afterSession(ME.uid); }
+  if(ME.ready){ try{ localStorage.setItem('kl_has_account', '1'); }catch(e){} }
   window.kl3d = {dress:function(a){ ME.A.sig = ''; dressAv(ME.A, a, ME.owner); }, enter:enterScene, cs:cs, ME:ME, goAct:goAct, doAct:doAct};
   joinChannel('kl-room-plaza'); djPull(); setInterval(djPull, 20000);
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
