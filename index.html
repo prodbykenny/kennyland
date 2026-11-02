@@ -1396,7 +1396,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   var N = 8, OX = 320, OY = 60, TW = 32, TH = 16, WALL = 130;
   var sb = null, user = null, nick = '', wallet = null, active = false;
   var scene = 'home', SCN = {}, spectator = false, vis = true, camX = 0, camY = 0, camReady = false, path = [];
-  var pos = {x:4, y:4}, target = null, face = 1, rafId = 0, lastT = 0, walkT = 0, dzT = 0;
+  var pos = {x:4, y:4}, target = null, face = 1, back = false, rafId = 0, lastT = 0, walkT = 0, dzT = 0;
   function iso(x, y){ return [OX + (x - y) * TW, OY + (x + y) * TH]; }
   function el(name, attrs, parent){
     var e = document.createElementNS(NS, name);
@@ -1635,9 +1635,27 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       new IntersectionObserver(function(en){ if(en[0].isIntersecting && !shown){ shown = true; setTimeout(function(){ type(0); }, 700); } }, {threshold:.4}).observe(wrap);
     }
   })();
+  // vista di spalle: nasconde il viso e copre la testa con i capelli (usata quando ci si muove verso l'alto della scena)
+  function setBack(av, on){
+    if(!av || av._bk === !!on) return; av._bk = !!on;
+    var vis2 = on ? 'hidden' : '';
+    ['.ly-face', '#acc-glasses', '#outer-collar'].forEach(function(q){ var e = av.querySelector(q); if(e) e.style.visibility = vis2; });
+    var vz = av.querySelector('#acc-cap path:nth-child(2)'); if(vz) vz.style.visibility = vis2;
+    var hd = av.querySelector('.j-head > g'); if(!hd) return;
+    var bh = hd.querySelector('.bk-hair');
+    if(!on){ if(bh) bh.style.display = 'none'; return; }
+    if(!bh){ bh = document.createElementNS('http://www.w3.org/2000/svg', 'g'); bh.setAttribute('class', 'bk-hair'); hd.insertBefore(bh, hd.querySelector('.ly-acc')); }
+    var hs = av.querySelector('[data-g="hair"]'), col = hs ? hs.getAttribute('fill') : '#ffffff', lg = av.querySelector('#hairLong'), isLong = lg && lg.style.display !== 'none';
+    bh.style.display = '';
+    bh.innerHTML = (isLong ? '<path d="M49.4 22 L46.2 46.4 Q60 50.6 73.8 46.4 L70.6 22 Z" fill="' + col + '" stroke="#1b1720" stroke-width=".5"/><path d="M60 30 L60 49 M54 30 L52.6 47.6 M66 30 L67.4 47.6" fill="none" stroke="#1b1720" stroke-width=".3" stroke-opacity=".4"/>' : '') +
+      '<path d="M51.2 13.5 Q51 7.4 60 7 Q69 7.4 68.8 13.5 L69.2 22 Q69 28 66 31.4 Q63.2 34.8 60 35.2 Q56.8 34.8 54 31.4 Q51 28 50.8 22 Z" fill="' + col + '" stroke="#1b1720" stroke-width=".5"/>' +
+      '<path d="M51 22 Q51 28 54 31.4 Q57 34.8 60 35.2 Q63 34.8 66 31.4 Q69 28 69 22 Q60 27 51 22 Z" fill="#000" opacity=".16"/>' +
+      '<path d="M60 8 Q58.6 20 60 34.4 M55 9 Q52.6 20 54.6 31 M65 9 Q67.4 20 65.4 31 M57.4 8.4 Q55.6 18 57 33 M62.6 8.4 Q64.4 18 63 33" fill="none" stroke="#1b1720" stroke-width=".3" stroke-opacity=".45"/>';
+  }
   function place(){
     var p = iso(pos.x, pos.y), g = $('roomAv'), av = g.querySelector('.av'), sh = g.querySelector('.sh');
     var el0 = elevAt(pos.x, pos.y), bob = (target ? walkBob : 0) + danceBob - (seat ? SITD * 0.5 : 0) + el0, sc = 0.5;
+    setBack(av, back && !seat && !!target);
     if(sh){ sh.setAttribute('cx', p[0]); sh.setAttribute('cy', p[1] - el0); }
     if(av) av.setAttribute('transform', 'translate(' + p[0] + ',' + (p[1] - bob) + ') scale(' + (sc * face) + ',' + sc + ') translate(-60,-176)');
   }
@@ -1661,7 +1679,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
         if(d <= step){
           pos.x = target.x; pos.y = target.y;
           if(path.length) target = path.shift(); else { target = null; arrive(); }
-        } else { pos.x += dx / d * step; pos.y += dy / d * step; var sd = (dx - dy); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; }
+        } else { pos.x += dx / d * step; pos.y += dy / d * step; var sd = (dx - dy); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; if(Math.abs(dx + dy) / d > 0.2) back = (dx + dy) < 0; }
         place();
       }
       pose(t); if(dancing || seat) place();
@@ -1748,7 +1766,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var S = SCN[scene], dest = {x:Math.min(N - 0.5, Math.max(0.5, x)), y:Math.min(N - 0.5, Math.max(0.5, y))};
     path = S.grid ? findPath(pos, dest, S.grid) : [dest];
     target = path.length ? path.shift() : null;
-    if(target){ var sd = (target.x - pos.x) - (target.y - pos.y); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; }
+    if(target){ var sd = (target.x - pos.x) - (target.y - pos.y); if(Math.abs(sd) > 0.01) face = sd > 0 ? 1 : -1; var sw = (target.x - pos.x) + (target.y - pos.y), dd0 = Math.hypot(target.x - pos.x, target.y - pos.y); if(dd0 > 0 && Math.abs(sw) / dd0 > 0.2) back = sw < 0; }
     if(!silent) document.dispatchEvent(new CustomEvent('kl-walk', {detail:{x:pos.x, y:pos.y, dx:dest.x, dy:dest.y, scene:scene}}));
   }
   var NEAR = 1.25, pending = null;
@@ -2126,7 +2144,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     reg:function(name, def){ SCN[name] = def; }, go:goScene, spectate:spectate, goTo:goTo, walkTo:walkTo, findPath:findPath,
     pos:function(){ return pos; }, scene:function(){ return scene; }, isSpectator:function(){ return spectator; }, isActive:function(){ return active; },
     nick:function(){ return nick; }, user:function(){ return user; }, face:function(){ return face; }, moving:function(){ return !!target; },
-    poseJ:poseJ, collectJ:collectJ, sitAt:sitAt, standUp:standUp, seat:function(){ return seat; }, elev:elevAt, musicOn:musicOn, inDz:inDanceZone, tpl:function(){ var s0 = editor.querySelector('.stage svg'); return s0 ? s0.innerHTML.replace(/\sid="([^"]*)"/g, ' data-id="$1"') : ''; },
+    poseJ:poseJ, collectJ:collectJ, setBack:setBack, sitAt:sitAt, standUp:standUp, seat:function(){ return seat; }, elev:elevAt, musicOn:musicOn, inDz:inDanceZone, tpl:function(){ var s0 = editor.querySelector('.stage svg'); return s0 ? s0.innerHTML.replace(/\sid="([^"]*)"/g, ' data-id="$1"') : ''; },
     setDz:function(a){ dz = a; }, N:function(){ return N; }, TW:function(){ return TW; }, TH:function(){ return TH; }
   };
 })();
@@ -3418,10 +3436,11 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
         var dx = r.target.x - r.x, dy = r.target.y - r.y, d = Math.sqrt(dx * dx + dy * dy), step = (S.speed || 2.2) * dt;
         r.walkT += dt;
         if(d <= step){ r.x = r.target.x; r.y = r.target.y; r.target = r.path.length ? r.path.shift() : null; }
-        else { r.x += dx / d * step; r.y += dy / d * step; var sd = dx - dy; if(Math.abs(sd) > 0.01) r.face = sd > 0 ? 1 : -1; }
+        else { r.x += dx / d * step; r.y += dy / d * step; var sd = dx - dy; if(Math.abs(sd) > 0.01) r.face = sd > 0 ? 1 : -1; if(Math.abs(dx + dy) / d > 0.2) r.back = (dx + dy) < 0; }
       }
       var res = R.poseJ(r.J, {moving:!!r.target, walkT:r.walkT, dz:R.inDz(r.x, r.y), music:on, k:k, ow:r.ow, sit:!!r.seat}, ts);
       var p = iso(r.x, r.y), e0 = S.elev ? S.elev(r.x, r.y) : 0; if(r.seat) r.face = r.seat.face || 1;
+      R.setBack(r.av, !!r.back && !r.seat && !!r.target);
       r.sh.setAttribute('cx', p[0]); r.sh.setAttribute('cy', p[1] - e0);
       r.av.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ',' + (p[1] - (r.target ? res.wb : 0) - res.db - (r.seat ? res.sd * 0.5 : 0) - e0).toFixed(1) + ') scale(' + (SC * r.face) + ',' + SC + ') translate(-60,-176)');
       avs.push({g:r.g, x:r.x, y:r.y, seat:r.seat && r.seat.o});
