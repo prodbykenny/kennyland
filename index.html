@@ -2230,12 +2230,12 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   }
   function buildPlaza(){
     sprites = []; blocked = []; anim = [];
-    var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco'), N = 16, i, j, dzs = [];
+    var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco'), N = 24, i, j, dzs = [];
     // quinte lontane + edifici
-    skyline(wl, 'x', [[0, 3.4, 210], [3.4, 6, 170], [6, 9.5, 240], [9.5, 12.5, 180], [12.5, 16, 220]], -3.2, '#0e0a1c');
-    skyline(wl, 'y', [[0, 3.2, 230], [3.2, 6.4, 180], [9.6, 12.8, 200], [12.8, 16, 250]], -3.2, '#0e0a1c');
-    skyline(wl, 'x', [[0, 5, 130], [10, 16, 120]], 0, '#16112a');
-    skyline(wl, 'y', [[0, 4.4, 120], [12.6, 16, 130]], 0, '#1a1330');
+    skyline(wl, 'x', [[0, 4, 210], [4, 8, 170], [8, 13, 240], [13, 18, 180], [18, 24, 220]], -3.2, '#0e0a1c');
+    skyline(wl, 'y', [[0, 4, 230], [4, 8, 180], [8, 12, 210], [12, 17, 190], [17, 24, 250]], -3.2, '#0e0a1c');
+    skyline(wl, 'x', [[0, 5, 130], [10, 24, 120]], 0, '#16112a');
+    skyline(wl, 'y', [[0, 4.4, 120], [19, 24, 130]], 0, '#1a1330');
     // pavimento a sampietrini
     cobblePattern(SCN_PLAZA.OX, SCN_PLAZA.OY);
     poly(fl, [iso(0, 0), iso(N, 0), iso(N, N), iso(0, N)], {fill:'url(#cobble)', stroke:'#2a2a3a', 'stroke-width':1.5});
@@ -2267,7 +2267,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       poly(fl, [Pz(s2[0], 3, s2[2]), Pz(s2[1], 3, s2[2]), Pz(s2[1], 4, s2[2]), Pz(s2[0], 4, s2[2])], {fill:'#201540', stroke:'#7b2fff', 'stroke-width':1});
     });
     // bordi invalicabili sul fronte del palco (si sale solo dalla scaletta o dalla passerella)
-    solid(3, 0, 1, 5); solid(4, 5, 3, 1); solid(9, 5, 5, 1); solid(6, 6, 1, 1); solid(9, 6, 1, 1); solid(7, 7, 2, 1); solid(13, 2, 1, 1); solid(13, 4, 1, 1);
+    solid(3, 0, 1, 5); solid(4, 5, 3, 1); solid(9, 5, 5, 1); solid(6, 6, 1, 1); solid(9, 6, 1, 1); solid(7, 7, 2, 1); solid(13, 0, 1, 3); solid(13, 4, 1, 1);
     // ----- LED screen dietro il palco
     var ledS = sprite(4.2, 0.2, 8.6, 0.6), led = el('g', {transform:'translate(0,-' + PZ + ')'}, ledS); solid(4, 0, 9, 1);
     box(led, 4.4, 0.25, 8.2, 0.35, 0, 30, '#16112a', '#100c20', '#0d0a1a');
@@ -2355,7 +2355,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     el('rect', {x:mh[0] - 4.5, y:mh[1] - 16, width:9, height:17, rx:4.5, fill:'#15111f', stroke:'#3dffa0', 'stroke-width':1.4}, mic);
     el('path', {d:'M' + (mh[0] - 3.4) + ',' + (mh[1] - 11) + ' h6.8 M' + (mh[0] - 3.4) + ',' + (mh[1] - 7) + ' h6.8 M' + (mh[0] - 3.4) + ',' + (mh[1] - 3) + ' h6.8', stroke:'#3dffa0', 'stroke-width':.8}, mic);
     // ----- fontana
-    var fo = sprite(6.8, 8.3, 3.4, 3.4, 'fountain', 'Fontana'); solid(6.8, 8.3, 3.4, 3.4);
+    var foS = sprite(9.8, 10.3, 3.4, 3.4, 'fountain', 'Fontana'), fo = el('g', {transform:'translate(32,80)'}, foS); solid(9.8, 10.3, 3.4, 3.4);
     var fc = {x:8.5, y:10};
     ellTop(fo, fc.x, fc.y, 1.7, 0, {fill:'#2a2548', stroke:'#4a4470', 'stroke-width':2});
     ellTop(fo, fc.x, fc.y, 1.7, 14, {fill:'none', stroke:'#6a63a0', 'stroke-width':3});
@@ -2377,7 +2377,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       fshine.setAttribute('opacity', (0.28 + 0.12 * Math.sin(t / 700)).toFixed(2));
     });
     // ----- caffè / bar
-    var ksS = sprite(13.2, 0.3, 2.8, 2.0, 'cafe', 'Caffè bar'), ks = el('g', {transform:'translate(121.6,-54.4)'}, ksS); solid(13.2, 0.2, 2.8, 1.7);
+    var ksS = sprite(21.2, 0.3, 2.8, 2.0, 'cafe', 'Caffè bar'), ks = el('g', {transform:'translate(377.6,73.6)'}, ksS); solid(21.2, 0.2, 2.8, 1.7);
     box(ks, 13.1, 4.0, 2.6, 0.5, 0, 74, '#241a2e', '#1a1224', '#130d1c');
     box(ks, 13.1, 4.9, 2.6, 0.7, 0, 30, '#3a2a1e', '#2a1d14', '#20150e');
     faceY(ks, 13.1, 15.7, 5.61, 3, 28, {fill:'#2a1d14', stroke:'#4a3524'});
@@ -2403,7 +2403,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     faceX(hs, 0.32, 3.55, 4.15, 0, 66, {fill:'rgba(61,255,160,.18)', stroke:'#3dffa0', 'stroke-width':1, filter:'url(#neonGlow)'});
     textX(hs, 'CASA', 0.32, 3.85, 80, 6.5, {fill:'#3dffa0', stroke:'#0a0414', 'stroke-width':'.3'});
     // ----- studio di registrazione
-    var sd = sprite(0.2, 10.0, 3.5, 5.8, 'studio', 'Studio di registrazione (serve il codice)'); solid(0, 10, 3.7, 6);
+    var sdS = sprite(0.2, 15.0, 3.5, 5.8, 'studio', 'Studio di registrazione (serve il codice)'), sd = el('g', {transform:'translate(-160,80)'}, sdS); solid(0, 15, 3.7, 6);
     box(sd, 0.25, 10.05, 3.4, 5.7, 0, 112, '#18151f', '#121019', '#0d0b14');
     for(i = 0; i < 5; i++) for(j = 0; j < 2; j++){ faceX(sd, 3.65, 10.4 + i * 1.05, 11.3 + i * 1.05, 14 + j * 26, 36 + j * 26, {fill:(i + j) % 2 ? '#24202e' : '#1c1926', stroke:'#2a2a3a', 'stroke-width':.8, display:(i === 2 && j === 0) ? 'none' : 'inline'}); }
     faceX(sd, 3.66, 12.25, 13.45, 0, 74, {fill:'#2b2d36', stroke:'#8a8fa8', 'stroke-width':2.4});
@@ -2413,7 +2413,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var onair = faceX(sd, 3.67, 12.4, 13.3, 100, 108, {fill:'#ff3b3b', filter:'url(#neonGlow)'});
     anim.push(function(t){ onair.setAttribute('opacity', (0.55 + 0.45 * Math.sin(t / 420)).toFixed(2)); });
     // ----- lampioni
-    [[15.3, 6.2], [15.3, 10.6], [15.3, 15.1], [11.4, 15.3], [7.0, 15.3]].forEach(function(p){
+    [[23.3, 6], [23.3, 11.5], [23.3, 17], [23.3, 23.2], [18, 23.3], [12.7, 23.3], [7.4, 23.3]].forEach(function(p){
       var lp = sprite(p[0] - 0.2, p[1] - 0.2, 0.4, 0.4);
       var lb = Pz(p[0], p[1], 0), lt = Pz(p[0], p[1], 86);
       ellTop(lp, p[0], p[1], 0.18, 0, {fill:'#0a0812', stroke:'#2a2438'});
@@ -2423,7 +2423,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       el('circle', {cx:lt[0], cy:lt[1] - 2, r:5, fill:'#ffe8b0'}, lp);
     });
     // aiuole
-    [[15, 8.4], [15, 13], [9.2, 15]].forEach(function(p){
+    [[23, 9], [23, 14.5], [23, 20], [15.5, 23], [10, 23]].forEach(function(p){
       var pl = sprite(p[0] - 0.5, p[1] - 0.5, 1, 1); solid(p[0] - 0.5, p[1] - 0.5, 1, 1);
       box(pl, p[0] - 0.45, p[1] - 0.45, 0.9, 0.9, 0, 14, '#2a2438', '#1d1830', '#15112a');
       var tp = Pz(p[0], p[1], 14);
@@ -2434,8 +2434,8 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     SCN_PLAZA.grid = mkGrid(N);
     $('roomTop').innerHTML = '';
   }
-  var SCN_PLAZA = {N:16, OX:560, OY:150, TW:32, TH:16, vb:[10, -60, 1100, 770], bounds:[10, -60, 1100, 770], cam:{w:720, h:504}, sort:true, speed:3, spawn:{x:2.2, y:3.9}, elev:plazaElev, dz:{x0:4, x1:13, y0:1, y1:5},
-    stand:{home:{x:1.6, y:3.85}, board:{x:1.8, y:7}, studio:{x:4.6, y:12.8}, mic:{x:8.5, y:6.4}, dj:{x:8.5, y:1.5}, cafe:{x:14.6, y:2.5}, fountain:{x:5.9, y:9.6}},
+  var SCN_PLAZA = {N:24, OX:800, OY:200, TW:32, TH:16, vb:[20, -100, 1560, 1080], bounds:[20, -100, 1560, 1080], cam:{w:720, h:504}, sort:true, speed:3, spawn:{x:2.2, y:3.9}, elev:plazaElev, dz:{x0:4, x1:13, y0:1, y1:5},
+    stand:{home:{x:1.6, y:3.85}, board:{x:1.8, y:7}, studio:{x:4.6, y:17.8}, mic:{x:8.5, y:6.4}, dj:{x:8.5, y:1.5}, cafe:{x:22.6, y:2.5}, fountain:{x:11.5, y:9.7}},
     build:buildPlaza, grid:null, name:'PIAZZA'};
 
   // ---------- STUDIO DI REGISTRAZIONE ----------
@@ -3119,7 +3119,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   };
   SCN_STUDIO.act = function(a){
     if(a.indexOf('sit:') === 0) doSit(a);
-    else if(a === 'plaza') R.go('plaza', {spawn:{x:4.8, y:12.9}});
+    else if(a === 'plaza') R.go('plaza', {spawn:{x:4.8, y:17.9}});
     else if(a === 'console') openMixer();
     else if(a === 'keys') openSynth();
     else if(a === 'booth') openRecorder();
