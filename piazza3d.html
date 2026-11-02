@@ -63,6 +63,17 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .sh-n{font-weight:700;font-size:13px;color:var(--ink,#f4f1ff);} .sh-d{font-size:11px;color:var(--muted,#9a93b8);flex:1;line-height:1.35;}
 .sh-b{display:flex;justify-content:flex-end;} .sh-buy{background:#3dffa0;color:#06100a;border:0;padding:7px 12px;font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;} .sh-ok{color:#3dffa0;font-size:12px;font-weight:700;}
 .sh-soon{grid-column:1/-1;padding:30px;text-align:center;color:var(--muted,#9a93b8);}
+.lk-panel{position:fixed;top:0;right:0;bottom:0;width:min(310px,88vw);z-index:80;background:rgba(10,4,20,.94);border-left:1px solid #3a2a66;display:flex;flex-direction:column;color:var(--ink,#f4f1ff);font-family:'Space Grotesk',sans-serif;}
+.lk-panel h4{margin:0;padding:16px 16px 6px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red,#ff3b3b);font-size:17px;}
+.lk-panel h3{margin:14px 0 0;font-size:12px;letter-spacing:.2em;color:#ffd23d;} .lk-panel h5{margin:10px 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted,#9a93b8);font-weight:600;}
+.lk-body{flex:1;overflow:auto;padding:0 16px 10px;}
+.lk-sw{display:flex;gap:7px;flex-wrap:wrap;} .lk-sw i{width:24px;height:24px;border:2px solid #3a2a66;cursor:pointer;display:block;} .lk-sw i.on{border-color:#fff;box-shadow:0 0 8px #b57bff;}
+.lk-cu{width:24px;height:24px;border:2px dashed #6a5a9a;font-size:12px;text-align:center;line-height:20px;position:relative;cursor:pointer;overflow:hidden;} .lk-cu input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;}
+.lk-seg,.lk-t-row,.lk-vip{display:flex;gap:6px;flex-wrap:wrap;} .lk-seg button,.lk-t{background:#150a26;border:1px solid #3a2a66;color:var(--ink,#f4f1ff);padding:7px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+.lk-seg button.on,.lk-t.on{background:#7b2fff;border-color:#b57bff;} .lk-t.lock{opacity:.55;}
+.lk-note{font-size:11px;color:var(--muted,#9a93b8);margin-top:8px;line-height:1.4;}
+.lk-act{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #2a1c4a;} .lk-act button{flex:1;padding:10px;font-family:'Press Start 2P',monospace;font-size:10px;border:0;cursor:pointer;} .lk-save{background:#3dffa0;color:#06100a;} .lk-cancel{background:#2a1c4a;color:#f4f1ff;}
+body.looking #chat,body.looking .right{display:none!important;}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -977,7 +988,7 @@ S.build = function(S){
 };
 S.act = function(a){
   if(a === 'shop') return SHOP.open();
-  if(a === 'look') return toast('👕 Il cambio look per ora è nel sito 2D.');
+  if(a === 'look') return LOOK.open();
   if(a === 'speaker') return toast('🔊 Cassa vecchia e rovinata: nel negozio ne trovi di migliori.');
 };
 })();
@@ -1102,6 +1113,79 @@ var SHOP = (function(){
     await load(); render();
   }
   return {open:open, price:price};
+})();
+
+// ======================= CAMBIO LOOK 3D =======================
+var LOOK = (function(){
+  var pn = null, draft = null, orig = null, saved = null;
+  var PAL = ['#ffffff', '#242430', '#3dffa0', '#7b2fff', '#ff2d55', '#2d7bff', '#ffd23d'];
+  function clone(o){ return JSON.parse(JSON.stringify(o || {})); }
+  function apply(){ ME.A.sig = ''; dressAv(ME.A, draft, ME.owner); }
+  function sw(key, label, extra){
+    var cur = (draft[key] || '#ffffff').toLowerCase(), list = PAL.slice(); if(extra) list.unshift(extra);
+    return '<h5>' + label + '</h5><div class="lk-sw" data-k="' + key + '">' + list.map(function(c){ return '<i class="' + (c === cur ? 'on' : '') + '" style="background:' + c + '" data-c="' + c + '"></i>'; }).join('') + '<label class="lk-cu">?<input type="color" value="' + (isHex(cur) ? cur : '#ff8800') + '"></label></div>';
+  }
+  function seg(key, label, opts){ var cur = draft[key]; return '<h5>' + label + '</h5><div class="lk-seg" data-k="' + key + '">' + opts.map(function(o){ return '<button type="button" class="' + (cur === o[0] || (!cur && o[2]) ? 'on' : '') + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>'; }
+  function tgl(id, label, on, locked){ return '<button type="button" class="lk-t' + (on ? ' on' : '') + (locked ? ' lock' : '') + '" data-t="' + id + '">' + label + (locked ? ' 🔒' : '') + '</button>'; }
+  function vipRow(slot, label){
+    var ids = Object.keys(ITEMS).filter(function(i){ return ITEMS[i].cloth && ITEMS[i].cloth.vip === slot; }), cur = (draft.vip || {})[slot];
+    return '<h5>' + label + '</h5><div class="lk-vip">' + tgl('vip:' + slot + ':', 'Nessuno', !cur) + ids.map(function(i){ return tgl('vip:' + slot + ':' + i, ITEMS[i].name, cur === i, !INV.own[i]); }).join('') + '</div>';
+  }
+  function render(){
+    var a = draft, vt = a.vip && a.vip.top, vb = a.vip && a.vip.bottom, vs = a.vip && a.vip.shoes, accs = a.accs || [];
+    var h = '<h4>CAMBIA LOOK</h4><div class="lk-body">';
+    h += seg('top', 'Maglia', [['tee', 'Corta'], ['long', 'Lunga', 1], ['hoodie', 'Felpa']]) + (vt ? '<div class="lk-note">Stai indossando un capo VIP: sostituisce la maglia.</div>' : sw('shirt', 'Colore maglia'));
+    h += '<div class="lk-t-row">' + tgl('outer', 'Camicia col colletto', !!a.outer, !INV.own.shirt_collar) + '</div>';
+    h += seg('bottom', 'Pantaloni', [['long', 'Lunghi', 1], ['short', 'Corti']]) + (vb ? '<div class="lk-note">Pantaloni VIP indossati.</div>' : sw('pants', 'Colore pantaloni'));
+    h += '<h5>Scarpe</h5><div class="lk-t-row">' + tgl('barefoot', 'Scalzo', a.barefoot !== false) + '</div>' + (a.barefoot === false && !vs ? sw('shoes', 'Colore scarpe') : '');
+    h += seg('hairStyle', 'Capelli', [['short', 'Corti', 1], ['long', 'Lunghi']]) + sw('hair', 'Colore capelli', ME.owner ? '#dfe2ec' : null);
+    h += '<h5>Accessori</h5><div class="lk-t-row">' + tgl('acc-cap', 'Cappello', accs.indexOf('acc-cap') > -1) + tgl('acc-glasses', 'Occhiali', accs.indexOf('acc-glasses') > -1) + tgl('acc-phones', 'Cuffie', accs.indexOf('acc-phones') > -1) + '</div>';
+    if(accs.indexOf('acc-cap') > -1) h += sw('cap', 'Colore cappello'); if(accs.indexOf('acc-glasses') > -1) h += sw('glasses', 'Colore occhiali'); if(accs.indexOf('acc-phones') > -1) h += sw('phones', 'Colore cuffie');
+    h += '<h3>VIP</h3>' + vipRow('top', 'Maglie e felpe') + vipRow('bottom', 'Pantaloni') + vipRow('shoes', 'Scarpe') + '<div class="lk-note">I capi con 🔒 si comprano nel <b>negozio</b> (computer in casa).</div></div>';
+    h += '<div class="lk-act"><button type="button" class="lk-cancel">Annulla</button><button type="button" class="lk-save">Salva</button></div>';
+    var sc = pn.querySelector('.lk-scroll'); var top = sc ? sc.scrollTop : 0; pn.innerHTML = h; sc = pn.querySelector('.lk-body'); if(sc) sc.scrollTop = top;
+  }
+  function onClick(e){
+    var t = e.target; if(!t.closest) return;
+    var c = t.closest('.lk-sw i'); if(c){ draft[c.parentNode.getAttribute('data-k')] = c.getAttribute('data-c'); if(c.parentNode.getAttribute('data-k') === 'shoes') draft.barefoot = false; apply(); return render(); }
+    var s = t.closest('.lk-seg button'); if(s){ draft[s.parentNode.getAttribute('data-k')] = s.getAttribute('data-v'); apply(); return render(); }
+    var g = t.closest('.lk-t'); if(g){
+      var id = g.getAttribute('data-t'), a = draft;
+      if(g.classList.contains('lock')) return toast('Si compra nel negozio (computer in casa).');
+      if(id === 'outer') a.outer = !a.outer;
+      else if(id === 'barefoot') a.barefoot = a.barefoot === false ? true : false;
+      else if(id.indexOf('acc-') === 0){ a.accs = a.accs || []; var i = a.accs.indexOf(id); if(i > -1) a.accs.splice(i, 1); else a.accs.push(id); }
+      else if(id.indexOf('vip:') === 0){ var p = id.split(':'); a.vip = a.vip || {}; if(p[2]) a.vip[p[1]] = p[2]; else delete a.vip[p[1]]; if(!Object.keys(a.vip).length) delete a.vip; }
+      apply(); return render();
+    }
+    if(t.closest('.lk-cancel')) return close(true);
+    if(t.closest('.lk-save')) return save();
+  }
+  function onInput(e){ var t = e.target; if(t.type === 'color' && t.closest('.lk-sw')){ var k = t.closest('.lk-sw').getAttribute('data-k'); draft[k] = t.value; if(k === 'shoes') draft.barefoot = false; apply(); } }
+  function onChange(e){ if(e.target.type === 'color') render(); }
+  async function save(){
+    var a = clone(draft);
+    ['top', 'bottom', 'hairStyle'].forEach(function(k){ if(!a[k]) delete a[k]; });
+    try{
+      var r = await sb.from('profiles').update({avatar:a}).eq('id', ME.uid);
+      if(r && r.error){ toast('Non riesco a salvare: controlla che i capi VIP siano tuoi.'); return; }
+    }catch(e){ toast('Salvataggio non riuscito, riprova.'); return; }
+    ME.av = a; try{ localStorage.setItem('kl_avatar', JSON.stringify(a)); }catch(e){} trackMe(); toast('✓ Look salvato'); close(false);
+  }
+  function close(revert){
+    if(revert){ draft = clone(orig); apply(); }
+    if(pn && pn.parentNode) pn.parentNode.removeChild(pn); pn = null; cs.tdist = saved.dist; cs.tpitch = saved.pitch; document.body.classList.remove('looking');
+  }
+  async function open(){
+    if(!ME.ready) return toast('Accedi dal sito per cambiare look.');
+    if(pn) return;
+    if(!INV.loaded){ try{ var q = await sb.from('inventory').select('item_id'); INV.own = {}; if(q && q.data) q.data.forEach(function(r){ INV.own[r.item_id] = 1; }); INV.loaded = true; }catch(e){} }
+    orig = clone(ME.av); draft = clone(ME.av); saved = {dist:cs.tdist, pitch:cs.tpitch};
+    ME.path = []; ME.face = cs.yaw; cs.tdist = 4.4; cs.tpitch = .22; document.body.classList.add('looking');
+    pn = document.createElement('div'); pn.className = 'lk-panel'; document.body.appendChild(pn);
+    pn.addEventListener('click', onClick); pn.addEventListener('input', onInput); pn.addEventListener('change', onChange); render();
+  }
+  return {open:open};
 })();
 
 // ---- strumenti dello studio: registratore, mixer, synth (stesso codice del 2D, tutto locale nel browser)
