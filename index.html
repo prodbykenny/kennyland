@@ -2452,34 +2452,34 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   function glowPool(g, x, y, r, c, z){ var q = Pz(x, y, z || 0); return el('ellipse', {cx:q[0], cy:q[1], rx:r * 46, ry:r * 23, fill:c}, g); }
   function buildStudio(){
     sprites = []; blocked = []; anim = []; clearSeats(SCN_STUDIO);
-    var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco'), N = 14, i, j, WALL = 150;
+    var fl = $('roomFloor'), wl = $('roomWalls'), dc = $('roomDeco'), N = 20, i, j, WALL = 150;
     var top = iso(0, 0), lft = iso(0, N), rgt = iso(N, 0);
     parquetPattern(SCN_STUDIO.OX, SCN_STUDIO.OY);
     el('polygon', {points:pts([top, [top[0], top[1] - WALL], [lft[0], lft[1] - WALL], lft]), fill:'#13101b', stroke:'#2a2a3a'}, wl);
     el('polygon', {points:pts([top, [top[0], top[1] - WALL], [rgt[0], rgt[1] - WALL], rgt]), fill:'#181220', stroke:'#2a2a3a'}, wl);
     // parete sinistra: doghe di legno + pannelli
     for(j = 0; j < N * 2; j++) faceX(wl, 0, j * 0.5, j * 0.5 + 0.5, 18, 108, {fill:j % 2 ? '#2a1c14' : '#33231a', stroke:'#120c08', 'stroke-width':.6});
-    for(j = 0; j < 7; j++) faceX(wl, 0, 0.3 + j * 2, 1.8 + j * 2, 112, 146, {fill:j % 2 ? '#1c1828' : '#221d30', stroke:'#0d0b14', 'stroke-width':1});
+    for(j = 0; j < 10; j++) faceX(wl, 0, 0.3 + j * 2, 1.8 + j * 2, 112, 146, {fill:j % 2 ? '#1c1828' : '#221d30', stroke:'#0d0b14', 'stroke-width':1});
     // parete destra: pannelli in tessuto e diffusori
-    for(i = 0; i < 14; i++) for(j = 0; j < 3; j++) faceY(wl, i + 0.05, i + 0.95, 0, 18 + j * 44, 58 + j * 44, {fill:(i + j) % 2 ? '#1d1828' : '#241e32', stroke:'#0d0b14', 'stroke-width':1});
+    for(i = 0; i < N; i++) for(j = 0; j < 3; j++) faceY(wl, i + 0.05, i + 0.95, 0, 18 + j * 44, 58 + j * 44, {fill:(i + j) % 2 ? '#1d1828' : '#241e32', stroke:'#0d0b14', 'stroke-width':1});
     // pavimento in parquet + tappeto
     poly(fl, [iso(0, 0), iso(N, 0), iso(N, N), iso(0, N)], {fill:'url(#parquet)', stroke:'#1a1410'});
-    poly(fl, [iso(5.6, 4.6), iso(11.4, 4.6), iso(11.4, 11), iso(5.6, 11)], {fill:'#3a1018', stroke:'#7a1c2a', 'stroke-width':2});
-    poly(fl, [iso(5.9, 4.9), iso(11.1, 4.9), iso(11.1, 10.7), iso(5.9, 10.7)], {fill:'none', stroke:'#d4af37', 'stroke-width':1, opacity:.6});
+    poly(fl, [iso(5.6, 7.6), iso(11.4, 7.6), iso(11.4, 14), iso(5.6, 14)], {fill:'#3a1018', stroke:'#7a1c2a', 'stroke-width':2});
+    poly(fl, [iso(5.9, 7.9), iso(11.1, 7.9), iso(11.1, 13.7), iso(5.9, 13.7)], {fill:'none', stroke:'#d4af37', 'stroke-width':1, opacity:.6});
     poly(fl, [iso(0.3, 5.1), iso(4.4, 5.1), iso(4.4, 12.6), iso(0.3, 12.6)], {fill:'#1a1620', stroke:'#2a2438'});
     // neon rosso (parete destra) e blu (parete sinistra) + luci da studio
-    var nr = seg(dc, 0.6, 0.02, 138, 11.2, 0.02, 138, 3, '#ff2d55', {filter:'url(#neonGlow)'});
-    var nb2 = seg(dc, 0.02, 0.6, 138, 0.02, 13.4, 138, 3, '#2d7bff', {filter:'url(#neonGlow)'});
-    seg(dc, 0.6, 0.02, 14, 11.2, 0.02, 14, 2, '#ff2d55', {filter:'url(#neonGlow)', opacity:.7});
-    seg(dc, 0.02, 0.6, 14, 0.02, 13.4, 14, 2, '#2d7bff', {filter:'url(#neonGlow)', opacity:.7});
-    [[1.6, '#2d7bff'], [2.7, '#ff2d55'], [11.0, '#2d7bff'], [10.0, '#ff2d55']].forEach(function(b){ faceY(dc, b[0], b[0] + 0.14, 0.02, 40, 124, {fill:b[1], filter:'url(#neonGlow)', opacity:.95}); });
-    [[2.4, '#ff2d55'], [5.8, '#2d7bff'], [9.2, '#ff2d55']].forEach(function(b){ faceX(dc, 0.02, b[0], b[0] + 0.14, 40, 124, {fill:b[1], filter:'url(#neonGlow)', opacity:.9}); });
-    var pools = [glowPool(fl, 2, 3, 2.6, 'rgba(45,123,255,.10)'), glowPool(fl, 8, 2, 3.4, 'rgba(255,45,85,.10)'), glowPool(fl, 10, 9, 3, 'rgba(255,45,85,.07)'), glowPool(fl, 3, 9, 3, 'rgba(45,123,255,.08)')];
+    var nr = seg(dc, 0.6, 0.02, 138, 19.4, 0.02, 138, 3, '#ff2d55', {filter:'url(#neonGlow)'});
+    var nb2 = seg(dc, 0.02, 0.6, 138, 0.02, 19.4, 138, 3, '#2d7bff', {filter:'url(#neonGlow)'});
+    seg(dc, 0.6, 0.02, 14, 19.4, 0.02, 14, 2, '#ff2d55', {filter:'url(#neonGlow)', opacity:.7});
+    seg(dc, 0.02, 0.6, 14, 0.02, 19.4, 14, 2, '#2d7bff', {filter:'url(#neonGlow)', opacity:.7});
+    [[1.6, '#2d7bff'], [2.7, '#ff2d55'], [11.0, '#2d7bff'], [10.0, '#ff2d55'], [13.9, '#ff2d55'], [15.3, '#2d7bff'], [17.0, '#ff2d55']].forEach(function(b){ faceY(dc, b[0], b[0] + 0.14, 0.02, 40, 124, {fill:b[1], filter:'url(#neonGlow)', opacity:.95}); });
+    [[2.4, '#ff2d55'], [5.8, '#2d7bff'], [9.2, '#ff2d55'], [12.6, '#2d7bff'], [16, '#ff2d55'], [19, '#2d7bff']].forEach(function(b){ faceX(dc, 0.02, b[0], b[0] + 0.14, 40, 124, {fill:b[1], filter:'url(#neonGlow)', opacity:.9}); });
+    var pools = [glowPool(fl, 2, 3, 2.6, 'rgba(45,123,255,.10)'), glowPool(fl, 8, 2, 3.4, 'rgba(255,45,85,.10)'), glowPool(fl, 10, 9, 3, 'rgba(255,45,85,.07)'), glowPool(fl, 3, 9, 3, 'rgba(45,123,255,.08)'), glowPool(fl, 14, 2, 3.4, 'rgba(255,45,85,.09)'), glowPool(fl, 3, 16, 3, 'rgba(45,123,255,.08)'), glowPool(fl, 8, 14, 3.4, 'rgba(255,45,85,.07)')];
     anim.push(function(t){ pools.forEach(function(p, k){ p.setAttribute('opacity', (0.7 + 0.3 * Math.sin(t / 1300 + k * 1.7)).toFixed(2)); }); });
     // pannelli LED da studio (luce bianca calda) sulla parete sinistra
-    for(i = 0; i < 2; i++) faceX(dc, 0.03, 1.4 + i * 3.0, 3.0 + i * 3.0, 112, 142, {fill:'rgba(200,220,255,.18)', stroke:'rgba(200,220,255,.7)', 'stroke-width':1.4});
+    for(i = 0; i < 6; i++) faceX(dc, 0.03, 1.4 + i * 3.0, 3.0 + i * 3.0, 112, 142, {fill:'rgba(200,220,255,.18)', stroke:'rgba(200,220,255,.7)', 'stroke-width':1.4});
     // dischi d'oro e di platino
-    [[4.6, '#d4af37'], [5.9, '#c0c0c0'], [7.2, '#d4af37'], [8.5, '#c0c0c0']].forEach(function(f){
+    [[4.6, '#d4af37'], [5.9, '#c0c0c0'], [7.2, '#d4af37'], [8.5, '#c0c0c0'], [12.2, '#d4af37'], [13.5, '#c0c0c0'], [14.8, '#d4af37'], [16.1, '#c0c0c0']].forEach(function(f){
       faceY(dc, f[0], f[0] + 1.0, 0.02, 112, 142, {fill:'#0a0814', stroke:f[1], 'stroke-width':2.2});
       var q = Pz(f[0] + 0.5, 0.02, 127); el('ellipse', {cx:q[0], cy:q[1], rx:9, ry:9, fill:f[1], opacity:.85}, dc); el('circle', {cx:q[0], cy:q[1], r:2, fill:'#0a0814'}, dc);
     });
@@ -2490,9 +2490,9 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     var ot = el('text', {x:0, y:3, 'text-anchor':'middle', 'font-family':'Playfair Display, serif', 'font-weight':'900', 'font-size':'12', 'letter-spacing':'2', fill:'#ff3b3b'}, og); ot.textContent = 'ON AIR';
     anim.push(function(t){ og.setAttribute('opacity', ((window.klRecOn ? 1 : 0.55) + 0.3 * Math.sin(t / 500)).toFixed(2)); });
     var dr = el('g', {'class':'obj'}, dc); el('title', {}, dr).textContent = 'Porta: torna in piazza';
-    faceY(dr, 11.7, 13.0, 0.02, 0, 86, {fill:'#2b2d36', stroke:'#8a8fa8', 'stroke-width':2.4});
-    faceY(dr, 11.85, 12.85, 0.02, 0, 76, {fill:'rgba(177,140,255,.14)', stroke:'#b57bff', 'stroke-width':1, filter:'url(#neonGlow)'});
-    textY(dr, 'PIAZZA', 12.35, 0.02, 100, 11, {fill:'#3dffa0'});
+    faceY(dr, 18.2, 19.5, 0.02, 0, 86, {fill:'#2b2d36', stroke:'#8a8fa8', 'stroke-width':2.4});
+    faceY(dr, 18.35, 19.35, 0.02, 0, 76, {fill:'rgba(177,140,255,.14)', stroke:'#b57bff', 'stroke-width':1, filter:'url(#neonGlow)'});
+    textY(dr, 'PIAZZA', 18.85, 0.02, 100, 11, {fill:'#3dffa0'});
     dr.addEventListener('click', function(e){ e.stopPropagation(); R.goTo('plaza'); });
     // ----- rack di outboard (2 torri) e pianoforte verticale
     [[0.4, 0.4], [1.55, 0.4]].forEach(function(p, k){
@@ -2559,7 +2559,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     bx(ch, 6.45, 4.4, 0.7, 0.14, 24, 62, '#242436');
     addSeat(SCN_STUDIO, 'prod', 6.8, 4.15, 1, {x:6.8, y:5.3});
     // ----- area tastiere / sintetizzatori (a destra)
-    var kb = sprite(10.5, 5.0, 3.0, 2.6, 'keys', 'Tastiere e synth: suona'); solid(10.4, 4.9, 3.2, 2.8);
+    var kbS = sprite(11.8, 0.6, 3.0, 2.6, 'keys', 'Tastiere e synth: suona'), kb = el('g', {transform:'translate(182.4,-49.6)'}, kbS); solid(11.7, 0.5, 3.2, 2.8);
     [[10.8, 5.1], [13.1, 5.1], [10.8, 6.9], [13.1, 6.9]].forEach(function(p){ bx(kb, p[0] - 0.04, p[1] - 0.04, 0.08, 0.08, 0, 30, '#55506e'); });
     bx(kb, 10.6, 5.05, 2.6, 0.9, 52, 56, '#15151f');
     for(i = 0; i < 26; i++){ flat(kb, [[10.65 + i * 0.1, 5.4], [10.72 + i * 0.1, 5.4], [10.72 + i * 0.1, 5.95], [10.65 + i * 0.1, 5.95]], 56.3, {fill:'#f4f1ff', stroke:'#8a8fa8', 'stroke-width':.4}); if(i % 7 !== 2 && i % 7 !== 6) flat(kb, [[10.69 + i * 0.1, 5.4], [10.74 + i * 0.1, 5.4], [10.74 + i * 0.1, 5.75], [10.69 + i * 0.1, 5.75]], 56.8, {fill:'#0a0812'}); }
@@ -2569,7 +2569,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     for(i = 0; i < 26; i++){ flat(kb, [[10.65 + i * 0.1, 6.35], [10.72 + i * 0.1, 6.35], [10.72 + i * 0.1, 6.9], [10.65 + i * 0.1, 6.9]], 36.3, {fill:i % 2 ? '#e8e4f4' : '#f4f1ff', stroke:'#8a8fa8', 'stroke-width':.4}); if(i % 7 !== 2 && i % 7 !== 6) flat(kb, [[10.69 + i * 0.1, 6.35], [10.74 + i * 0.1, 6.35], [10.74 + i * 0.1, 6.7], [10.69 + i * 0.1, 6.7]], 36.8, {fill:'#0a0812'}); }
     for(i = 0; i < 6; i++){ var kq = Pz(10.75 + i * 0.16, 6.1, 36.5); el('circle', {cx:kq[0], cy:kq[1], r:1.5, fill:['#ff9d3b', '#4aa8ff', '#3dffa0'][i % 3]}, kb); }
     // MPC / drum machine + modulare su tavolo
-    var mp = sprite(10.5, 7.9, 2.6, 1.0); solid(10.4, 7.8, 2.8, 1.2);
+    var mpS = sprite(15.1, 0.9, 2.6, 1.0), mp = el('g', {transform:'translate(371.2,-38.4)'}, mpS); solid(15.0, 0.8, 2.8, 1.2);
     bx(mp, 10.5, 7.9, 2.6, 1.0, 0, 34, '#241c18');
     bx(mp, 10.6, 8.0, 1.0, 0.8, 34, 37, '#15151f');
     for(i = 0; i < 4; i++) for(j = 0; j < 4; j++) flat(mp, [[10.65 + i * 0.22, 8.05 + j * 0.18], [10.83 + i * 0.22, 8.05 + j * 0.18], [10.83 + i * 0.22, 8.19 + j * 0.18], [10.65 + i * 0.22, 8.19 + j * 0.18]], 37.3, {fill:['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][(i + j) % 4]});
@@ -2577,7 +2577,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     for(i = 0; i < 6; i++) for(j = 0; j < 2; j++){ var rq = Pz(11.88 + i * 0.18, 8.79, 38 + j * 6); el('circle', {cx:rq[0], cy:rq[1], r:1.4, fill:'#c8cde0'}, mp); }
     for(i = 0; i < 4; i++){ var cq = Pz(11.9 + i * 0.28, 8.8, 44), cq2 = Pz(12.3 + (i % 2) * 0.4, 8.8, 40); el('path', {d:'M' + cq[0] + ',' + cq[1] + ' Q' + ((cq[0] + cq2[0]) / 2) + ',' + (cq[1] + 12) + ' ' + cq2[0] + ',' + cq2[1], stroke:['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][i], 'stroke-width':1.6, fill:'none'}, mp); }
     // ----- strumenti sparsi: chitarra elettrica, basso, acustica, ampli
-    [[5.3, 9.0, '#c0392b'], [6.0, 9.2, '#1f6ed8']].forEach(function(g2, k){
+    [[0.9, 15.0, '#c0392b'], [1.6, 15.2, '#1f6ed8']].forEach(function(g2, k){
       var gt = sprite(g2[0] - 0.2, g2[1] - 0.2, 0.5, 0.5);
       var gb = Pz(g2[0], g2[1], 0), gtp = Pz(g2[0] - 0.1, g2[1], 66 + k * 6);
       el('line', {x1:gb[0], y1:gb[1], x2:gtp[0], y2:gtp[1], stroke:'#2a2438', 'stroke-width':2.4}, gt);
@@ -2586,21 +2586,21 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       el('rect', {x:gtp[0] - 1.6, y:gtp[1] - 6, width:3.2, height:42 + k * 6, fill:'#6a4a2a', stroke:'#14101c', 'stroke-width':.6}, gt);
       el('rect', {x:gtp[0] - 3.2, y:gtp[1] - 12, width:6.4, height:8, rx:1.5, fill:'#2a1d14', stroke:'#14101c', 'stroke-width':.6}, gt);
     });
-    var ac = sprite(12.0, 9.8, 0.6, 0.6);
-    var ab = Pz(12.3, 10.1, 0), at = Pz(12.4, 10.1, 62);
+    var ac = sprite(2.4, 16.1, 0.6, 0.6);
+    var ab = Pz(2.7, 16.4, 0), at = Pz(2.8, 16.4, 62);
     el('path', {d:'M' + (ab[0] - 11) + ',' + (ab[1] - 4) + ' q-3,-18 11,-20 q14,2 11,20 q-11,9 -22,0 z', fill:'#a86a32', stroke:'#14101c', 'stroke-width':1.1}, ac);
     el('circle', {cx:ab[0], cy:ab[1] - 14, r:4, fill:'#150e08'}, ac); el('rect', {x:at[0] - 1.6, y:at[1] - 14, width:3.2, height:46, fill:'#c89a5a', stroke:'#14101c', 'stroke-width':.6}, ac);
-    var am = sprite(11.4, 11.6, 1.4, 0.9); solid(11.4, 11.6, 1.4, 0.9);
+    var amS = sprite(0.4, 17.4, 1.4, 0.9), am = el('g', {transform:'translate(-531.2,-86.4)'}, amS); solid(0.4, 17.4, 1.4, 0.9);
     bx(am, 11.4, 11.6, 1.3, 0.8, 0, 50, '#19151f'); faceY(am, 11.5, 12.6, 12.401, 6, 44, {fill:'#2a2438', stroke:'#555a70', 'stroke-width':1});
     for(i = 0; i < 4; i++){ var aq = Pz(11.65 + i * 0.25, 12.41, 40); el('circle', {cx:aq[0], cy:aq[1], r:1.6, fill:'#c8cde0'}, am); }
     // ----- divano, tavolino, sgabelli
-    var sf = sprite(6.2, 9.7, 3.4, 1.7, 'sit:sofa0', 'Siediti'); solid(6.2, 9.7, 3.4, 1.7);
+    var sfS = sprite(6.2, 12.7, 3.4, 1.7, 'sit:sofa0', 'Siediti'), sf = el('g', {transform:'translate(-96,48)'}, sfS); solid(6.2, 12.7, 3.4, 1.7);
     bx(sf, 6.3, 9.8, 3.2, 1.5, 0, 20, '#5a1a2a');
     bx(sf, 6.3, 9.8, 3.2, 0.45, 20, 56, '#6a2234');
     bx(sf, 6.3, 9.8, 0.35, 1.5, 20, 40, '#6a2234'); bx(sf, 9.15, 9.8, 0.35, 1.5, 20, 40, '#6a2234');
-    addSeat(SCN_STUDIO, 'sofa0', 7.1, 10.4, 1, {x:7.1, y:11.8}); addSeat(SCN_STUDIO, 'sofa1', 8.7, 10.4, -1, {x:8.7, y:11.8});
-    SCN_STUDIO.stand['sit:sofa0'] = {x:7.1, y:11.8};
-    var tbl = sprite(7.3, 12.1, 1.4, 0.8); solid(7.3, 12.1, 1.4, 0.8);
+    addSeat(SCN_STUDIO, 'sofa0', 7.1, 13.4, 1, {x:7.1, y:14.8}); addSeat(SCN_STUDIO, 'sofa1', 8.7, 13.4, -1, {x:8.7, y:14.8});
+    SCN_STUDIO.stand['sit:sofa0'] = {x:7.1, y:14.8};
+    var tblS = sprite(7.3, 15.1, 1.4, 0.8), tbl = el('g', {transform:'translate(-96,48)'}, tblS); solid(7.3, 15.1, 1.4, 0.8);
     bx(tbl, 7.35, 12.15, 1.3, 0.7, 0, 16, '#14141e'); ellTop(tbl, 7.9, 12.5, 0.22, 17, {fill:'#2a2438', stroke:'#c8cde0'});
     // ----- cabina di registrazione (live room) in vetro
     var by0 = 5.0, by1 = 12.6, bx1 = 4.4;
@@ -2653,12 +2653,31 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
       el('rect', {x:lq[0] - 6, y:lq[1], width:12, height:9, rx:2, fill:'#15111f', stroke:'#555a70'}, lg);
       el('polygon', {points:lq[0] + ',' + (lq[1] + 9) + ' ' + (lq[0] - 28) + ',' + (lq[1] + 120) + ' ' + (lq[0] + 28) + ',' + (lq[1] + 120), fill:l2[2] === '#ff2d55' ? 'rgba(255,45,85,.10)' : 'rgba(45,123,255,.10)'}, lg);
     });
+    // ----- zona relax a destra: tappeto, pouf e tavolino
+    poly(fl, [iso(12.4, 9.6), iso(18.6, 9.6), iso(18.6, 15.4), iso(12.4, 15.4)], {fill:'#16202e', stroke:'#2d7bff', 'stroke-width':1.5, opacity:.9});
+    poly(fl, [iso(12.7, 9.9), iso(18.3, 9.9), iso(18.3, 15.1), iso(12.7, 15.1)], {fill:'none', stroke:'#4aa8ff', 'stroke-width':.8, opacity:.5});
+    [[13.4, 11.2, '#ff2d55', 0], [16.4, 11.2, '#2d7bff', 1], [14.9, 14.0, '#b57bff', 2]].forEach(function(pf){
+      var pS = sprite(pf[0] - 0.6, pf[1] - 0.6, 1.2, 1.2, 'sit:pouf' + pf[3], 'Siediti'); solid(pf[0] - 0.55, pf[1] - 0.55, 1.1, 1.1);
+      bx(pS, pf[0] - 0.55, pf[1] - 0.55, 1.1, 1.1, 0, 22, pf[2]);
+      ellTop(pS, pf[0], pf[1], 0.4, 22.5, {fill:'rgba(255,255,255,.12)', stroke:'rgba(0,0,0,.25)'});
+      addSeat(SCN_STUDIO, 'pouf' + pf[3], pf[0], pf[1], pf[3] === 2 ? -1 : 1, {x:pf[0], y:pf[1] + 1.2});
+      SCN_STUDIO.stand['sit:pouf' + pf[3]] = {x:pf[0], y:pf[1] + 1.2};
+    });
+    var rt = sprite(14.4, 12.1, 1.0, 1.0); solid(14.4, 12.1, 1.0, 1.0);
+    bx(rt, 14.45, 12.15, 0.9, 0.9, 0, 18, '#14141e'); ellTop(rt, 14.9, 12.6, 0.3, 19, {fill:'#2a2438', stroke:'#4aa8ff'});
+    // piante negli angoli
+    [[19, 19], [12, 19], [19, 7]].forEach(function(q){
+      var pl = sprite(q[0] - 0.5, q[1] - 0.5, 1, 1); solid(q[0] - 0.5, q[1] - 0.5, 1, 1);
+      bx(pl, q[0] - 0.45, q[1] - 0.45, 0.9, 0.9, 0, 14, '#2a2438');
+      var tp = Pz(q[0], q[1], 14);
+      [[0, -26, 16, '#1c7a52'], [-10, -14, 12, '#25a06c'], [10, -16, 12, '#1c7a52']].forEach(function(c){ el('circle', {cx:tp[0] + c[0], cy:tp[1] + c[1], r:c[2], fill:c[3]}, pl); });
+    });
     finishSprites();
     SCN_STUDIO.grid = mkGrid(N);
     $('roomTop').innerHTML = '';
   }
-  var SCN_STUDIO = {N:14, OX:520, OY:150, TW:32, TH:16, vb:[40, -50, 960, 700], bounds:[40, -50, 960, 700], cam:{w:720, h:504}, sort:true, speed:2.8, spawn:{x:12.3, y:1.9}, dz:null,
-    stand:{plaza:{x:12.35, y:1.4}, console:{x:6.8, y:5.3}, keys:{x:11.9, y:9.5}, booth:{x:3.4, y:8.8}}, build:buildStudio, grid:null, name:'STUDIO'};
+  var SCN_STUDIO = {N:20, OX:712, OY:150, TW:32, TH:16, vb:[40, -50, 1344, 850], bounds:[40, -50, 1344, 850], cam:{w:720, h:504}, sort:true, speed:2.8, spawn:{x:18.8, y:1.9}, dz:null,
+    stand:{plaza:{x:18.85, y:1.4}, console:{x:6.8, y:5.3}, keys:{x:13.3, y:4.3}, booth:{x:3.4, y:8.8}}, build:buildStudio, grid:null, name:'STUDIO'};
 
   // ---------- utilità UI ----------
   var toastT = 0;
@@ -3094,7 +3113,7 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
         var msg = ov.querySelector('#codeMsg'); msg.textContent = '…';
         try{
           var r = await window.klSb.rpc('studio_try', {p_code:inp.value});
-          if(r.data === 'ok'){ close(); R.go('studio', {spawn:{x:12.3, y:1.9}}); }
+          if(r.data === 'ok'){ close(); R.go('studio', {spawn:{x:18.8, y:1.9}}); }
           else msg.textContent = r.data === 'rate' ? 'Troppi tentativi: aspetta un minuto.' : (r.data === 'login' ? 'Entra per provare il codice.' : 'Codice sbagliato.');
         }catch(e){ msg.textContent = 'Errore, riprova.'; }
       }
