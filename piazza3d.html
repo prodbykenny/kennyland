@@ -57,7 +57,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
   <div class="right"><a href="index.html">← Torna al sito 2D</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
 </div>
 <div id="banner"></div><div id="toast"></div><div id="log"></div>
-<div class="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button><button id="bTop" type="button">Dall'alto</button></div>
+<div class="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
 <form id="chat" autocomplete="off" hidden><input id="msg" maxlength="140" placeholder="Scrivi in piazza…" aria-label="Messaggio in gioco"><button type="submit" aria-label="Invia">↵</button></form>
 <div id="guest" hidden>Stai guardando la piazza da spettatore. <a href="index.html">Entra dal sito</a> per muoverti e scrivere.</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -133,17 +133,31 @@ var NEON = glow(0x3dffa0), VIO = glow(0x7b2fff);
 var SH = .75, stageMat = M(0x1b1233, {roughness:.4, metalness:.4});
 box(9, SH, 6, stageMat, 8.5, SH / 2, 3); box(2, SH, 2.4, stageMat, 8.5, SH / 2, 7.2);
 [[4, 6, 13, 6.04, 0], [7.5, 6, 7.54, 8.4, 0], [9.5, 6, 9.54, 8.4, 0], [7.5, 8.4, 9.5, 8.44, 0], [13, 0, 13.04, 6, 0], [4, 0, 4.04, 6, 0]].forEach(function(e){ box(Math.max(e[2] - e[0], .05), .05, Math.max(e[3] - e[1], .05), NEON, (e[0] + e[2]) / 2, SH + .01, (e[1] + e[3]) / 2); });
-// rampa laterale (una sola scaletta)
-(function(){ var len = Math.hypot(1.5, SH), g = new THREE.Mesh(new THREE.BoxGeometry(len, .1, 1), stageMat); g.position.set(13.75, SH / 2, 3.5); g.rotation.z = Math.atan2(SH, 1.5); g.castShadow = g.receiveShadow = true; scene.add(g); })();
-ob(3.7, -1, 4.0, 6.3); ob(4, 6, 7.5, 6.3); ob(9.5, 6, 13, 6.3); ob(7.3, 6.2, 7.6, 8.7); ob(9.4, 6.2, 9.7, 8.7); ob(7.3, 8.5, 9.7, 8.8); ob(13, -1, 13.3, 3); ob(13, 4, 13.3, 6.3);
+// due scalette (sinistra e destra): 3 gradini + alzata finale, con bordo luminoso e corrimano
+var stairMat = M(0x6a56b8, {roughness:.5, metalness:.1, emissive:0x2a1f5a}), railMat = M(0xdfe3f5, {roughness:.4, metalness:.1, emissive:0x6a6f88});
+function stairs(dir){ // +1 destra (x 13 -> 14.5), -1 sinistra (x 4 -> 2.5)
+  for(var k = 1; k <= 3; k++){ var h = SH * k / 4, cx = dir > 0 ? (14.5 - k * .5 + .25) : (2.5 + (k - 1) * .5 + .25);
+    box(.5, h, 1.3, stairMat, cx, h / 2, 3.5);
+    box(.05, .02, 1.3, NEON, dir > 0 ? cx + .225 : cx - .225, h + .01, 3.5);
+    box(.5, .02, .05, NEON, cx, h + .01, 2.85); box(.5, .02, .05, NEON, cx, h + .01, 4.15);
+  }
+  var xs = dir > 0 ? [14.5, 13] : [2.5, 4];
+  [2.8, 4.2].forEach(function(z){
+    [0, 1].forEach(function(i){ var top = i ? .75 : .1875; box(.06, top + .75, .06, railMat, xs[i], (top + .75) / 2, z); });
+    var len = Math.hypot(1.5, SH * .75), r = new THREE.Mesh(new THREE.BoxGeometry(len, .05, .05), railMat); r.position.set((xs[0] + xs[1]) / 2, (.1875 + .75 + .75 + .75) / 2, z); r.rotation.z = (dir > 0 ? -1 : 1) * Math.atan2(SH * .75, 1.5); scene.add(r);
+  });
+  plight(0x3dffa0, .5, dir > 0 ? 14.2 : 2.8, 1.2, 3.5, 4);
+}
+stairs(1); stairs(-1);
+ob(3.7, -1, 4.0, 3); ob(3.7, 4, 4.0, 6.3); ob(4, 6, 7.5, 6.3); ob(9.5, 6, 13, 6.3); ob(7.3, 6.2, 7.6, 8.7); ob(9.4, 6.2, 9.7, 8.7); ob(7.3, 8.5, 9.7, 8.8); ob(13, -1, 13.3, 3); ob(13, 4, 13.3, 6.3);
 function stageH(x, z){
   if(x > 4 && x < 13 && z > -1 && z < 6) return SH;
   if(x > 7.5 && x < 9.5 && z >= 6 && z < 8.4) return SH;
-  if(x >= 13 && x < 14.5 && z > 3 && z < 4) return SH * (1 - (x - 13) / 1.5);
+  if(z > 3 && z < 4){ if(x >= 13 && x < 14.5) return SH * (3 - Math.floor((x - 13) / .5)) / 4; if(x > 2.5 && x <= 4) return SH * (1 + Math.floor((x - 2.5) / .5)) / 4; }
   return 0;
 }
 // LED screen
-var led = sign('KENNYLAND LIVE', 8.6, 3.4, '#ffffff', '#07050f', '900 76px "Playfair Display",Georgia,serif'); led.position.set(8.5, SH + 2.6, .35); scene.add(led);
+var led = (function(){ var t = tex(1024, 406, function(g, W, H){ g.fillStyle = '#07050f'; g.fillRect(0, 0, W, H); g.strokeStyle = '#ffffff'; g.lineWidth = 8; g.strokeRect(8, 8, W - 16, H - 16); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#b18cff'; g.shadowBlur = 24; var f = 150; g.font = '900 ' + f + 'px "Playfair Display",Georgia,serif'; var w = g.measureText('KENNYLAND').width; f = Math.floor(f * (W * .84) / w); g.font = '900 ' + f + 'px "Playfair Display",Georgia,serif'; g.fillText('KENNYLAND', W / 2, H * .38); var f2 = Math.floor(f * .62); g.font = '900 ' + f2 + 'px "Playfair Display",Georgia,serif'; g.fillStyle = '#ff3b3b'; g.shadowColor = '#ff3b3b'; g.fillText('LIVE', W / 2, H * .75); }); return new THREE.Mesh(new THREE.PlaneGeometry(8.6, 3.4), new THREE.MeshBasicMaterial({map:t})); })(); led.position.set(8.5, SH + 2.6, .35); scene.add(led);
 box(8.9, 3.7, .2, M(0x16112a), 8.5, SH + 2.6, .2);
 // console DJ
 box(6.1, .9, 1.4, M(0x1b1526), 8.5, SH + .45, 2.7); ob(5.4, 2, 11.6, 3.4);
@@ -274,11 +288,35 @@ var wheelG = new THREE.Group();
   cyl(.04, 1.75, M(0x8a8fa8), 2.9, H + .87, Z0 + 4.55, scene, 8); var mast = box(.14, .14, .14, glow(0xff3b3b), 2.9, H + 1.8, Z0 + 4.55); window.__mast = mast;
   plight(0xff3b3b, 1.1, 4.4, 3, 17.9, 9);
 })();
-// ---- bacheca, porta di casa
+// ---- bacheca da piazza e porta di casa, distribuite sulla parete ovest (come nel 2D, ma con più aria)
 (function(){
-  box(.3, 2.6, 4, M(0x2a1f14), .15, 1.6, 7); var bb = sign('BACHECA', 3.7, 2.2, '#3dffa0', '#0a0414', '800 70px "Space Grotesk",sans-serif'); bb.rotation.y = Math.PI / 2; bb.position.set(.31, 1.6, 7); scene.add(bb); ob(0, 5, .6, 9);
-  box(.08, 2.3, 1.3, M(0x2b2d36), .05, 1.15, 2.6); var d = sign('CASA', 1.0, 2.1, '#3dffa0', '#0b0618', '800 56px "Space Grotesk",sans-serif'); d.rotation.y = Math.PI / 2; d.position.set(.1, 1.15, 2.6); scene.add(d);
-  box(.3, 5, 4.4, M(0x1a1330), -.1, 2.5, 2.2);
+  var BZ = 9.6, SC = 128, BW = 3.8, BH = 100 / 32;
+  box(.28, BH, BW, M(0x2a1f14, {roughness:.9}), .49, BH / 2, BZ);
+  var tb = tex(Math.round(BW * SC), Math.round(BH * SC), function(g, W, H){
+    g.fillStyle = '#2a1f14'; g.fillRect(0, 0, W, H);
+    var px0 = .15 * SC, px1 = W - .15 * SC, py0 = H - 2.875 * SC, py1 = H - .69 * SC;
+    g.fillStyle = '#0a0414'; g.strokeStyle = '#7b2fff'; g.lineWidth = 5; g.shadowColor = '#7b2fff'; g.shadowBlur = 8; g.fillRect(px0, py0, px1 - px0, py1 - py0); g.strokeRect(px0, py0, px1 - px0, py1 - py0); g.shadowBlur = 0;
+    var cols = ['#fbf7e8', '#fff2a0', '#e8d6ff', '#ffd6e0', '#d5ffe9'], pins = ['#ff3b3b', '#7b2fff', '#3dffa0'], v = 5;
+    function rn(){ v = (v * 16807) % 2147483647; return v / 2147483647; }
+    for(var i = 0; i < 9; i++){ var yy = (5.4 + (i % 3) * 1.1 - 5.1) * SC, zz = (30 + Math.floor(i / 3) * 20 + rn() * 4) / 32 * SC, w = .8 * SC, h = 15 / 32 * SC;
+      g.save(); g.translate(yy + w / 2, H - zz - h / 2); g.rotate((rn() - .5) * .08); g.fillStyle = cols[i % 5]; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 6; g.fillRect(-w / 2, -h / 2, w, h); g.shadowBlur = 0; g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1.5; g.strokeRect(-w / 2, -h / 2, w, h);
+      g.fillStyle = 'rgba(0,0,0,.28)'; for(var l = 0; l < 3; l++) g.fillRect(-w / 2 + 8, -h / 2 + 9 + l * 9, w - 16 - (l == 2 ? 30 : 0), 3);
+      g.fillStyle = pins[i % 3]; g.beginPath(); g.arc(0, -h / 2 + 4, 5, 0, 7); g.fill(); g.restore(); }
+    g.fillStyle = '#3dffa0'; g.font = '800 24px "Space Grotesk",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#3dffa0'; g.shadowBlur = 10; g.fillText('BACHECA', W / 2, py0 / 2 + 1);
+  });
+  var bf = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), new THREE.MeshBasicMaterial({map:tb})); bf.rotation.y = Math.PI / 2; bf.position.set(.635, BH / 2, BZ); scene.add(bf);
+  ob(0, BZ - 2, .7, BZ + 2);
+  var DZ = 3.4, DH = 82 / 32, DWd = 1.5;
+  var td = tex(240, Math.round(240 * DH / DWd), function(g, W, H){
+    g.fillStyle = '#2b2d36'; g.fillRect(0, 0, W, H); g.strokeStyle = '#8a8fa8'; g.lineWidth = 9; g.strokeRect(5, 5, W - 10, H - 10);
+    g.fillStyle = '#0b0618'; g.strokeStyle = '#b57bff'; g.lineWidth = 5; g.fillRect(22, 28, W - 44, H - 28); g.strokeRect(22, 28, W - 44, H - 28);
+    g.fillStyle = 'rgba(61,255,160,.16)'; g.strokeStyle = '#3dffa0'; g.lineWidth = 3; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.fillRect(34, 40, W - 68, H - 52); g.strokeRect(34, 40, W - 68, H - 52); g.shadowBlur = 0;
+    g.fillStyle = '#d4af37'; g.beginPath(); g.arc(W - 52, H * .62, 9, 0, 7); g.fill();
+    g.fillStyle = '#3dffa0'; g.font = '800 34px "Space Grotesk",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.fillText('CASA', W / 2, 82);
+  });
+  var dr = new THREE.Mesh(new THREE.PlaneGeometry(DWd, DH), new THREE.MeshBasicMaterial({map:td})); dr.rotation.y = Math.PI / 2; dr.position.set(.05, DH / 2, DZ); scene.add(dr);
+  ob(0, DZ - .75, .4, DZ + .75);
+  plight(0x3dffa0, .5, 1.2, 2.2, DZ, 4);
 })();
 // lampioni e aiuole
 [[23.3, 6], [23.3, 11.5], [23.3, 17], [23.3, 23.2], [18, 23.3], [12.7, 23.3], [7.4, 23.3]].forEach(function(p){ cyl(.05, 2.7, M(0x55506e), p[0], 1.35, p[1], scene, 8); var l = new THREE.Mesh(new THREE.SphereGeometry(.17, 12, 12), glow(0xffe8b0)); l.position.set(p[0], 2.75, p[1]); scene.add(l); plight(0xffd68a, .55, p[0], 2.6, p[1], 8); });
@@ -368,7 +406,7 @@ function turn(cur, tgt, dt){ var d = ((tgt - cur + Math.PI * 3) % (Math.PI * 2))
 // ---- stato giocatore locale e remoti
 var ME = {A:mkAvatar(), x:2.2, z:3.9, face:0, path:[], seat:null, nick:'', uid:'', owner:false, ready:false}; ME.A.g.position.set(ME.x, 0, ME.z);
 var REM = {}, SEAT = {bar0:{x:21, z:3.5, out:{x:21, z:4.5}}, bar1:{x:22.2, z:3.5, out:{x:22.2, z:4.5}}, bar2:{x:23.4, z:3.5, out:{x:23.4, z:4.5}}};
-var STAND = {dj:{x:8.5, z:1.5}, mic:{x:8.5, z:7.4}, cafe:{x:22, z:4.6}, wheel:{x:17.5, z:9.8}, studio:{x:4.6, z:17.8}, home:{x:1.5, z:2.65}, board:{x:1.8, z:7}, fountain:{x:11.5, z:9.7}};
+var STAND = {dj:{x:8.5, z:1.5}, mic:{x:8.5, z:7.4}, cafe:{x:22, z:4.6}, wheel:{x:17.5, z:9.8}, studio:{x:4.6, z:17.8}, home:{x:1.5, z:3.4}, board:{x:1.8, z:9.6}, fountain:{x:11.5, z:9.7}};
 var ch = null, myKey = '', labels = [];
 function mkLabel(nick, own){ var d = document.createElement('div'); d.className = 'nm' + (own ? ' own' : ''); d.innerHTML = '<div class="bub"></div><span>' + esc(nick) + '</span>'; $('labels').appendChild(d); return d; }
 function bubble(lb, text){ var b = lb.el.querySelector('.bub'); b.textContent = text; b.classList.add('on'); clearTimeout(lb.bt); lb.bt = setTimeout(function(){ b.classList.remove('on'); }, 6000); }
@@ -403,7 +441,7 @@ var HIT = [];
 function hit(act, x0, z0, x1, z1, h){ var m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, h, z1 - z0), new THREE.MeshBasicMaterial({visible:false})); m.position.set((x0 + x1) / 2, h / 2, (z0 + z1) / 2); m.userData.act = act; scene.add(m); HIT.push(m); }
 hit('dj', 5.4, 2, 11.6, 3.4, 2.4); hit('mic', 8.2, 7.6, 8.8, 8.4, 2.2); hit('cafe', 20, 0, 24, 1, 7); hit('cafe', 20.2, 2.3, 24, 3, 1.4);
 [21, 22.2, 23.4].forEach(function(x, i){ hit('sit:bar' + i, x - .3, 3.25, x + .3, 3.85, 1); });
-hit('wheel', 16.2, 7.6, 18.8, 8.6, 4.8); hit('fountain', 9.8, 10.3, 13.2, 13.7, 1.6); hit('studio', .2, 15, 3.8, 20.8, 3.5); hit('board', 0, 5, .6, 9, 3); hit('home', 0, 1.9, .3, 3.3, 2.4);
+hit('wheel', 16.2, 7.6, 18.8, 8.6, 4.8); hit('fountain', 9.8, 10.3, 13.2, 13.7, 1.6); hit('studio', .2, 15, 3.8, 20.8, 3.5); hit('board', 0, 7.6, .7, 11.6, 3.2); hit('home', 0, 2.65, .3, 4.15, 2.6);
 
 // ---- multigiocatore (stesso canale e stesso protocollo della piazza 2D)
 function trackMe(){ if(!ch || !ME.ready) return; var a = ME.av || {}; try{ ch.track({uid:ME.uid, nick:ME.nick, a:a, x:+ME.x.toFixed(2), y:+ME.z.toFixed(2), ow:[false, false], own:ME.owner, sit:ME.seat || ''}); }catch(e){} }
@@ -553,8 +591,8 @@ cv2.addEventListener('pointerup', function(e){
   var pt = new THREE.Vector3(); if(rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -stageH(ME.x, ME.z)), pt) || rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt)){ pendingAct = null; walkMe(Math.min(23.5, Math.max(.5, pt.x)), Math.min(23.5, Math.max(.5, pt.z))); }
 });
 cv2.addEventListener('wheel', function(e){ e.preventDefault(); cs.tdist = Math.min(24, Math.max(4, cs.tdist + e.deltaY * .01)); }, {passive:false});
-var keys = {}; addEventListener('keydown', function(e){ if(/INPUT|TEXTAREA/.test((e.target || {}).tagName || '')) return; keys[e.key.toLowerCase()] = 1; }); addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = 0; });
-$('bStage').onclick = function(){ goAct('mic'); }; $('bBar').onclick = function(){ goAct('cafe'); }; $('bWheel').onclick = function(){ goAct('wheel'); }; $('bTop').onclick = function(){ cs.tpitch = 1.45; cs.tdist = 22; };
+var keys = {}; addEventListener('keydown', function(e){ if(/INPUT|TEXTAREA/.test((e.target || {}).tagName || '')) return; var kk = e.key.toLowerCase(); if(kk.indexOf('arrow') === 0) e.preventDefault(); keys[kk] = 1; }); addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = 0; });
+$('bStage').onclick = function(){ goAct('mic'); }; $('bBar').onclick = function(){ goAct('cafe'); }; $('bWheel').onclick = function(){ goAct('wheel'); };
 
 // ---- aggiornamento di un giocatore che segue un percorso
 function follow(P, dt, speed){
@@ -567,7 +605,7 @@ var clock = new THREE.Clock(), lastSent = 0;
 function frame(){
   requestAnimationFrame(frame); var dt = Math.min(.05, clock.getDelta()), t = clock.elapsedTime;
   if(ME.ready){
-    var kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), kz = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
+    var kx = (keys.arrowright ? 1 : 0) - (keys.arrowleft ? 1 : 0), kz = (keys.arrowup ? 1 : 0) - (keys.arrowdown ? 1 : 0);
     if((kx || kz) && !ME.seat){ ME.path = []; pendingAct = null; var c = Math.cos(cs.yaw), s2 = Math.sin(cs.yaw), mx = -s2 * kz + c * kx, mz = -c * kz - s2 * kx, m = Math.hypot(mx, mz); mx /= m; mz /= m; var nx = ME.x + mx * 3.2 * dt, nz = ME.z + mz * 3.2 * dt;
       if(free(Math.floor(nx), Math.floor(nz))){ ME.x = nx; ME.z = nz; } else if(free(Math.floor(nx), Math.floor(ME.z))) ME.x = nx; else if(free(Math.floor(ME.x), Math.floor(nz))) ME.z = nz; ME.face = turn(ME.face, Math.atan2(mx, mz), dt); ME.keyMoving = true; if(t - lastSent > .4 && ch){ lastSent = t; try{ ch.send({type:'broadcast', event:'walk', payload:{k:myKey, x:+ME.x.toFixed(2), y:+ME.z.toFixed(2), dx:+(ME.x + mx * 1.2).toFixed(2), dy:+(ME.z + mz * 1.2).toFixed(2)}}); }catch(e){} } }
     else ME.keyMoving = false;
@@ -602,7 +640,7 @@ frame();
   }
   if(ME.ready){ meLabel = {el:mkLabel(ME.nick, ME.owner), bt:0}; $('who').textContent = ME.nick; $('coinbox').hidden = false; $('chat').hidden = false; ME.A.g.position.set(ME.x, 0, ME.z); }
   else { scene.remove(ME.A.g); $('guest').hidden = false; }
-  window.kl3d = {ME:ME, goAct:goAct, doAct:doAct};
+  window.kl3d = {cs:cs, ME:ME, goAct:goAct, doAct:doAct};
   joinChannel(); djPull(); setInterval(djPull, 20000);
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
 })();
