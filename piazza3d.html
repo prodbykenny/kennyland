@@ -73,7 +73,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .lk-seg button.on,.lk-t.on{background:#7b2fff;border-color:#b57bff;} .lk-t.lock{opacity:.55;}
 .lk-note{font-size:11px;color:var(--muted,#9a93b8);margin-top:8px;line-height:1.4;}
 .lk-act{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #2a1c4a;} .lk-act button{flex:1;padding:10px;font-family:'Press Start 2P',monospace;font-size:10px;border:0;cursor:pointer;} .lk-save{background:#3dffa0;color:#06100a;} .lk-cancel{background:#2a1c4a;color:#f4f1ff;}
-body.looking #chat,body.looking .right{display:none!important;}
+body.looking #chat,body.looking .right,body.looking .deco{display:none!important;}
+.deco{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px));font:700 12px 'Space Grotesk',sans-serif;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 11px;cursor:pointer;z-index:20}
+.deco[hidden]{display:none}
+.dc-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;} .dc-it{display:flex;align-items:center;gap:8px;background:#150a26;border:1px solid #3a2a66;color:var(--ink,#f4f1ff);padding:4px 8px 4px 4px;cursor:pointer;font-family:inherit;font-size:12px;text-align:left;} .dc-it img{width:52px;height:44px;object-fit:contain;background:#0a0414;} .dc-it span{flex:1;} .dc-it em{font-style:normal;color:#3dffa0;font-size:11px;}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -102,7 +105,7 @@ body.looking #chat,body.looking .right{display:none!important;}
   <div class="right"><a href="index.html">← Torna al sito 2D</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
 </div>
 <div id="banner"></div><div id="toast"></div><div id="log"></div>
-<div class="btns" id="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
+<button class="deco" id="bDeco" type="button" hidden>🛋 Arredamento</button><div class="btns" id="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
 <form id="chat" autocomplete="off" hidden><input id="msg" maxlength="140" placeholder="Scrivi in piazza…" aria-label="Messaggio in gioco"><button type="submit" aria-label="Invia">↵</button></form>
 <div id="guest" hidden>Stai guardando la piazza da spettatore. <a href="index.html">Entra dal sito</a> per muoverti e scrivere.</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -582,7 +585,7 @@ function enterScene(name, sp){
     ME.seat = null; ME.path = []; ME.goal = null; pendingAct = null; var p = sp || S.spawn; ME.x = p.x; ME.z = p.z; ME.face = 0; ME.A.g.position.set(ME.x, 0, ME.z);
     $('btns').style.display = S.btns ? '' : 'none'; $('msg').placeholder = S.ph; $('chat').hidden = !(ME.ready && S.chat); $('log').innerHTML = ''; $('count').textContent = S.label;
     if(name !== 'plaza'){ audio.pause(); $('snd').style.display = 'none'; } else { $('snd').style.display = ''; djPull(); }
-    if(S.chan) joinChannel(S.chan);
+    if(S.chan) joinChannel(S.chan); if(typeof HOME !== 'undefined' && HOME.onEnter) HOME.onEnter(name);
     cs.tyaw = cs.yaw = S.cam.yaw; cs.tpitch = cs.pitch = S.cam.pitch; cs.tdist = cs.dist = S.cam.dist;
     if(ME.ready) trackSoon(); fade.classList.remove('on');
   }, 190);
@@ -701,6 +704,7 @@ cv2.addEventListener('pointermove', function(e){ if(!drag) return; var dx = e.cl
 cv2.addEventListener('pointerup', function(e){
   var was = drag; drag = null; if(moved > 6 || !was) return;
   var rc = new THREE.Raycaster(), v = new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); rc.setFromCamera(v, cam);
+  if(typeof HOME !== 'undefined' && HOME.editing && HOME.tap(rc)) return;
   var hs = rc.intersectObjects(HIT, false); if(hs.length){ goAct(hs[0].object.userData.act); return; }
   var pt = new THREE.Vector3(); if(rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -curH(ME.x, ME.z)), pt) || rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt)){ pendingAct = null; walkMe(Math.min(23.5, Math.max(.5, pt.x)), Math.min(23.5, Math.max(.5, pt.z))); }
 });
@@ -973,9 +977,11 @@ S.build = function(S){
   planeY(1.002, .47, 1.43, 8, 72, tmat(.96 * 120, 64 * 4, function(g, W, H){ g.fillStyle = '#5d4d3a'; g.fillRect(0, 0, W, H); g.strokeStyle = '#2a2118'; g.lineWidth = 3; g.strokeRect(2, 2, W / 2 - 3, H - 4); g.strokeRect(W / 2 + 1, 2, W / 2 - 3, H - 4); g.strokeStyle = '#241b12'; g.lineWidth = 4; g.beginPath(); g.moveTo(W / 2, 4); g.lineTo(W / 2, H - 4); g.stroke(); g.fillStyle = '#b8a36a'; g.beginPath(); g.arc(W / 2 - 12, H * .5, 6, 0, 7); g.arc(W / 2 + 12, H * .5, 6, 0, 7); g.fill(); g.fillStyle = 'rgba(155,139,90,.75)'; g.fillRect(W * .1, H * .08, W * .24, H * .08); }));
   // scrivania + portatile vecchio (azione 'shop'): box x 3.3-5.6, y .3-1.4 h 28px
   bxp(3.3, .3, 2.3, 1.1, 0, 28, '#2d1f4d'); sol(3.2, .2, 2.5, 1.3);
-  bxp(4.1, .6, .8, .5, 28, 30.5, '#8a8776'); var scr = new THREE.Mesh(new THREE.BoxGeometry(.8, .55, .05), M(0x3a3a35)); scr.position.set(4.5, 30.5 * PXH + .28, .64); scr.rotation.x = -.15; ROOT.add(scr); var sc2 = new THREE.Mesh(new THREE.PlaneGeometry(.66, .4), mbasic(0x15171a)); sc2.position.set(4.5, 30.5 * PXH + .3, .668); sc2.rotation.x = -.15; ROOT.add(sc2);
+  S.oldLap = new THREE.Group(); S.group.add(S.oldLap); ROOT = S.oldLap;
+  bxp(4.1, .6, .8, .5, 28, 30.5, '#8a8776'); var scr = new THREE.Mesh(new THREE.BoxGeometry(.8, .55, .05), M(0x3a3a35)); scr.position.set(4.5, 30.5 * PXH + .28, .64); scr.rotation.x = -.15; ROOT.add(scr); var sc2 = new THREE.Mesh(new THREE.PlaneGeometry(.66, .4), mbasic(0x15171a)); sc2.position.set(4.5, 30.5 * PXH + .3, .668); sc2.rotation.x = -.15; ROOT.add(sc2); ROOT = S.group;
   // cassa vecchia nell'angolo (2D: iso(7.3,.9))
-  bxp(7.0, .65, .6, .55, 0, 28, '#33332e'); var s1 = new THREE.Mesh(new THREE.CircleGeometry(.14, 14), mbasic(0x6a6a60)); s1.position.set(7.2, .55, 1.205); ROOT.add(s1); sol(6.9, .55, .8, .7);
+  S.oldSpk = new THREE.Group(); S.group.add(S.oldSpk); ROOT = S.oldSpk;
+  bxp(7.0, .65, .6, .55, 0, 28, '#33332e'); var s1 = new THREE.Mesh(new THREE.CircleGeometry(.14, 14), mbasic(0x6a6a60)); s1.position.set(7.2, .55, 1.205); ROOT.add(s1); ROOT = S.group; sol(6.9, .55, .8, .7);
   // porta verso la piazza (parete destra, x 1.7-3.1, h 80px)
   planeY(.02, 1.7, 3.1, 0, 80, tmat(1.4 * 120, 80 * 3.75, function(g, W, H){ g.fillStyle = '#0b0618'; g.strokeStyle = '#b57bff'; g.lineWidth = 6; g.fillRect(0, 0, W, H); g.strokeRect(3, 3, W - 6, H - 6); g.fillStyle = 'rgba(61,255,160,.16)'; g.strokeStyle = '#3dffa0'; g.lineWidth = 3; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.fillRect(W * .11, H * .12, W * .78, H * .88); g.strokeRect(W * .11, H * .12, W * .78, H * .88); }));
   planeY(.021, 1.6, 3.2, 84, 98, tmat(256, 40, function(g, W, H){ g.fillStyle = '#3dffa0'; g.font = '700 30px "Space Grotesk",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#3dffa0'; g.shadowBlur = 8; g.fillText('PIAZZA', W / 2, H / 2); }, {transparent:true}));
@@ -984,7 +990,7 @@ S.build = function(S){
   plight(0xb57bff, 1.0, 4, 3.2, 4, 12); plight(0x3dffa0, .5, .8, 2.6, 4, 7);
   // zona ballo: bagliore viola che pulsa
   var dzl = plight(0x7b2fff, .8, 4, 1.2, 4, 6); S.anim.push(function(t){ dzl.intensity = .5 + .3 * Math.sin(t * 2); });
-  solidsToBlk(S, SOL); ROOT = prev;
+  S.SOL = SOL; solidsToBlk(S, SOL); ROOT = prev;
 };
 S.act = function(a){
   if(a === 'shop') return SHOP.open();
@@ -1004,8 +1010,8 @@ function ring(x, y, z, r, col, t){ var m = new THREE.Mesh(new THREE.TorusGeometr
 function speakerBox(x, z, w, d, h, drivers){ bxp(x, z, w, d, 0, h, '#14141e'); drivers.forEach(function(dv){ disc(x + dv[0], dv[1] * PXH, z + d + .004, dv[2], 0x0a0812); ring(x + dv[0], dv[1] * PXH, z + d + .006, dv[2], dv[3] || 0x555a70); }); }
 function guitarModel(col, neonK, len, bodyR){ var gg = new THREE.Group(); var body = new THREE.Mesh(new THREE.CylinderGeometry(bodyR, bodyR, .09, 20), M(col, {roughness:.3})); body.rotation.x = Math.PI / 2; body.position.y = .95; gg.add(body); var neck = new THREE.Mesh(new THREE.BoxGeometry(.07, len, .04), M(0x6a4a2a)); neck.position.y = .95 + len / 2 + .1; gg.add(neck); var head = new THREE.Mesh(new THREE.BoxGeometry(.13, .25, .05), M(0x2a1d14)); head.position.y = .95 + len + .22; gg.add(head); var st = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .8, 6), M(0x2a2438)); st.position.set(0, .4, -.02); gg.add(st); gg.rotation.x = -.06; return gg; }
 var ITEMS = {
-  laptop_pro:{cat:'tech', name:'Portatile nuovo', fp:[.9, .6], up:'laptop', desc:'Schermo acceso e tastiera che funziona. Sostituisce il rottame sul tavolo.', build:function(fp){ bxp(0, 0, .9, .6, 0, 2.5, '#3a3a4d'); var sc = new THREE.Mesh(new THREE.BoxGeometry(.9, .62, .04), M(0x3a3a4d)); sc.position.set(.45, .78, .05); sc.rotation.x = -.18; ROOT.add(sc); var s2 = new THREE.Mesh(new THREE.PlaneGeometry(.8, .5), mbasic(0x0c0c16)); s2.position.set(.45, .8, .075); s2.rotation.x = -.18; ROOT.add(s2); [38, 43, 48].forEach(function(hz, n){ var l = new THREE.Mesh(new THREE.PlaneGeometry(.5 - n * .1, .06), mbasic(n === 1 ? 0x7b2fff : 0x3dffa0)); l.position.set(.3 + (.5 - n * .1) / 2 - .15, .62 + n * .12, .078 + n * .004); l.rotation.x = -.18; ROOT.add(l); }); }},
-  speaker_pro:{cat:'audio', name:'Cassa nuova', fp:[.7, .6], up:'speaker', desc:'Cassa vera, senza nastro adesivo. Pulsa a tempo con la musica.', build:function(fp){ bxp(0, 0, .7, .55, 0, 52, '#1a1a2e'); disc(.35, 1.0, .557, .17, 0x0a0812); ring(.35, 1.0, .56, .17, 0x3dffa0, .025); disc(.35, .55, .557, .12, 0x0a0812); ring(.35, .55, .56, .12, 0x7b2fff, .025); }},
+  laptop_pro:{cat:'tech', name:'Portatile nuovo', fp:[.9, .6], up:'laptop', desc:'Schermo acceso, tutto nuovo. Sostituisce il rottame sulla scrivania.', build:function(fp){ bxp(0, 0, .9, .6, 0, 2.5, '#3a3a4d'); var sc = new THREE.Mesh(new THREE.BoxGeometry(.9, .62, .04), M(0x3a3a4d)); sc.position.set(.45, .78, .05); sc.rotation.x = -.18; ROOT.add(sc); var s2 = new THREE.Mesh(new THREE.PlaneGeometry(.8, .5), mbasic(0x0c0c16)); s2.position.set(.45, .8, .075); s2.rotation.x = -.18; ROOT.add(s2); [38, 43, 48].forEach(function(hz, n){ var l = new THREE.Mesh(new THREE.PlaneGeometry(.5 - n * .1, .06), mbasic(n === 1 ? 0x7b2fff : 0x3dffa0)); l.position.set(.3 + (.5 - n * .1) / 2 - .15, .62 + n * .12, .078 + n * .004); l.rotation.x = -.18; ROOT.add(l); }); }},
+  speaker_pro:{cat:'audio', name:'Cassa nuova', fp:[.7, .6], up:'speaker', desc:'Cassa vera, senza nastro adesivo. Sostituisce quella rovinata dell\'angolo.', build:function(fp){ bxp(0, 0, .7, .55, 0, 52, '#1a1a2e'); disc(.35, 1.0, .557, .17, 0x0a0812); ring(.35, 1.0, .56, .17, 0x3dffa0, .025); disc(.35, .55, .557, .12, 0x0a0812); ring(.35, .55, .56, .12, 0x7b2fff, .025); }},
   monitors_pair:{cat:'tech', name:'Monitor da studio', fp:[1.9, .7], desc:'Due monitor da studio su stand: ascolti il mix come si deve.', build:function(){ [0, 1.15].forEach(function(x){ bxp(x + .1, .1, .45, .4, 0, 52, '#1c1c28'); bxp(x, 0, .66, .55, 52, 112, '#14141e'); disc(x + .33, 98 * PXH, .552, .19, 0x0a0812); ring(x + .33, 98 * PXH, .555, .19, 0x555a70); disc(x + .33, 74 * PXH, .552, .34, 0x0a0812); ring(x + .33, 74 * PXH, .555, .34, 0x555a70); disc(x + .33, 74 * PXH, .557, .16, 0x1d1d2a); ring(x + .33, 74 * PXH, .559, .16, 0x3dffa0, .015); }); }},
   mpc_table:{cat:'tech', name:'MPC e modulare', fp:[2.6, 1.0], desc:'Drum machine con i pad colorati e un sintetizzatore modulare con i cavi, su un tavolo da lavoro.', build:function(){ bxp(0, 0, 2.6, 1.0, 0, 34, '#241c18'); bxp(.1, .1, 1.0, .8, 34, 37, '#15151f'); for(var i = 0; i < 4; i++) for(var j = 0; j < 4; j++) bxp(.15 + i * .22, .15 + j * .18, .18, .14, 37, 38.5, ['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][(i + j) % 4]); bxp(1.3, .08, 1.2, .8, 34, 48, '#101018'); for(i = 0; i < 6; i++) for(j = 0; j < 2; j++) disc(1.38 + i * .18, (38 + j * 6) * PXH, .885, .045, 0xc8cde0); for(i = 0; i < 4; i++){ var cb = new THREE.Mesh(new THREE.TorusGeometry(.12, .012, 6, 14, Math.PI), mbasic([0xff2d55, 0x2d7bff, 0x3dffa0, 0xffd23d][i])); cb.position.set(1.6 + i * .28, 41 * PXH, .9); cb.rotation.z = Math.PI; ROOT.add(cb); } }},
   synth_stand:{cat:'tech', name:'Tastiere e synth', fp:[2.6, .9], desc:'Due tastiere su stand con pannello di controllo e manopole.', build:function(){ [[0, 0], [2.6, 0], [0, .9], [2.6, .9]].forEach(function(p){ bxp(Math.min(p[0] + .02, 2.54), Math.min(p[1] + .02, .84), .06, .06, 0, 30, '#55506e'); }); bxp(0, 0, 2.6, .9, 52, 56, '#15151f'); for(var i = 0; i < 26; i++){ bxp(.05 + i * .1, .35, .09, .55, 56, 57, '#f4f1ff'); if(i % 7 !== 2 && i % 7 !== 6) bxp(.09 + i * .1, .35, .05, .33, 57, 58, '#0a0812'); } bxp(.05, .03, 1.25, .22, 56, 57.5, '#0a0812'); for(i = 0; i < 8; i++) cylP(1.4 + i * .1, .14, 57.5, 61, .04, [0xff3b3b, 0x3dffa0, 0xb57bff, 0xffd23d][i % 4]); bxp(0, .3, 2.6, .6, 32, 36, '#1a1522'); }},
@@ -1023,7 +1029,7 @@ var ITEMS = {
   bass_b:{cat:'furniture', name:'Basso blu', fp:[.6, .6], desc:'Basso elettrico blu su supporto.', build:function(){ var g = guitarModel(0x1f6ed8, 0, 1.5, .27); g.position.set(.3, 0, .3); ROOT.add(g); }},
   guitar_a:{cat:'furniture', name:'Chitarra acustica', fp:[.8, .6], desc:'Chitarra acustica in legno.', build:function(){ var b = new THREE.Mesh(new THREE.SphereGeometry(.4, 20, 16), M(0xa86a32, {roughness:.35})); b.scale.set(1, 1.15, .45); b.position.set(.4, .6, .3); ROOT.add(b); disc(.4, .7, .485, .1, 0x150e08); var n = new THREE.Mesh(new THREE.BoxGeometry(.08, 1.4, .05), M(0xc89a5a)); n.position.set(.4, 1.7, .3); ROOT.add(n); }},
   amp_stack:{cat:'furniture', name:'Amplificatore', fp:[1.4, .9], desc:'Ampli per chitarra con la griglia e le manopole.', build:function(){ bxp(0, 0, 1.3, .8, 0, 50, '#19151f'); planeY(.802, .1, 1.2, 6, 44, mbasic(0x2a2438)); for(var i = 0; i < 4; i++) disc(.25 + i * .25, 40 * PXH, .804, .05, 0xc8cde0); }},
-  gold_record:{cat:'furniture', name:'Disco d\'oro', wall:true, fp:[1.0, .1], desc:'Disco d\'oro incorniciato per la parete.', build:function(){ var h = 2.85; planeY(.03, 0, 1.0, 112, 142, mbasic(0x0a0814)); var fr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .94), mbasic(0x0a0814)); fr.position.set(.5, h, .03); ROOT.add(fr); var f2 = new THREE.Mesh(new THREE.RingGeometry(.42, .46, 4, 1, Math.PI / 4), mbasic(0xd4af37)); f2.scale.set(1.2, 1.1, 1); f2.position.set(.5, h, .035); ROOT.add(f2); disc(.5, h, .04, .28, 0xd4af37); disc(.5, h, .045, .06, 0x0a0814); }},
+  gold_record:{cat:'furniture', name:'Disco d\'oro', wall:true, fp:[1.0, .1], desc:'Disco d\'oro incorniciato per la parete.', build:function(){ var h = 2.85; var fr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .94), mbasic(0x0a0814)); fr.position.set(.5, h, .03); ROOT.add(fr); var f2 = new THREE.Mesh(new THREE.RingGeometry(.42, .46, 4, 1, Math.PI / 4), mbasic(0xd4af37)); f2.scale.set(1.2, 1.1, 1); f2.position.set(.5, h, .035); ROOT.add(f2); disc(.5, h, .04, .28, 0xd4af37); disc(.5, h, .045, .06, 0x0a0814); }},
   platinum_record:{cat:'furniture', name:'Disco di platino', wall:true, fp:[1.0, .1], desc:'Disco di platino incorniciato per la parete.', build:function(){ var h = 2.85; var fr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .94), mbasic(0x0a0814)); fr.position.set(.5, h, .03); ROOT.add(fr); var f2 = new THREE.Mesh(new THREE.RingGeometry(.42, .46, 4, 1, Math.PI / 4), mbasic(0xc0c0c0)); f2.scale.set(1.2, 1.1, 1); f2.position.set(.5, h, .035); ROOT.add(f2); disc(.5, h, .04, .28, 0xc0c0c0); disc(.5, h, .045, .06, 0x0a0814); }},
   shirt_collar:{cat:'clothes', name:'Camicia con colletto', cloth:{outer:true}, desc:'Camicia nera con colletto e bottoni da mettere sopra la maglia base.'},
   tee_omg:{cat:'clothes', name:'Maglia OMG KENNY!', cloth:{vip:'top'}, desc:'Maglia nera con la scritta OMG KENNY! verde neon. Maniche corte.'},
@@ -1089,7 +1095,7 @@ var SHOP = (function(){
     try{
       var r = await sb.rpc('shop_buy', {p_item:id}), d = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data), res = d && d.res;
       if(r.error || !d) toast('Acquisto non riuscito, riprova.');
-      else if(res === 'ok'){ INV.own[id] = 1; setCoins(d.total_coins); toast('✓ Comprato: ' + ITEMS[id].name + (ITEMS[id].cat === 'clothes' ? ' — lo trovi nell\'armadio' : '')); }
+      else if(res === 'ok'){ INV.own[id] = 1; setCoins(d.total_coins); if(typeof HOME !== 'undefined') HOME.refresh(); toast('✓ Comprato: ' + ITEMS[id].name + (ITEMS[id].cat === 'clothes' ? ' — lo trovi nell\'armadio' : '')); }
       else if(res === 'owned'){ INV.own[id] = 1; toast('Ce l\'hai già.'); }
       else if(res === 'poor'){ if(d.total_coins !== undefined && d.total_coins !== null) setCoins(d.total_coins); toast('Servono più monete: ' + price[id] + ' 🪙'); }
       else toast('Oggetto non disponibile.');
@@ -1186,6 +1192,115 @@ var LOOK = (function(){
     pn.addEventListener('click', onClick); pn.addEventListener('input', onInput); pn.addEventListener('change', onChange); render();
   }
   return {open:open};
+})();
+
+// ======================= ARREDAMENTO DELLA CASA 3D =======================
+var HOME = (function(){
+  var S = SCN.home, layout = [], objs = [], loaded = false, ed = null, pn = null, saved = null, upg = {}, foot = null;
+  var DOOR = [1.6, 0, 1.7, 1.2], MAXN = 40;
+  function F(id){ return ITEMS[id].fp; }
+  function rotFp(id, r){ var f = F(id); return (r | 0) % 2 ? [f[1], f[0]] : f; }
+  function rectOf(o){ var f = rotFp(o.id, o.r); return [o.x - f[0] / 2, o.z - f[1] / 2, f[0], f[1]]; }
+  function ov(a, b){ return a[0] < b[0] + b[2] - .001 && a[0] + a[2] > b[0] + .001 && a[1] < b[1] + b[3] - .001 && a[1] + a[3] > b[1] + .001; }
+  function valid(o, skip){
+    var it = ITEMS[o.id], i, other;
+    if(it.wall){ if(o.x - .5 < .1 || o.x + .5 > 7.9) return false; var wr = [o.x - .5, 0, 1, .2]; if(ov(wr, DOOR)) return false; for(i = 0; i < layout.length; i++){ if(layout[i] === skip || !ITEMS[layout[i].id].wall) continue; if(ov(wr, [layout[i].x - .5, 0, 1, .2])) return false; } return true; }
+    var r = rectOf(o); if(r[0] < .05 || r[1] < .05 || r[0] + r[2] > 7.95 || r[1] + r[3] > 7.95) return false;
+    for(i = 0; i < S.SOL.length; i++) if(ov(r, S.SOL[i])) return false;
+    if(ov(r, DOOR)) return false;
+    for(i = 0; i < layout.length; i++){ other = layout[i]; if(other === skip || ITEMS[other.id].wall) continue; if(ov(r, rectOf(other))) return false; }
+    return true;
+  }
+  function place(holder, o){ var it = ITEMS[o.id]; if(it.wall) holder.position.set(o.x, 0, .05); else { holder.position.set(o.x, 0, o.z); holder.rotation.y = (o.r | 0) * Math.PI / 2; } }
+  function mk(o){ var h = itemModel(o.id); if(!h) return null; place(h, o); S.group.add(h); h.userData.o = o; return h; }
+  function rebuildBlk(){
+    var rects = S.SOL.slice(); layout.forEach(function(o){ if(!ITEMS[o.id].wall) rects.push(rectOf(o)); });
+    solidsToBlk(S, rects); if(CUR === S){ BLK = S.BLK; var i = Math.floor(ME.x), j = Math.floor(ME.z);
+      if(BLK[j * S.N + i]){ var best = null, bd = 99; for(var a = 0; a < S.N; a++) for(var b = 0; b < S.N; b++) if(!BLK[b * S.N + a]){ var d = Math.hypot(a + .5 - ME.x, b + .5 - ME.z); if(d < bd){ bd = d; best = [a + .5, b + .5]; } } if(best){ ME.x = best[0]; ME.z = best[1]; ME.path = []; ME.A.g.position.set(ME.x, 0, ME.z); } } }
+  }
+  function build(){
+    objs.forEach(function(h){ S.group.remove(h); }); objs = [];
+    layout.forEach(function(o){ if(ITEMS[o.id]){ var h = mk(o); if(h) objs.push(h); } });
+    rebuildBlk(); upgrades();
+  }
+  function upgrades(){
+    if(INV.own.laptop_pro && !upg.lap){ S.oldLap.visible = false; upg.lap = itemModel('laptop_pro'); upg.lap.position.set(4.5, 28 * PXH, .9); S.group.add(upg.lap); }
+    if(INV.own.speaker_pro && !upg.spk){ S.oldSpk.visible = false; upg.spk = itemModel('speaker_pro'); upg.spk.position.set(7.3, 0, .92); S.group.add(upg.spk); }
+  }
+  async function persist(){
+    var a = layout.map(function(o){ var q = {id:o.id, x:o.x}; if(!ITEMS[o.id].wall){ q.z = o.z; q.r = o.r | 0; } return q; });
+    try{ var r = await sb.from('home_layouts').upsert({user_id:ME.uid, layout:a, updated_at:new Date().toISOString()}); if(r && r.error){ toast('Non riesco a salvare la casa, riprova.'); return false; } return true; }catch(e){ toast('Non riesco a salvare la casa, riprova.'); return false; }
+  }
+  async function load(){
+    if(loaded) return; loaded = true;
+    try{ var q = await sb.from('inventory').select('item_id'); INV.own = {}; if(q && q.data) q.data.forEach(function(r){ INV.own[r.item_id] = 1; }); INV.loaded = true; }catch(e){}
+    try{ var r = await sb.from('home_layouts').select('layout').eq('user_id', ME.uid).maybeSingle(); var L = r && r.data && r.data.layout; if(Array.isArray(L)) layout = L.filter(function(o){ return o && ITEMS[o.id] && INV.own[o.id] && isFinite(o.x); }).map(function(o){ return {id:o.id, x:+o.x, z:+o.z || 0, r:o.r | 0}; }); }catch(e){}
+    build();
+  }
+  // ---- editor
+  function showFoot(){
+    if(!foot){ foot = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({color:0x3dffa0, transparent:true, opacity:.55, depthWrite:false, depthTest:false, side:THREE.DoubleSide})); foot.rotation.x = -Math.PI / 2; foot.renderOrder = 5; }
+    if(!foot.parent) S.group.add(foot);
+  }
+  function updFoot(){
+    if(!ed || !ed.o) { if(foot && foot.parent) foot.parent.remove(foot); return; } showFoot(); var o = ed.o, it = ITEMS[o.id], ok = valid(o, ed.cur);
+    foot.material.color.set(ok ? 0x3dffa0 : 0xff3b3b); ed.ok = ok;
+    if(it.wall){ foot.rotation.x = 0; foot.scale.set(1, .94, 1); foot.position.set(o.x, 2.85, .04); } else { var f = rotFp(o.id, o.r); foot.rotation.x = -Math.PI / 2; foot.scale.set(f[0], f[1], 1); foot.position.set(o.x, .03, o.z); }
+  }
+  function ghostOpacity(h, on){ h.traverse(function(m){ if(m.material && !Array.isArray(m.material)){ m.material.transparent = on || m.material.transparent; if(on){ m.userData._op = m.material.opacity; m.material.opacity = Math.min(m.material.opacity, .65); } else if(m.userData._op !== undefined){ m.material.opacity = m.userData._op; } m.material.needsUpdate = true; } }); }
+  function startSel(id){
+    var cur = null, h = null; layout.forEach(function(o, i){ if(o.id === id){ cur = o; h = objs[i]; } });
+    if(cur){ ed.cur = cur; ed.o = {id:id, x:cur.x, z:cur.z, r:cur.r | 0}; ed.h = h; ed.isNew = false; }
+    else { var it = ITEMS[id], o = {id:id, x:it.wall ? 5.5 : 4, z:4, r:0}, found = false;
+      if(it.wall){ for(var x = 4; x <= 7.5 && !found; x += .5){ o.x = x; if(valid(o)) found = true; } if(!found) for(x = .5; x <= 7.5 && !found; x += .5){ o.x = x; if(valid(o)) found = true; } }
+      else for(var zz = 2; zz <= 7 && !found; zz += .5) for(var xx = 1; xx <= 7 && !found; xx += .5){ o.x = xx; o.z = zz; if(valid(o)) found = true; }
+      ed.cur = null; ed.o = o; ed.h = mk(o); ed.isNew = true; }
+    ghostOpacity(ed.h, true); updFoot(); render();
+  }
+  function endSel(){ if(ed && ed.h){ ghostOpacity(ed.h, false); if(ed.isNew) S.group.remove(ed.h); else if(ed.cur) place(ed.h, ed.cur); } if(ed){ ed.o = null; ed.cur = null; ed.h = null; } updFoot(); render(); }
+  function render(){
+    if(!pn) return; var h = '<h4>ARREDAMENTO</h4><div class="lk-body">';
+    if(ed.o){
+      var it = ITEMS[ed.o.id]; h += '<h5>' + esc(it.name) + '</h5><div class="lk-note">' + (it.wall ? 'Tocca un punto della parete (lato porta) per spostarlo.' : 'Tocca il pavimento per spostarlo.') + '</div><div class="lk-note" style="color:' + (ed.ok ? '#3dffa0' : '#ff6b6b') + '">' + (ed.ok ? '✓ Posizione libera' : '✗ Posizione occupata') + '</div><div class="lk-t-row" style="margin-top:10px">' + (it.wall ? '' : '<button type="button" class="lk-t" data-d="rot">↻ Ruota</button>') + '<button type="button" class="lk-t" data-d="ok">✓ Conferma</button>' + (ed.isNew ? '' : '<button type="button" class="lk-t" data-d="del">🗑 Rimuovi</button>') + '<button type="button" class="lk-t" data-d="no">✕ Annulla</button></div>';
+    } else {
+      var list = Object.keys(INV.own).filter(function(i){ var t = ITEMS[i]; return t && t.build && !t.up; });
+      h += '<div class="lk-note">Scegli un oggetto tuo da mettere in casa (o da spostare). Si salva da solo.</div>';
+      if(!list.length) h += '<div class="lk-note" style="margin-top:14px">Non hai ancora oggetti. Comprali nel negozio (computer sulla scrivania).</div>';
+      h += '<div class="dc-list">' + list.map(function(i){ var placed = layout.some(function(o){ return o.id === i; }); return '<button type="button" class="dc-it" data-i="' + i + '"><img alt="" src="' + THUMB.get(i) + '"><span>' + esc(ITEMS[i].name) + '</span><em>' + (placed ? 'Sposta' : 'Metti') + '</em></button>'; }).join('') + '</div>';
+    }
+    h += '</div><div class="lk-act"><button type="button" class="lk-cancel" data-d="end">Fine</button></div>'; pn.innerHTML = h;
+  }
+  async function act(d){
+    if(d === 'rot'){ ed.o.r = ((ed.o.r | 0) + 1) % 4; ed.h.rotation.y = ed.o.r * Math.PI / 2; var f2 = rotFp(ed.o.id, ed.o.r); ed.o.x = Math.min(7.95 - f2[0] / 2, Math.max(.05 + f2[0] / 2, ed.o.x)); ed.o.z = Math.min(7.95 - f2[1] / 2, Math.max(.05 + f2[1] / 2, ed.o.z)); ed.h.position.set(ed.o.x, 0, ed.o.z); updFoot(); render(); return; }
+    if(d === 'no') return endSel();
+    if(d === 'ok'){ if(!ed.ok) return toast('Posizione occupata.'); if(ed.isNew && layout.length >= MAXN) return toast('Casa piena (max ' + MAXN + ' oggetti).');
+      var h = ed.h, o = ed.o, c = ed.cur; if(c){ c.x = o.x; c.z = o.z; c.r = o.r; } else { layout.push({id:o.id, x:o.x, z:o.z, r:o.r}); objs.push(h); }
+      ghostOpacity(h, false); ed.o = null; ed.cur = null; ed.h = null; updFoot(); rebuildBlk(); render(); if(await persist()) toast('✓ Salvato'); return; }
+    if(d === 'del'){ var i = layout.indexOf(ed.cur); if(i > -1){ layout.splice(i, 1); S.group.remove(objs[i]); objs.splice(i, 1); } ed.o = null; ed.cur = null; ed.h = null; updFoot(); rebuildBlk(); render(); if(await persist()) toast('Rimosso'); return; }
+    if(d === 'end') return closeEd();
+  }
+  function snap(v){ return Math.round(v * 2) / 2; }
+  function tap(rc){
+    if(!ed) return false;
+    var pt = new THREE.Vector3();
+    if(!ed.o){ var hs = rc.intersectObjects(objs, true); if(hs.length){ var p = hs[0].object; while(p && !p.userData.o) p = p.parent; if(p) startSel(p.userData.o.id); } return true; }
+    var it = ITEMS[ed.o.id];
+    if(it.wall){ if(rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), pt)){ ed.o.x = Math.min(7.5, Math.max(.5, snap(pt.x))); ed.h.position.x = ed.o.x; } }
+    else if(rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt)){ var f = rotFp(ed.o.id, ed.o.r); ed.o.x = Math.min(7.95 - f[0] / 2, Math.max(.05 + f[0] / 2, snap(pt.x))); ed.o.z = Math.min(7.95 - f[1] / 2, Math.max(.05 + f[1] / 2, snap(pt.z))); ed.h.position.set(ed.o.x, 0, ed.o.z); }
+    updFoot(); render(); return true;
+  }
+  async function openEd(){
+    if(!ME.ready) return toast('Accedi dal sito per arredare.'); if(ed) return; await load();
+    ed = {o:null}; ME.path = []; saved = {dist:cs.tdist, pitch:cs.tpitch, yaw:cs.tyaw}; cs.tdist = 11; cs.tpitch = 1.0; document.body.classList.add('looking');
+    pn = document.createElement('div'); pn.className = 'lk-panel'; document.body.appendChild(pn); pn.addEventListener('click', function(e){
+      var b = e.target.closest ? e.target.closest('[data-d]') : null; if(b) return act(b.getAttribute('data-d'));
+      var i = e.target.closest ? e.target.closest('.dc-it') : null; if(i) startSel(i.getAttribute('data-i'));
+    }); render();
+  }
+  function closeEd(){ if(ed && ed.o) endSel(); ed = null; if(pn && pn.parentNode) pn.parentNode.removeChild(pn); pn = null; updFoot(); if(saved){ cs.tdist = saved.dist; cs.tpitch = saved.pitch; } document.body.classList.remove('looking'); }
+  function onEnter(name){ var b = $('bDeco'); if(name === 'home' && ME.ready){ b.hidden = false; load(); } else { b.hidden = true; if(ed) closeEd(); } }
+  $('bDeco').onclick = openEd;
+  return {onEnter:onEnter, refresh:function(){ if(loaded){ upgrades(); } }, tap:tap, get editing(){ return !!ed; }};
 })();
 
 // ---- strumenti dello studio: registratore, mixer, synth (stesso codice del 2D, tutto locale nel browser)
