@@ -2228,15 +2228,16 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
     skyline(wl, 'y', [[0, 3.2, 230], [3.2, 6.4, 180], [9.6, 12.8, 200], [12.8, 16, 250]], -3.2, '#0e0a1c');
     skyline(wl, 'x', [[0, 5, 130], [10, 16, 120]], 0, '#16112a');
     skyline(wl, 'y', [[0, 4.4, 120], [12.6, 16, 130]], 0, '#1a1330');
-    // pavimento
+    // pavimento a sampietrini
+    cobblePattern(SCN_PLAZA.OX, SCN_PLAZA.OY);
+    poly(fl, [iso(0, 0), iso(N, 0), iso(N, N), iso(0, N)], {fill:'url(#cobble)', stroke:'#2a2a3a', 'stroke-width':1.5});
+    poly(fl, [iso(0, 0), iso(N, 0), iso(N, 0.35), iso(0, 0.35)], {fill:'#4a4562'});
+    poly(fl, [iso(0, 0), iso(0.35, 0), iso(0.35, N), iso(0, N)], {fill:'#443f5c'});
     for(i = 0; i < N; i++){
       for(j = 0; j < N; j++){
-        var dxx = i + .5 - 8.5, dyy = j + .5 - 10, ring = Math.sqrt(dxx * dxx + dyy * dyy) < 4.6;
         var stage = (i >= 4 && i <= 12 && j <= 3), dzone = (i >= 5 && i <= 11 && j >= 4 && j <= 6);
-        var path2 = (i === 2 || i === 3) && j >= 6 && j <= 13 ? 0 : 0;
-        var fill = stage ? '#1b1033' : (ring ? '#1e1c3a' : ((i + j) % 2 ? '#101022' : '#14142a'));
-        var st = stage ? '#5a2fb8' : (dzone ? '#7b2fff' : '#26263c');
-        var t = el('polygon', {points:pts([iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1)]), fill:dzone ? 'rgba(123,47,255,0.16)' : fill, stroke:st, 'stroke-width':dzone ? 1.2 : 1}, fl);
+        if(!stage && !dzone) continue;
+        var t = el('polygon', {points:pts([iso(i, j), iso(i + 1, j), iso(i + 1, j + 1), iso(i, j + 1)]), fill:dzone ? 'rgba(123,47,255,0.16)' : '#1b1033', stroke:dzone ? '#7b2fff' : '#5a2fb8', 'stroke-width':dzone ? 1.2 : 1}, fl);
         if(dzone) dzs.push({el:t, i:i, j:j});
       }
     }
