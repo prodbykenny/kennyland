@@ -98,6 +98,11 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
 .rk-tabs{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap} .rk-tab{background:#150a26;border:1px solid var(--line);color:var(--muted);padding:7px 11px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer} .rk-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff}
 .rk-tot{color:var(--acid);font:700 12px 'Space Grotesk',sans-serif;margin-bottom:8px} .rk-row{display:flex;gap:10px;padding:6px 8px;border-bottom:1px solid #1d1432;font-size:13px} .rk-row.me{background:#1d1040} .rk-r{color:#3dffa0;font-weight:700;min-width:36px} .rk-n{flex:1;word-break:break-word} .rk-p{color:#b57bff;font-weight:700} .rk-gap{text-align:center;color:var(--muted)} .rk-empty{color:var(--muted);font-size:13px;padding:8px 0} .rk-sub{margin:8px 0 2px;color:var(--muted);font-size:11px;letter-spacing:.08em}
 .rp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px} .rp-grid h5{margin:12px 0 6px;color:var(--red);letter-spacing:.1em;font-size:12px} .st3{display:grid;grid-template-columns:1fr 70px 90px;gap:6px;padding:5px 0;border-bottom:1px solid #1d1432;font-size:13px} .st3 b{text-align:right} .st3.hd{color:var(--muted);font-size:11px} .st3.tot{color:var(--acid)}
+.mp3-now{font:700 15px 'Space Grotesk',sans-serif;margin:4px 0 10px;min-height:20px} .mp3-pl{display:inline-block;background:#7b2fff;color:#fff;font:700 10px 'Space Grotesk',sans-serif;padding:2px 6px;margin-right:8px;letter-spacing:.08em}
+.mp3-ctl{display:flex;gap:8px;align-items:center;margin-bottom:10px} .mp3-ctl button{background:#150a26;border:1px solid var(--line);color:var(--ink);width:40px;height:36px;cursor:pointer;font-size:16px} .mp3-ctl #mpPlay{background:var(--acid);color:#04140c;border:0} .mp3-ctl span{font-size:11px;color:var(--muted);white-space:nowrap} .mp3-ctl input{flex:1;min-width:0;accent-color:#3dffa0;width:auto!important;padding:0!important}
+.mp3-radio{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px} .mp3-radio:empty{display:none} .mp3-radio button{background:#150a26;border:1px solid var(--line);color:var(--ink);padding:5px 10px;cursor:pointer;font:700 11px 'Space Grotesk',sans-serif}
+.mp3-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px} .mp3-tab{background:#150a26;border:1px solid var(--line);color:var(--muted);padding:6px 10px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer} .mp3-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff}
+.mp3-list{max-height:40vh;overflow:auto} .mp3-row{display:flex;gap:10px;padding:8px;border-bottom:1px solid #1d1432;cursor:pointer;font-size:13px} .mp3-row span{color:var(--muted);min-width:20px} .mp3-row.on{background:#1d1040;color:var(--acid)} .mp3-row:hover{background:#150a26}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -547,7 +552,7 @@ function animAv(A, moving, sit, dt, y, face){
   if(face !== undefined) A.g.rotation.y = face + fy;
 }
 var homeMusic = false;
-function musicOn(){ if(CUR.name === 'plaza') return !!dj.playing; if(CUR.name === 'home') return homeMusic && !!dj.playing; return !!window.klMixOn || Date.now() < (window.klMusicUntil || 0); }
+function musicOn(){ if(typeof MUSIC !== 'undefined' && MUSIC.playing()) return true; if(CUR.name === 'plaza') return !!dj.playing; if(homeMusic && dj.playing) return true; if(CUR.name === 'home') return false; return !!window.klMixOn || Date.now() < (window.klMusicUntil || 0); }
 function remoteMusic(){ return CUR.name === 'plaza' ? !!dj.playing : false; }
 function seatH(id){ return id && SEAT[id] && SEAT[id].h || 0; }
 function turn(cur, tgt, dt){ var d = ((tgt - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return cur + d * Math.min(1, dt * 12); }
@@ -580,7 +585,8 @@ function doAct(a){
   if(a.indexOf('sit:') === 0) return sitAt(a.slice(4));
   if(a === 'wheel') return openWheel();
   if(a === 'mic') return openMic();
-  if(a === 'dj'){ dj.muted = !dj.muted; audio.muted = dj.muted; if(!dj.muted && dj.playing){ var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){}); } djUi(); toast(dj.playing ? (dj.muted ? 'Audio silenziato' : '♪ ' + (dj.title || 'DJ set in corso')) : 'Il DJ non sta suonando adesso'); return; }
+  if(a === 'dj') return MUSIC.open();
+  if(a === 'djold'){ dj.muted = !dj.muted; audio.muted = dj.muted; if(!dj.muted && dj.playing){ var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){}); } djUi(); toast(dj.playing ? (dj.muted ? 'Audio silenziato' : '♪ ' + (dj.title || 'DJ set in corso')) : 'Il DJ non sta suonando adesso'); return; }
   if(a === 'cafe') return toast('Il cocktail bar apre presto 🍸. Intanto siediti al bancone.');
   if(a === 'fountain') return toast('🪙 Lancia una moneta ed esprimi un desiderio (presto!)');
   if(a === 'board') return openBoard();
@@ -668,7 +674,7 @@ function djApply(row){
   if(audio.getAttribute('data-u') !== url){ audio.setAttribute('data-u', url); audio.src = url; }
   var seek = function(){ var d = audio.duration, t = Number(row.pos) || 0; if(isFinite(d) && d > 0) t = t % d; try{ if(Math.abs(audio.currentTime - t) > 2.5) audio.currentTime = t; }catch(e){} };
   if(audio.readyState >= 1) seek(); else audio.addEventListener('loadedmetadata', seek, {once:true});
-  if(CUR.name !== 'plaza' && !(CUR.name === 'home' && homeMusic)){ audio.pause(); djUi(); return; }
+  if(CUR.name !== 'plaza' && !homeMusic){ audio.pause(); djUi(); return; }
   audio.muted = dj.muted; var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){ dj.muted = true; djUi(); }); djUi();
 }
 async function djPull(){ if(CUR.name !== 'plaza' && !homeMusic) return; try{ var r = await sb.rpc('dj_state'); var row = r && r.data && r.data[0]; if(row) djApply(row); }catch(e){} }
@@ -1017,12 +1023,12 @@ S.build = function(S){
   // ---- porta verso la piazza + zone cliccabili
   sol(0, 0, 0, 0);
   S.STAND.plaza = {x:18.85, z:1.4}; S.STAND.console = {x:6.8, z:5.3}; S.STAND.keys = {x:13.3, z:4.3}; S.STAND.booth = {x:3.4, z:8.8};
-  hitS(S, 'plaza', 18.2, 0, 1.3, .5, 2.7); hitS(S, 'console', 3.8, 1.2, 6.2, 2.0, 2.0); hitS(S, 'keys', 11.7, .5, 3.2, 2.8, 1.9); hitS(S, 'booth', 2.2, 9.2, .8, .8, 3.8);
+  hitS(S, 'plaza', 18.2, 0, 1.3, .5, 2.7); S.STAND.speaker = {x:2.6, z:2.4}; hitS(S, 'speaker', 2.85, .4, .95, .8, 3.6); hitS(S, 'speaker', 9.95, .4, .95, .8, 3.6); hitS(S, 'speaker', 10.9, .4, .8, .9, 1.5); hitS(S, 'console', 3.8, 1.2, 6.2, 2.0, 2.0); hitS(S, 'keys', 11.7, .5, 3.2, 2.8, 1.9); hitS(S, 'booth', 2.2, 9.2, .8, .8, 3.8);
   hitS(S, 'sit:piano', 1.7, 3.0, .6, .6, .8); hitS(S, 'sit:prod', 6.3, 3.6, 1.0, 1.0, 2.0); hitS(S, 'sit:sofa', 6.9, 9.5, 3.2, 1.5, 1.7); hitS(S, 'sit:stool', 1.2, 9.0, .6, .6, .8); hitS(S, 'sit:gpiano', 7.6, 18.6, 1.3, .7, 1.0);
   [[13.4, 11.2, 0], [16.4, 11.2, 1], [14.9, 14.0, 2]].forEach(function(p){ hitS(S, 'sit:pouf' + p[2], p[0] - .6, p[1] - .6, 1.2, 1.2, .8); });
   solidsToBlk(S, SOL); ROOT = prev;
 };
-S.act = function(a){ if(a === 'console') return openMixer(); if(a === 'keys') return openSynth(); if(a === 'booth') return openRecorder(); };
+S.act = function(a){ if(a === 'speaker') return MUSIC.open(); if(a === 'console') return openMixer(); if(a === 'keys') return openSynth(); if(a === 'booth') return openRecorder(); };
 })();
 // ======================= CASA (stanza personale 8x8, identica al 2D) =======================
 (function(){
@@ -1066,7 +1072,7 @@ S.act = function(a){
   if(a === 'shop'){ CH.mission('click_pc'); return SHOP.open(); }
   if(a === 'look'){ CH.mission('click_wardrobe'); return LOOK.open(); }
   if(a === 'sign'){ CH.mission('click_sign'); return toast('✨ ' + (ME.nick || '') + ' ROOM: casa tua.'); }
-  if(a === 'speaker'){ if(!dj.playing) return toast('🔊 Nessuna musica: il DJ non sta suonando in piazza.'); CH.mission('click_speaker'); homeMusic = !homeMusic; if(homeMusic){ dj.muted = false; djPull(); toast('♪ ' + (dj.title || 'Musica in casa')); } else { audio.pause(); toast('Musica spenta'); } return; }
+  if(a === 'speaker'){ CH.mission('click_speaker'); return MUSIC.open(); }
 };
 })();
 
@@ -1706,7 +1712,7 @@ var CH = (function(){
   document.querySelectorAll('.soc a').forEach(function(a){ a.addEventListener('click', function(){ var h = a.getAttribute('href') || ''; track(h.indexOf('spotify') > -1 ? 'click_spotify' : h.indexOf('soundcloud') > -1 ? 'click_soundcloud' : 'click_page'); }); });
   new MutationObserver(function(){ var n = parseInt($('coins').textContent, 10); if(isFinite(n) && n !== wallet.coins){ wallet.coins = n; paint(); } }).observe($('coins'), {childList:true, characterData:true, subtree:true});
   // ascolto: missione "ascolta un brano" quando la musica audible gira per qualche secondo
-  var lt = 0; setInterval(function(){ if(!ME.ready) return; var hear = (CUR.name === 'plaza' && dj.playing && !dj.muted) || (CUR.name === 'home' && homeMusic && dj.playing); lt = hear ? lt + 1 : 0; if(lt === 5){ mission('listen_any'); track('listen_player'); } }, 1000);
+  var lt = 0; setInterval(function(){ if(!ME.ready) return; var hear = (CUR.name === 'plaza' && dj.playing && !dj.muted) || (homeMusic && dj.playing) || MUSIC.playing(); lt = hear ? lt + 1 : 0; if(lt === 5){ mission('listen_any'); track('listen_player'); } }, 1000);
   return {stats:function(){ return U; }, init:init, track:track, mission:mission, setCoins:setCoins, paint:paint};
 })();
 window.klMission = CH.mission;
@@ -1812,6 +1818,67 @@ var RANK = (function(){
   }
   refresh(); setInterval(refresh, 60000);
   return {open:open, refresh:refresh};
+})();
+
+// ======================= PLAYER KENNYLAND (brani riservati agli iscritti: esclusive e prossimi drop) =======================
+var MUSIC = (function(){
+  var tracks = [], pl = null, a = new Audio(), queue = [], idx = -1, loaded = false, ui = null, lastLog = {}; a.preload = 'auto';
+  function fmt(s){ s = Math.floor(s || 0); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  async function load(){
+    loaded = true; try{ var r = await sb.from('tracks').select('id,title,playlist,position,file_path').order('position', {ascending:true}); tracks = (r && r.data) || []; }catch(e){ tracks = []; }
+    var pls = []; tracks.forEach(function(t){ if(pls.indexOf(t.playlist) < 0) pls.push(t.playlist); }); if(!pl || pls.indexOf(pl) < 0) pl = pls[0] || null;
+  }
+  function playlists(){ var p = []; tracks.forEach(function(t){ if(p.indexOf(t.playlist) < 0) p.push(t.playlist); }); return p; }
+  function stopRadio(){ if(CUR.name === 'plaza'){ audio.muted = true; dj.muted = true; djUi(); } else { homeMusic = false; audio.pause(); } }
+  async function play(list, i){
+    queue = list; idx = i; var t = queue[idx]; if(!t) return; stopRadio();
+    if(ui) ui();
+    try{ var r = await sb.storage.from('member-tracks').createSignedUrl(t.file_path, 3600); if(!r || r.error || !r.data){ toast('Non riesco a caricare il brano.'); return; } a.src = r.data.signedUrl; await a.play(); }
+    catch(e){ toast('Non riesco a riprodurre il brano.'); }
+  }
+  function step(d){ if(!queue.length){ var l = tracks.filter(function(t){ return t.playlist === pl; }); if(!l.length) return; play(l, 0); return; } var n = idx + d; if(n < 0) n = queue.length - 1; if(n >= queue.length) n = 0; play(queue, n); }
+  a.addEventListener('play', function(){
+    if(ui) ui(); var t = queue[idx]; if(!ME.ready) return; CH.track('listen_player'); CH.mission('listen_any');
+    if(t){ var now = Date.now(); if(!lastLog[t.title] || now - lastLog[t.title] > 20000){ lastLog[t.title] = now; try{ sb.rpc('log_listen', {p_source:'player', p_title:String(t.title).slice(0, 80)}); }catch(e){} } }
+  });
+  a.addEventListener('pause', function(){ if(ui) ui(); }); a.addEventListener('timeupdate', function(){ if(ui) ui(true); });
+  a.addEventListener('ended', function(){ if(idx + 1 < queue.length) play(queue, idx + 1); else if(ui) ui(); });
+  function radioToggle(){
+    if(!dj.playing) return toast('Il DJ non sta suonando adesso.');
+    if(CUR.name === 'plaza'){ dj.muted = !dj.muted; audio.muted = dj.muted; if(!dj.muted){ a.pause(); var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){}); } djUi(); }
+    else { homeMusic = !homeMusic; if(homeMusic){ a.pause(); dj.muted = false; djPull(); } else audio.pause(); }
+    if(ui) ui();
+  }
+  function radioOn(){ return dj.playing && (CUR.name === 'plaza' ? !dj.muted : homeMusic); }
+  async function open(){
+    if(!ME.ready) return toast('🔒 I brani KENNYLAND sono riservati agli iscritti: entra dal sito.');
+    if(!loaded) await load();
+    modal('<h4>PLAYER KENNYLAND</h4><p>Esclusive e prossimi drop: li senti solo qui, in tutte le stanze.</p><div class="mp3-now" id="mpNow"></div><div class="mp3-ctl"><button type="button" data-a="prev">⏮</button><button type="button" data-a="play" id="mpPlay">▶</button><button type="button" data-a="next">⏭</button><span id="mpT">0:00</span><input type="range" id="mpSeek" min="0" max="1000" value="0"></div><div class="mp3-radio" id="mpRadio"></div><div class="mp3-tabs" id="mpTabs"></div><div class="mp3-list" id="mpList"></div>', function(ov, close){
+      ov.querySelector('.card').classList.add('wide'); var seeking = false, seek = ov.querySelector('#mpSeek');
+      function list(){ return tracks.filter(function(t){ return t.playlist === pl; }); }
+      function paint(tick){
+        var t = queue[idx], now = ov.querySelector('#mpNow'); if(!now){ ui = null; return; }
+        ov.querySelector('#mpPlay').textContent = (!a.paused) ? '⏸' : '▶'; ov.querySelector('#mpT').textContent = fmt(a.currentTime) + ' / ' + fmt(a.duration);
+        if(!seeking && isFinite(a.duration) && a.duration > 0) seek.value = Math.round(a.currentTime / a.duration * 1000);
+        if(tick) return;
+        now.innerHTML = t ? '<span class="mp3-pl">' + esc(t.playlist || '') + '</span>' + esc(t.title) : 'Scegli un brano';
+        var rd = ov.querySelector('#mpRadio'); rd.innerHTML = dj.playing ? '<span>📻 Radio DJ' + (dj.title ? ' · ' + esc(dj.title) : '') + '</span><button type="button" data-a="radio">' + (radioOn() ? 'Silenzia' : 'Ascolta') + '</button>' : '';
+        ov.querySelector('#mpTabs').innerHTML = playlists().map(function(n){ return '<button type="button" class="mp3-tab' + (n === pl ? ' on' : '') + '" data-p="' + esc(n) + '">' + esc(n) + '</button>'; }).join('');
+        var l = list(); ov.querySelector('#mpList').innerHTML = l.length ? l.map(function(x, i){ return '<div class="mp3-row' + (queue[idx] && queue[idx].id === x.id ? ' on' : '') + '" data-i="' + i + '"><span>' + (i + 1) + '</span><b>' + esc(x.title) + '</b></div>'; }).join('') : '<div class="rk-empty">Nessun brano ancora: le esclusive arrivano presto.</div>';
+      }
+      ui = paint; paint();
+      seek.addEventListener('input', function(){ seeking = true; }); seek.addEventListener('change', function(){ if(isFinite(a.duration)) a.currentTime = seek.value / 1000 * a.duration; seeking = false; });
+      ov.addEventListener('click', function(e){
+        var b = e.target.closest ? e.target.closest('[data-a],[data-p],.mp3-row') : null; if(!b) return;
+        if(b.getAttribute('data-p')){ pl = b.getAttribute('data-p'); paint(); return; }
+        if(b.classList.contains('mp3-row')){ play(list(), +b.getAttribute('data-i')); return; }
+        var k = b.getAttribute('data-a'); if(k === 'prev') step(-1); else if(k === 'next') step(1); else if(k === 'radio') radioToggle();
+        else if(k === 'play'){ if(!a.src) step(1); else if(a.paused){ stopRadio(); a.play(); } else a.pause(); }
+      });
+      new MutationObserver(function(){ if(!document.body.contains(ov)) ui = null; }).observe(document.body, {childList:true});
+    });
+  }
+  return {open:open, playing:function(){ return !a.paused && !a.ended; }};
 })();
 
 // ---- avvio: sessione condivisa con il sito (stesso dominio), profilo, canale

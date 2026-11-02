@@ -51,7 +51,9 @@ button.del{border-color:var(--mag);color:var(--mag);}
   <div class="panel">
     <div class="field"><label for="fFile">File audio o video (mp3, wav, mp4, webm)</label><input type="file" id="fFile" accept="audio/*,video/mp4,video/webm,video/quicktime"></div>
     <div class="field"><label for="fTitle">Titolo (se vuoto uso il nome del file)</label><input type="text" id="fTitle" maxlength="120"></div>
-    <div class="field"><label for="fPl">Playlist (scegli una esistente o scrivine una nuova)</label><input type="text" id="fPl" list="plList" value="Beats" maxlength="40"></div>
+    <div class="field"><label for="fKind">Che cos'è</label><select id="fKind"><option value="Esclusive">Esclusiva (solo iscritti)</option><option value="Prossimo drop">Prossimo drop (anteprima agli iscritti)</option><option value="">Altra playlist…</option></select></div>
+    <div class="field"><label for="fPl">Playlist (si compila da sola, puoi cambiarla o scriverne una nuova)</label><input type="text" id="fPl" list="plList" value="Esclusive" maxlength="40"></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:13px"><input type="checkbox" id="fOnair" style="width:auto;margin-top:3px"><span>Metti subito in onda anche in piazza (radio DJ: lo sentono tutti, ovunque nel 3D)</span></label>
     <datalist id="plList"></datalist>
     <button class="main" id="btnUp" type="button">Carica brano</button>
     <div class="msg" id="upMsg"></div>
@@ -263,6 +265,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     return el;
   }
 
+  $('fKind').addEventListener('change', function(){ if(this.value) $('fPl').value = this.value; else { $('fPl').value = ''; $('fPl').focus(); } });
   $('btnUp').addEventListener('click', async function(){
     var msg = $('upMsg');
     var f = $('fFile').files[0];
@@ -282,8 +285,20 @@ button.del{border-color:var(--mag);color:var(--mag);}
         await sb.storage.from('member-tracks').remove([path]);
         say(msg, 'Errore nel salvataggio: ' + ins.error.message, true); return;
       }
-      say(msg, 'Caricato ✓');
-      $('fFile').value = ''; $('fTitle').value = '';
+      var onairMsg = '';
+      if($('fOnair').checked){
+        if(f.type && f.type.indexOf('audio/') === 0){
+          var dpath = Date.now() + '-' + f.name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(-60);
+          var du = await sb.storage.from('dj').upload(dpath, f, {contentType: f.type || 'audio/mpeg', upsert: false});
+          if(du.error){ onairMsg = ' (ma NON in onda: ' + du.error.message + ')'; }
+          else {
+            var dr = await sb.rpc('dj_set', {p_url: sb.storage.from('dj').getPublicUrl(dpath).data.publicUrl, p_title: title, p_playing: true, p_restart: true});
+            onairMsg = dr.error ? ' (ma NON in onda: ' + dr.error.message + ')' : ' · in onda in piazza ✓';
+          }
+        } else { onairMsg = ' (in onda solo per file audio, non video)'; }
+      }
+      say(msg, 'Caricato ✓' + onairMsg);
+      $('fFile').value = ''; $('fTitle').value = ''; $('fOnair').checked = false;
       await load();
     }catch(e){ say(msg, 'Qualcosa non ha funzionato, riprova.', true); }
     finally{ $('btnUp').disabled = false; }
