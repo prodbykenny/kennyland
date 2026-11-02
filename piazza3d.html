@@ -101,8 +101,14 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
 .mp3-now{font:700 15px 'Space Grotesk',sans-serif;margin:4px 0 10px;min-height:20px} .mp3-pl{display:inline-block;background:#7b2fff;color:#fff;font:700 10px 'Space Grotesk',sans-serif;padding:2px 6px;margin-right:8px;letter-spacing:.08em}
 .mp3-ctl{display:flex;gap:8px;align-items:center;margin-bottom:10px} .mp3-ctl button{background:#150a26;border:1px solid var(--line);color:var(--ink);width:40px;height:36px;cursor:pointer;font-size:16px} .mp3-ctl #mpPlay{background:var(--acid);color:#04140c;border:0} .mp3-ctl span{font-size:11px;color:var(--muted);white-space:nowrap} .mp3-ctl input{flex:1;min-width:0;accent-color:#3dffa0;width:auto!important;padding:0!important}
 .mp3-radio{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px} .mp3-radio:empty{display:none} .mp3-radio button{background:#150a26;border:1px solid var(--line);color:var(--ink);padding:5px 10px;cursor:pointer;font:700 11px 'Space Grotesk',sans-serif}
+.mp3-pub{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:10px} .mp3-pub span{flex:1;min-width:160px} .mp3-pub button{background:#150a26;border:1px solid var(--violet);color:var(--ink);padding:6px 12px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer}
 .mp3-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px} .mp3-tab{background:#150a26;border:1px solid var(--line);color:var(--muted);padding:6px 10px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer} .mp3-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff}
 .mp3-list{max-height:40vh;overflow:auto} .mp3-row{display:flex;gap:10px;padding:8px;border-bottom:1px solid #1d1432;cursor:pointer;font-size:13px} .mp3-row span{color:var(--muted);min-width:20px} .mp3-row.on{background:#1d1040;color:var(--acid)} .mp3-row:hover{background:#150a26}
+.dk{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px));width:min(380px,92vw);z-index:95;background:#0a0414;border:1px solid var(--violet);box-shadow:0 0 30px rgba(123,47,255,.4);transition:transform .25s}
+.dk.off{transform:translateY(130%);pointer-events:none}
+.dk-h{display:flex;gap:6px;align-items:center;padding:8px;border-bottom:1px solid #1d1432;flex-wrap:wrap} .dk-t{background:#150a26;border:1px solid var(--line);color:var(--muted);padding:6px 10px;font:700 12px 'Space Grotesk',sans-serif;cursor:pointer} .dk-t.on{background:#7b2fff;color:#fff;border-color:#b57bff}
+.dk-n{flex:1;min-width:120px;font-size:10px;color:var(--muted);line-height:1.3} .dk-x{background:none;border:0;color:var(--ink);font-size:16px;cursor:pointer}
+.dk-b{position:relative;padding:8px;min-height:170px} .dk-p{width:100%} .dk-p.off{position:absolute;left:-9999px;top:0;width:360px}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -552,7 +558,7 @@ function animAv(A, moving, sit, dt, y, face){
   if(face !== undefined) A.g.rotation.y = face + fy;
 }
 var homeMusic = false;
-function musicOn(){ if(typeof MUSIC !== 'undefined' && MUSIC.playing()) return true; if(CUR.name === 'plaza') return !!dj.playing; if(homeMusic && dj.playing) return true; if(CUR.name === 'home') return false; return !!window.klMixOn || Date.now() < (window.klMusicUntil || 0); }
+function musicOn(){ if((typeof MUSIC !== 'undefined' && MUSIC.playing()) || (typeof EMB !== 'undefined' && EMB.playing())) return true; if(CUR.name === 'plaza') return !!dj.playing; if(homeMusic && dj.playing) return true; if(CUR.name === 'home') return false; return !!window.klMixOn || Date.now() < (window.klMusicUntil || 0); }
 function remoteMusic(){ return CUR.name === 'plaza' ? !!dj.playing : false; }
 function seatH(id){ return id && SEAT[id] && SEAT[id].h || 0; }
 function turn(cur, tgt, dt){ var d = ((tgt - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return cur + d * Math.min(1, dt * 12); }
@@ -1820,6 +1826,48 @@ var RANK = (function(){
   return {open:open, refresh:refresh};
 })();
 
+// ======================= PLAYER UFFICIALI SPOTIFY / SOUNDCLOUD (gli ascolti contano sulle piattaforme) =======================
+var EMB = (function(){
+  var dock = null, built = false, on = {sp:false, sc:false}, wdg = null, ctrl = null, cur = 'sp', logged = {}, spNames = {};
+  var SP_URI = 'spotify:artist:1A4ZZ7547fH0sEMwOqFc9y';
+  function logListen(src, title){
+    if(!ME.ready || !title) return; title = String(title).slice(0, 80); var k = src + '|' + title, now = Date.now(); if(logged[k] && now - logged[k] < 20000) return; logged[k] = now;
+    try{ sb.rpc('log_listen', {p_source:src, p_title:title}); }catch(e){}
+  }
+  function started(src){ if(ME.ready){ CH.track(src === 'sp' ? 'listen_spotify' : 'listen_soundcloud'); CH.mission('listen_any'); } MUSIC.pauseOwn(); }
+  function setOn(k, v){ var was = on[k]; on[k] = v; if(v && !was) started(k); }
+  function build(){
+    if(built) return; built = true;
+    dock = document.createElement('div'); dock.id = 'embDock'; dock.className = 'dk off';
+    dock.innerHTML = '<div class="dk-h"><button type="button" class="dk-t on" data-e="sp">Spotify</button><button type="button" class="dk-t" data-e="sc">SoundCloud</button><span class="dk-n">Gli ascolti da qui contano anche sulle piattaforme</span><button type="button" class="dk-x" aria-label="Chiudi (la musica continua)">▾</button></div>' +
+      '<div class="dk-b"><div class="dk-p" id="dkSp"></div><div class="dk-p off" id="dkSc"><iframe id="scFrame" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/escaape&color=%233dffa0&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe></div></div>';
+    document.body.appendChild(dock);
+    dock.querySelector('.dk-x').onclick = function(){ dock.classList.add('off'); };
+    Array.prototype.forEach.call(dock.querySelectorAll('.dk-t'), function(b){ b.onclick = function(){ show(b.getAttribute('data-e')); }; });
+    // Spotify: iframe ufficiale con API per sapere quando suona
+    var holder = document.createElement('div'); $('dkSp').appendChild(holder);
+    window.onSpotifyIframeApiReady = function(api){
+      try{ api.createController(holder, {uri:SP_URI, width:'100%', height:152}, function(c){ ctrl = c;
+        c.addListener('playback_update', function(e){ var d = e && e.data, pl = !!(d && !d.isPaused); setOn('sp', pl); if(pl){ var m = JSON.stringify(d || {}).match(/spotify:(track|episode):[A-Za-z0-9]+/); var uri = m ? m[0] : ''; if(uri){ var url = uri.replace(/^spotify:(\w+):(.+)$/, 'https://open.spotify.com/$1/$2'); if(spNames[uri]) logListen('spotify', spNames[uri]); else { try{ fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url)).then(function(r){ return r.json(); }).then(function(j){ if(j && j.title){ spNames[uri] = j.title; logListen('spotify', j.title); } }).catch(function(){ logListen('spotify', 'Brano Spotify'); }); }catch(x){} } } else logListen('spotify', 'Brano Spotify'); } });
+      }); }catch(e){}
+    };
+    var fb = document.createElement('iframe'); fb.style.cssText = 'border-radius:8px;display:none'; // fallback se l'API non risponde
+    setTimeout(function(){ if(!ctrl){ holder.innerHTML = '<iframe style="border-radius:8px" src="https://open.spotify.com/embed/artist/1A4ZZ7547fH0sEMwOqFc9y?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>'; } }, 7000);
+    var s1 = document.createElement('script'); s1.src = 'https://open.spotify.com/embed/iframe-api/v1'; s1.async = true; document.body.appendChild(s1);
+    // SoundCloud: widget API
+    var s2 = document.createElement('script'); s2.src = 'https://w.soundcloud.com/player/api.js'; s2.onload = function(){ try{ wdg = SC.Widget($('scFrame'));
+      wdg.bind(SC.Widget.Events.PLAY, function(){ setOn('sc', true); try{ wdg.getCurrentSound(function(snd){ if(snd && snd.title) logListen('soundcloud', snd.title); }); }catch(e){} });
+      wdg.bind(SC.Widget.Events.PAUSE, function(){ setOn('sc', false); }); wdg.bind(SC.Widget.Events.FINISH, function(){ setOn('sc', false); }); }catch(e){} };
+    document.body.appendChild(s2);
+    // clic dentro gli iframe (il browser avvisa del primo clic)
+    window.addEventListener('blur', function(){ setTimeout(function(){ var ae = document.activeElement; if(!ae || ae.tagName !== 'IFRAME' || !dock.contains(ae)) return; if(ae.id === 'scFrame') CH.track('click_soundcloud'); else CH.track('click_spotify'); }, 0); });
+  }
+  function show(k){ cur = k; $('dkSp').classList.toggle('off', k !== 'sp'); $('dkSc').classList.toggle('off', k !== 'sc'); Array.prototype.forEach.call(dock.querySelectorAll('.dk-t'), function(b){ b.classList.toggle('on', b.getAttribute('data-e') === k); }); }
+  function open(k){ build(); show(k || cur); dock.classList.remove('off'); }
+  function pauseAll(){ try{ if(wdg && on.sc) wdg.pause(); }catch(e){} try{ if(ctrl && on.sp) ctrl.pause(); }catch(e){} }
+  return {open:open, pauseAll:pauseAll, playing:function(){ return on.sp || on.sc; }};
+})();
+
 // ======================= PLAYER KENNYLAND (brani riservati agli iscritti: esclusive e prossimi drop) =======================
 var MUSIC = (function(){
   var tracks = [], pl = null, a = new Audio(), queue = [], idx = -1, loaded = false, ui = null, lastLog = {}; a.preload = 'auto';
@@ -1829,9 +1877,10 @@ var MUSIC = (function(){
     var pls = []; tracks.forEach(function(t){ if(pls.indexOf(t.playlist) < 0) pls.push(t.playlist); }); if(!pl || pls.indexOf(pl) < 0) pl = pls[0] || null;
   }
   function playlists(){ var p = []; tracks.forEach(function(t){ if(p.indexOf(t.playlist) < 0) p.push(t.playlist); }); return p; }
+  function pauseOwn(){ a.pause(); stopRadio(); }
   function stopRadio(){ if(CUR.name === 'plaza'){ audio.muted = true; dj.muted = true; djUi(); } else { homeMusic = false; audio.pause(); } }
   async function play(list, i){
-    queue = list; idx = i; var t = queue[idx]; if(!t) return; stopRadio();
+    queue = list; idx = i; var t = queue[idx]; if(!t) return; stopRadio(); EMB.pauseAll();
     if(ui) ui();
     try{ var r = await sb.storage.from('member-tracks').createSignedUrl(t.file_path, 3600); if(!r || r.error || !r.data){ toast('Non riesco a caricare il brano.'); return; } a.src = r.data.signedUrl; await a.play(); }
     catch(e){ toast('Non riesco a riprodurre il brano.'); }
@@ -1845,15 +1894,15 @@ var MUSIC = (function(){
   a.addEventListener('ended', function(){ if(idx + 1 < queue.length) play(queue, idx + 1); else if(ui) ui(); });
   function radioToggle(){
     if(!dj.playing) return toast('Il DJ non sta suonando adesso.');
-    if(CUR.name === 'plaza'){ dj.muted = !dj.muted; audio.muted = dj.muted; if(!dj.muted){ a.pause(); var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){}); } djUi(); }
-    else { homeMusic = !homeMusic; if(homeMusic){ a.pause(); dj.muted = false; djPull(); } else audio.pause(); }
+    if(CUR.name === 'plaza'){ dj.muted = !dj.muted; audio.muted = dj.muted; if(!dj.muted){ a.pause(); EMB.pauseAll(); var pr = audio.play(); if(pr && pr.catch) pr.catch(function(){}); } djUi(); }
+    else { homeMusic = !homeMusic; if(homeMusic){ a.pause(); EMB.pauseAll(); dj.muted = false; djPull(); } else audio.pause(); }
     if(ui) ui();
   }
   function radioOn(){ return dj.playing && (CUR.name === 'plaza' ? !dj.muted : homeMusic); }
   async function open(){
     if(!ME.ready) return toast('🔒 I brani KENNYLAND sono riservati agli iscritti: entra dal sito.');
     if(!loaded) await load();
-    modal('<h4>PLAYER KENNYLAND</h4><p>Esclusive e prossimi drop: li senti solo qui, in tutte le stanze.</p><div class="mp3-now" id="mpNow"></div><div class="mp3-ctl"><button type="button" data-a="prev">⏮</button><button type="button" data-a="play" id="mpPlay">▶</button><button type="button" data-a="next">⏭</button><span id="mpT">0:00</span><input type="range" id="mpSeek" min="0" max="1000" value="0"></div><div class="mp3-radio" id="mpRadio"></div><div class="mp3-tabs" id="mpTabs"></div><div class="mp3-list" id="mpList"></div>', function(ov, close){
+    modal('<h4>PLAYER KENNYLAND</h4><p>Esclusive e prossimi drop: li senti solo qui, in tutte le stanze.</p><div class="mp3-now" id="mpNow"></div><div class="mp3-ctl"><button type="button" data-a="prev">⏮</button><button type="button" data-a="play" id="mpPlay">▶</button><button type="button" data-a="next">⏭</button><span id="mpT">0:00</span><input type="range" id="mpSeek" min="0" max="1000" value="0"></div><div class="mp3-pub"><span>Brani pubblici (gli ascolti contano anche su Spotify e SoundCloud)</span><button type="button" data-a="sp">Spotify</button><button type="button" data-a="sc">SoundCloud</button></div><div class="mp3-radio" id="mpRadio"></div><div class="mp3-tabs" id="mpTabs"></div><div class="mp3-list" id="mpList"></div>', function(ov, close){
       ov.querySelector('.card').classList.add('wide'); var seeking = false, seek = ov.querySelector('#mpSeek');
       function list(){ return tracks.filter(function(t){ return t.playlist === pl; }); }
       function paint(tick){
@@ -1872,13 +1921,13 @@ var MUSIC = (function(){
         var b = e.target.closest ? e.target.closest('[data-a],[data-p],.mp3-row') : null; if(!b) return;
         if(b.getAttribute('data-p')){ pl = b.getAttribute('data-p'); paint(); return; }
         if(b.classList.contains('mp3-row')){ play(list(), +b.getAttribute('data-i')); return; }
-        var k = b.getAttribute('data-a'); if(k === 'prev') step(-1); else if(k === 'next') step(1); else if(k === 'radio') radioToggle();
-        else if(k === 'play'){ if(!a.src) step(1); else if(a.paused){ stopRadio(); a.play(); } else a.pause(); }
+        var k = b.getAttribute('data-a'); if(k === 'prev') step(-1); else if(k === 'next') step(1); else if(k === 'radio') radioToggle(); else if(k === 'sp' || k === 'sc'){ close(); EMB.open(k); }
+        else if(k === 'play'){ if(!a.src) step(1); else if(a.paused){ stopRadio(); EMB.pauseAll(); a.play(); } else a.pause(); }
       });
       new MutationObserver(function(){ if(!document.body.contains(ov)) ui = null; }).observe(document.body, {childList:true});
     });
   }
-  return {open:open, playing:function(){ return !a.paused && !a.ended; }};
+  return {open:open, pauseOwn:pauseOwn, playing:function(){ return !a.paused && !a.ended; }};
 })();
 
 // ---- avvio: sessione condivisa con il sito (stesso dominio), profilo, canale
