@@ -22,6 +22,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .coin{background:var(--panel);border:1px solid var(--line);padding:8px 11px;font:700 12px 'Space Grotesk',sans-serif;color:#ffd23d}
 .btns{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap}
 #chat[hidden]{display:none}
+body.emb>*:not(#c):not(#labels):not(script){display:none!important}
 #chat{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:6px}
 #chat input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--violet);color:var(--ink);padding:11px 12px;font:500 14px 'Space Grotesk',sans-serif}
 #chat button{background:var(--panel);border:1px solid var(--violet);color:var(--acid);width:46px;font-size:18px;cursor:pointer}
@@ -138,7 +139,7 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
    <div class="hpop" id="hudPop" hidden><div class="hst">GIORNI DI FILA<b id="hStreak">0</b></div><div class="lvb"><i id="lvFill"></i></div><div class="lvt" id="lvTxt"></div>
     <button type="button" class="hbtn" id="hClaim" disabled>BONUS DEL GIORNO</button><div id="hMis" style="display:none"></div><button type="button" class="hbtn alt" id="hShop" style="margin-top:8px">NEGOZIO</button>
     <div class="acc"><div>Nickname <b id="aNick"></b></div><div>Email <b id="aEmail"></b></div><label><input type="checkbox" id="aNews"><span>Avvisami via email quando esce un nuovo drop</span></label><a id="aOut" href="#">Esci</a><button type="button" class="dng" id="aDel">Elimina il mio account</button><div id="aMsg" style="margin-top:6px"></div></div></div></div></div>
-  <div class="right"><div class="cnt"><span title="Abitanti iscritti">👥 <b id="mCount">0</b></span><span title="Online ora">● <b id="oCount">0</b></span></div><div class="soc"><a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a><a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a><a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a></div><a href="index.html">← Torna al sito</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
+  <div class="right"><div class="cnt"><span title="Abitanti iscritti">👥 <b id="mCount">0</b></span><span title="Online ora">● <b id="oCount">0</b></span></div><div class="soc"><a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a><a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a><a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a></div><a href="index.html?sito=1">← Torna al sito</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
 </div>
 <div id="banner"></div><div id="toast"></div><div id="log"></div>
 <button class="deco dnc" id="bDance" type="button" hidden>💃 Balla</button><button class="deco" id="bDeco" type="button" hidden>🛋 Arredamento</button><div class="btns" id="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
@@ -153,6 +154,7 @@ var renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 var scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a0a12); scene.fog = new THREE.Fog(0x0a0a12, 40, 95);
+var EMB3 = /[?&]embed=1/.test(location.search); if(EMB3) document.body.classList.add('emb');
 var cam = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
 function M(c, o){ return new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.7, metalness:.1}, o || {})); }
 var ROOT = scene;
@@ -792,6 +794,7 @@ function openWheel(){
 
 // ---- camera e input
 var cs = {yaw:.55, pitch:.62, dist:15, tyaw:.55, tpitch:.62, tdist:15};
+if(EMB3){ cs.dist = cs.tdist = 26; cs.pitch = cs.tpitch = .5; }
 function size(){ var w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
 addEventListener('resize', size); size();
 var drag = null, moved = 0, cv2 = $('c');
@@ -830,7 +833,7 @@ function frame(){
     if(CUR.name === 'home' && ME.x > 2 && ME.x < 6 && ME.z > 2 && ME.z < 6) CH.mission('walk_dance');
   }
   Object.keys(REM).forEach(function(k){ var r = REM[k]; var mv = follow(r, dt, 3.2); r.A.music = remoteMusic(); r.A.dancing = !!r.A.danceId && (r.A.music || r.dn) && !r.seat; animAv(r.A, mv && !r.seat, !!r.seat, dt, curH(r.x, r.z) + seatH(r.seat), r.face); r.A.g.position.x = r.x; r.A.g.position.z = r.z; proj(r.lb, r.A, 2.15); });
-  var ref = ME.ready ? ME.A.g.position : new THREE.Vector3(12, 0, 12), a = 1 - Math.pow(.0005, dt); cs.yaw += (cs.tyaw - cs.yaw) * a; cs.pitch += (cs.tpitch - cs.pitch) * a; cs.dist += (cs.tdist - cs.dist) * a;
+  var ref = ME.ready ? ME.A.g.position : new THREE.Vector3(12, 0, 12), a = 1 - Math.pow(.0005, dt); if(EMB3) cs.tyaw += dt * .07; cs.yaw += (cs.tyaw - cs.yaw) * a; cs.pitch += (cs.tpitch - cs.pitch) * a; cs.dist += (cs.tdist - cs.dist) * a;
   var fy = ref.y + (window.__hf || 1.1); cam.position.set(ref.x + Math.sin(cs.yaw) * Math.cos(cs.pitch) * cs.dist, fy + Math.sin(cs.pitch) * cs.dist, ref.z + Math.cos(cs.yaw) * Math.cos(cs.pitch) * cs.dist); cam.lookAt(ref.x, fy, ref.z);
   wheelG.rotation.z = -t * (wheelUsed ? .12 : .4);
   pulse.forEach(function(g, i){ var s3 = dj.playing && !dj.muted ? 1 + .07 * Math.abs(Math.sin(t * 6.6 + i)) : 1; g.scale.set(s3, s3, 1); });
@@ -1948,7 +1951,7 @@ var MUSIC = (function(){
 // ---- avvio: sessione condivisa con il sito (stesso dominio), profilo, canale
 (async function(){
   if(!sb){ toast('Servizio non disponibile.'); return; }
-  var ses = null; try{ var r = await sb.auth.getSession(); ses = r && r.data && r.data.session; }catch(e){}
+  var ses = null; if(!EMB3) try{ var r = await sb.auth.getSession(); ses = r && r.data && r.data.session; }catch(e){}
   var noProfile = false;
   if(ses && ses.user){
     ME.uid = ses.user.id;
@@ -1963,7 +1966,7 @@ var MUSIC = (function(){
   else { scene.remove(ME.A.g); $('guest').hidden = false; $('gEnter').onclick = function(){ var had = false; try{ had = !!localStorage.getItem('kl_has_account'); }catch(e){} AUTH.open(noProfile ? 'nickonly' : (had ? 'login' : 'signup')); }; if(noProfile) AUTH.afterSession(ME.uid); }
   if(ME.ready){ try{ localStorage.setItem('kl_has_account', '1'); }catch(e){} }
   window.kl3d = {cam:cam, dress:function(a){ ME.A.sig = ''; dressAv(ME.A, a, ME.owner); }, enter:enterScene, cs:cs, ME:ME, goAct:goAct, doAct:doAct};
-  joinChannel('kl-room-plaza'); djPull(); setInterval(djPull, 20000);
+  joinChannel('kl-room-plaza'); if(!EMB3){ djPull(); setInterval(djPull, 20000); }
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
 })();
 })();
