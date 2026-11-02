@@ -3100,18 +3100,19 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   var GERR = {rate:'Piano piano…', banned:'Non puoi scrivere.', login:'Entra per scrivere.', bad_body:'Messaggio non valido.', no_profile:'Completa il profilo.'};
   gform.addEventListener('submit', async function(e){
     e.preventDefault();
-    var body = gmsg.value.trim(); if(!body || R.isSpectator() || !ch) return;
+    var body = gmsg.value.trim(); if(!body || R.isSpectator()) return;
+    var inHome = R.scene() === 'home'; if(!inHome && !ch) return;
     if(Date.now() - lastSay < 900) return; lastSay = Date.now();
     gmsg.value = '';
-    if(R.scene() === 'plaza'){
+    if(R.scene() === 'plaza' || inHome){
       try{
-        var r = await window.klSb.rpc('chat_post', {p_nick:'', p_body:body, p_device:dev, p_place:'piazza', p_src:'game'});
+        var r = await window.klSb.rpc('chat_post', {p_nick:'', p_body:body, p_device:dev, p_place:inHome ? 'casa' : 'piazza', p_src:'game'});
         if(r.error || r.data !== 'ok'){ toast(GERR[r.data] || 'Non sono riuscito a inviare.'); return; }
       }catch(err){ toast('Non sono riuscito a inviare.'); return; }
     }
     body = body.slice(0, 140);
-    try{ ch.send({type:'broadcast', event:'say', payload:{k:myKey, nick:R.nick(), body:body, own:isOwner}}); }catch(err){}
-    if(me) setBubble(me, body);
+    if(ch && !inHome){ try{ ch.send({type:'broadcast', event:'say', payload:{k:myKey, nick:R.nick(), body:body, own:isOwner}}); }catch(err){} }
+    if(me && !inHome) setBubble(me, body);
     addLog(R.nick(), body, isOwner);
   });
 
@@ -3456,11 +3457,12 @@ function klSetAnalyser(a){ klAnalyser = a || null; }
   document.addEventListener('kl-scene', function(e){
     var sc = e.detail.scene, spec = e.detail.spectator;
     var live = (sc === 'plaza' || sc === 'studio');
-    $('gameChat').style.display = (live && !spec) ? '' : 'none';
-    $('gameLog').style.display = live ? '' : 'none';
+    var chatOn = (live || sc === 'home');
+    $('gameChat').style.display = (chatOn && !spec) ? '' : 'none';
+    $('gameLog').style.display = chatOn ? '' : 'none';
     $('sceneBar').style.display = live ? '' : 'none';
     $('sceneBar').style.top = spec ? '12px' : '86px';
-    $('gameMsg').placeholder = sc === 'studio' ? 'Scrivi nello studio (privato)…' : 'Scrivi in piazza…';
+    $('gameMsg').placeholder = sc === 'studio' ? 'Scrivi nello studio (privato)…' : (sc === 'home' ? 'Scrivi da casa (arriva su CHATLAND)…' : 'Scrivi in piazza…');
     $('plazaBanner').style.display = 'none'; $('gameLog').innerHTML = '';
     if(live) joinChannel(sc); else leaveChannel();
     if(sc === 'plaza' && !spec) djStart(); else { djStop(); }
