@@ -51,6 +51,18 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .go:disabled{opacity:.55;cursor:default}
 /* strumenti studio */
 .tool-b input[type=file]{display:none!important}
+.sh-card-main{width:min(860px,100%)!important;max-height:88vh;display:flex;flex-direction:column;}
+.sh-coins{position:absolute;top:22px;right:60px;font-family:'Press Start 2P',monospace;font-size:12px;color:var(--gold,#ffd23d);}
+.sh-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px;}
+.sh-tab{background:#150a26;border:1px solid #3a2a66;color:var(--muted,#9a93b8);padding:7px 11px;font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;}
+.sh-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff;} .sh-tab.soon{opacity:.55;}
+.sh-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding-right:4px;}
+.sh-card{background:#100620;border:1px solid #2a1c4a;padding:8px;display:flex;flex-direction:column;gap:5px;}
+.sh-card.own{border-color:#3dffa0;}
+.sh-img{height:150px;background:radial-gradient(circle at 50% 40%,#2a1a4a,#0a0414);display:flex;align-items:center;justify-content:center;overflow:hidden;} .sh-img img{max-width:100%;max-height:100%;} .sh-img span{font-size:54px;}
+.sh-n{font-weight:700;font-size:13px;color:var(--ink,#f4f1ff);} .sh-d{font-size:11px;color:var(--muted,#9a93b8);flex:1;line-height:1.35;}
+.sh-b{display:flex;justify-content:flex-end;} .sh-buy{background:#3dffa0;color:#06100a;border:0;padding:7px 12px;font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;} .sh-ok{color:#3dffa0;font-size:12px;font-weight:700;}
+.sh-soon{grid-column:1/-1;padding:30px;text-align:center;color:var(--muted,#9a93b8);}
 .world-modal{position:fixed;inset:0;z-index:90;background:rgba(5,3,12,.82);display:flex;align-items:center;justify-content:center;padding:16px;}
 .world-card{position:relative;width:min(380px,100%);background:#0a0414;border:1px solid #3a2a66;box-shadow:0 0 40px rgba(123,47,255,.35);padding:24px 22px 20px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
 .world-card h4{margin:0 0 8px;font-family:'Playfair Display',serif;font-weight:900;letter-spacing:.14em;color:var(--red);font-size:18px;} .world-card p{margin:0 0 12px;font-size:13px;color:var(--muted);}
@@ -388,9 +400,21 @@ function findPath(a, b){
 }
 
 // ---- avatar (bianco, scalzo, capelli argento): costruttore riusabile anche per gli altri giocatori
-function mkAvatar(){
-  var g = new THREE.Group(), SHM = M(0xf4f1ff, {roughness:.55, emissive:0x3a3858, emissiveIntensity:.8}), PNM = M(0xf4f1ff, {roughness:.55, emissive:0x3a3858, emissiveIntensity:.8}), SK = M(0xf1e4e2, {roughness:.6, emissive:0x3a3030, emissiveIntensity:.6}), HR = M(0xf4f1ff, {roughness:.5, emissive:0x2a2a40, emissiveIntensity:.6}), FT = SK.clone();
+// capi VIP (stessi id del negozio): stile, colore, stampe
+var VIP = {
+  top:{tee_omg:{style:'tee', col:'#14121c', print:{t:'OMG', s:'KENNY!', c:'#3dffa0'}}, hoodie_kl:{style:'hoodie', col:'#14121c', print:{t:'KENNYLAND', c:'#ffffff', sm:1}}, hoodie_vip:{style:'hoodie', col:'#d9b45c', metal:1, print:{t:'VIP', c:'#2a1c06'}}},
+  bottom:{cargo_kl:{style:'long', col:'#2d3a2e', pockets:1}, shorts_kl:{style:'short', col:'#14121c', stripe:'#3dffa0'}},
+  shoes:{sneaker_kl:{col:'#ffffff', sole:'#3dffa0'}}
+};
+var _pt = {};
+function printTex(p){ var k = JSON.stringify(p); if(_pt[k]) return _pt[k]; var t = tex(256, 160, function(g, W, H){ g.clearRect(0, 0, W, H); g.fillStyle = p.c; g.textAlign = 'center'; g.textBaseline = 'middle'; var f = p.sm ? 38 : 84; g.font = '900 ' + f + 'px "Space Grotesk",sans-serif'; var w = g.measureText(p.t).width; if(w > W - 20){ f = Math.floor(f * (W - 20) / w); g.font = '900 ' + f + 'px "Space Grotesk",sans-serif'; } g.shadowColor = p.c; g.shadowBlur = 8; g.fillText(p.t, W / 2, p.s ? H * .38 : H / 2); if(p.s){ g.font = '900 36px "Space Grotesk",sans-serif'; g.fillText(p.s, W / 2, H * .72); } }); return _pt[k] = t; }
+function mkAvatar(par){
+  var g = new THREE.Group(), SHM = M(0xf4f1ff, {roughness:.55, emissive:0x3a3858, emissiveIntensity:.8}), PNM = M(0xf4f1ff, {roughness:.55, emissive:0x3a3858, emissiveIntensity:.8}), SK = M(0xf1e4e2, {roughness:.6, emissive:0x3a3030, emissiveIntensity:.6}), HR = M(0xf4f1ff, {roughness:.5, emissive:0x2a2a40, emissiveIntensity:.6}), FT = SK.clone(), SHOE = M(0xffffff, {roughness:.5}), SOLE = M(0x3dffa0, {roughness:.6}), DK = M(0x14121c, {roughness:.8});
   var torso = new THREE.Mesh(new THREE.CylinderGeometry(.2, .17, .62, 16), SHM); torso.position.y = 1.1; torso.castShadow = true; g.add(torso);
+  var print = new THREE.Mesh(new THREE.PlaneGeometry(.3, .19), new THREE.MeshBasicMaterial({transparent:true, depthWrite:false})); print.position.set(0, 1.17, .2); print.visible = false; g.add(print);
+  var pocket = new THREE.Mesh(new THREE.BoxGeometry(.24, .1, .04), SHM); pocket.position.set(0, .96, .215); pocket.visible = false; g.add(pocket);
+  var hood = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 12, 0, Math.PI * 2, Math.PI * .15, Math.PI * .6), SHM); hood.position.set(0, 1.4, -.1); hood.scale.set(1.15, .8, .95); hood.rotation.x = .55; hood.visible = false; g.add(hood);
+  var collar = new THREE.Group(); var cr = new THREE.Mesh(new THREE.TorusGeometry(.12, .035, 8, 18), M(0x242430)); cr.rotation.x = Math.PI / 2; cr.position.y = 1.4; collar.add(cr); collar.visible = false; g.add(collar);
   var head = new THREE.Group(); head.position.y = 1.62; g.add(head);
   var hd = new THREE.Mesh(new THREE.SphereGeometry(.21, 24, 20), SK); hd.scale.set(.92, 1.05, .95); hd.castShadow = true; head.add(hd);
   var hair = new THREE.Mesh(new THREE.SphereGeometry(.235, 24, 20, 0, Math.PI * 2, 0, Math.PI * .62), HR); hair.position.set(0, .03, -.02); hair.scale.set(1, 1.05, 1.04); head.add(hair);
@@ -398,26 +422,46 @@ function mkAvatar(){
   var hb = new THREE.Mesh(new THREE.CylinderGeometry(.2, .15, .3, 14), HR); hb.position.set(0, -.08, -.1); head.add(hb);
   var hl = new THREE.Mesh(new THREE.BoxGeometry(.44, .74, .13), HR); hl.position.set(0, -.34, -.17); hl.visible = false; head.add(hl);
   [-1, 1].forEach(function(s2){ var e = new THREE.Mesh(new THREE.SphereGeometry(.032, 10, 10), new THREE.MeshBasicMaterial({color:0xd8261a})); e.position.set(s2 * .075, 0, .19); head.add(e); });
-  // accessori
   var capM = M(0xffffff), glM = new THREE.MeshStandardMaterial({color:0x3dffa0, transparent:true, opacity:.55, roughness:.2}), phM = M(0x7b2fff);
   var cap = new THREE.Group(); var dome = new THREE.Mesh(new THREE.SphereGeometry(.245, 20, 14, 0, Math.PI * 2, 0, Math.PI * .5), capM); dome.position.y = .06; cap.add(dome); var vis = new THREE.Mesh(new THREE.BoxGeometry(.3, .02, .22), capM); vis.position.set(0, .07, .3); vis.rotation.x = .12; cap.add(vis); cap.visible = false; head.add(cap);
   var gl = new THREE.Group(); [-1, 1].forEach(function(s2){ var l = new THREE.Mesh(new THREE.BoxGeometry(.13, .08, .02), glM); l.position.set(s2 * .08, .01, .205); gl.add(l); }); var br = new THREE.Mesh(new THREE.BoxGeometry(.05, .015, .02), glM); br.position.set(0, .03, .205); gl.add(br); gl.visible = false; head.add(gl);
   var ph = new THREE.Group(); var band = new THREE.Mesh(new THREE.TorusGeometry(.235, .018, 8, 24, Math.PI), phM); band.rotation.z = 0; band.position.y = .02; ph.add(band); band.rotation.y = Math.PI / 2; [-1, 1].forEach(function(s2){ var c = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, .05, 12), phM); c.rotation.z = Math.PI / 2; c.position.set(s2 * .235, .01, 0); ph.add(c); }); ph.visible = false; head.add(ph);
-  function limb(x, y, len, r, mat){ var gr = new THREE.Group(); gr.position.set(x, y, 0); var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * .85, len, 10), mat); m.position.y = -len / 2; m.castShadow = true; gr.add(m); g.add(gr); return gr; }
-  var A = {g:g, head:head, aL:limb(-.27, 1.36, .56, .06, SHM), aR:limb(.27, 1.36, .56, .06, SHM), lL:limb(-.09, .8, .78, .085, PNM), lR:limb(.09, .8, .78, .085, PNM), t:Math.random() * 6, m:{shirt:SHM, pants:PNM, hair:HR, foot:FT, cap:capM, glasses:glM, phones:phM}, o:{hl:hl, cap:cap, gl:gl, ph:ph}, feet:[], sig:''};
-  [A.lL, A.lR].forEach(function(l){ var f = new THREE.Mesh(new THREE.BoxGeometry(.13, .06, .22), FT); f.position.set(0, -.8, .04); l.add(f); A.feet.push(f); });
-  scene.add(g); return A;
+  // arti in due pezzi: sopra (stoffa) e sotto (stoffa o pelle) per maniche e pantaloncini corti
+  function limb2(x, y, lu, ll, r, matU, matL){ var gr = new THREE.Group(); gr.position.set(x, y, 0); var u = new THREE.Mesh(new THREE.CylinderGeometry(r, r * .93, lu, 10), matU); u.position.y = -lu / 2; u.castShadow = true; gr.add(u); var l = new THREE.Mesh(new THREE.CylinderGeometry(r * .93, r * .8, ll, 10), matL); l.position.y = -lu - ll / 2; l.castShadow = true; gr.add(l); g.add(gr); gr.userData = {u:u, l:l}; return gr; }
+  var A = {g:g, head:head, torso:torso, aL:limb2(-.27, 1.36, .3, .27, .06, SHM, SHM), aR:limb2(.27, 1.36, .3, .27, .06, SHM, SHM), lL:limb2(-.09, .8, .4, .38, .085, PNM, PNM), lR:limb2(.09, .8, .4, .38, .085, PNM, PNM), t:Math.random() * 6, m:{shirt:SHM, pants:PNM, hair:HR, foot:FT, cap:capM, glasses:glM, phones:phM, skin:SK, shoe:SHOE, sole:SOLE, dk:DK}, o:{hl:hl, cap:cap, gl:gl, ph:ph, print:print, pocket:pocket, hood:hood, collar:collar, cuffs:[]}, feet:[], shoes:[], extra:{}, sig:''};
+  [A.lL, A.lR].forEach(function(l){ var f = new THREE.Mesh(new THREE.BoxGeometry(.13, .06, .22), FT); f.position.set(0, -.8, .04); l.add(f); A.feet.push(f);
+    var sh = new THREE.Mesh(new THREE.BoxGeometry(.15, .1, .27), SHOE); sh.position.set(0, -.78, .06); sh.visible = false; l.add(sh); var so = new THREE.Mesh(new THREE.BoxGeometry(.16, .035, .29), SOLE); so.position.set(0, -.835, .06); so.visible = false; l.add(so); A.shoes.push(sh, so);
+    var pk = new THREE.Mesh(new THREE.BoxGeometry(.045, .13, .1), PNM); pk.position.set(l === A.lL ? -.1 : .1, -.3, .02); pk.visible = false; l.add(pk); A.extra[l === A.lL ? 'pkL' : 'pkR'] = pk;
+    var st = new THREE.Mesh(new THREE.BoxGeometry(.012, .78, .03), new THREE.MeshBasicMaterial({color:0x3dffa0})); st.position.set(l === A.lL ? -.093 : .093, -.4, 0); st.visible = false; l.add(st); A.extra[l === A.lL ? 'stL' : 'stR'] = st; });
+  [A.aL, A.aR].forEach(function(a2, i){ var cf = new THREE.Mesh(new THREE.CylinderGeometry(.052, .052, .03, 10), M(0x242430)); cf.position.y = -.57; cf.visible = false; a2.add(cf); A.o.cuffs.push(cf); });
+  (par || scene).add(g); return A;
 }
 function tint(m, hex, k){ try{ m.color.set(hex); if(m.emissive) { m.emissive.set(hex); m.emissive.multiplyScalar(k === undefined ? .22 : k); } }catch(e){} }
 function isHex(v){ return /^#[0-9a-f]{6}$/i.test(v || ''); }
-// vestiti: stessi dati del look 2D (colori, stile capelli, accessori, scalzo)
+// vestiti: stessi dati del look 2D (colori, stile capelli, accessori, scalzo) + nuovi: top, bottom, vip
 function dressAv(A, a, viewerOwner){
   a = a || {}; var sig = JSON.stringify(a) + (viewerOwner ? 'o' : ''); if(A.sig === sig) return; A.sig = sig;
   var hair = isHex(a.hair) ? a.hair : '#ffffff'; if(hair.toLowerCase() === '#dfe2ec' && !viewerOwner) hair = '#ffffff';
-  tint(A.m.shirt, isHex(a.shirt) ? a.shirt : '#ffffff'); tint(A.m.pants, isHex(a.pants) ? a.pants : '#ffffff'); tint(A.m.hair, hair, .2);
-  var barefoot = a.barefoot !== false; if(a.shoes && isHex(a.shoes) && a.barefoot === false) tint(A.m.foot, a.shoes); else tint(A.m.foot, '#f1e4e2', .6);
+  var vip = a.vip || {}, vt = VIP.top[vip.top], vb = VIP.bottom[vip.bottom], vs = VIP.shoes[vip.shoes];
+  var top = vt ? vt.style : (a.top === 'tee' || a.top === 'hoodie' ? a.top : 'long'), bottom = vb ? vb.style : (a.bottom === 'short' ? 'short' : 'long');
+  var shirtC = vt ? vt.col : (isHex(a.shirt) ? a.shirt : '#ffffff'), pantsC = vb ? vb.col : (isHex(a.pants) ? a.pants : '#ffffff');
+  tint(A.m.shirt, shirtC); tint(A.m.pants, pantsC); tint(A.m.hair, hair, .2);
+  if(vt && vt.metal){ A.m.shirt.metalness = .35; A.m.shirt.roughness = .4; A.m.shirt.emissive.set(shirtC).multiplyScalar(.5); } else { A.m.shirt.metalness = .1; A.m.shirt.roughness = .55; }
+  // maniche e pantaloni
+  var hood = top === 'hoodie', skinSleeve = top === 'tee';
+  A.aL.userData.l.material = A.aR.userData.l.material = skinSleeve ? A.m.skin : A.m.shirt;
+  var ks = hood ? 1.16 : 1; A.torso.scale.set(hood ? 1.14 : 1, 1, hood ? 1.16 : 1); [A.aL, A.aR].forEach(function(x){ x.scale.set(ks, 1, ks); });
+  A.o.hood.visible = hood; A.o.pocket.visible = hood; var pr = vt && vt.print; A.o.print.visible = !!pr; if(pr){ A.o.print.material.map = printTex(pr); A.o.print.material.needsUpdate = true; A.o.print.position.z = hood ? .235 : .2; A.o.print.position.y = 1.18; }
+  var short = bottom === 'short'; [A.lL, A.lR].forEach(function(l){ l.userData.l.material = short ? A.m.skin : A.m.pants; });
+  A.extra.pkL.visible = A.extra.pkR.visible = !!(vb && vb.pockets); A.extra.stL.visible = A.extra.stR.visible = !!(vb && vb.stripe);
+  if(vb && vb.stripe){ A.extra.stL.material.color.set(vb.stripe); A.extra.stR.material.color.set(vb.stripe); A.extra.stL.scale.y = A.extra.stR.scale.y = short ? .5 : 1; A.extra.stL.position.y = A.extra.stR.position.y = short ? -.2 : -.4; }
+  // scarpe
+  var shoeOn = !!vs || (a.barefoot === false && isHex(a.shoes)); A.feet.forEach(function(f){ f.visible = !shoeOn; }); A.shoes.forEach(function(m){ m.visible = shoeOn; });
+  if(vs){ tint(A.m.shoe, vs.col, .25); tint(A.m.sole, vs.sole, .5); } else if(shoeOn){ tint(A.m.shoe, a.shoes, .25); tint(A.m.sole, '#14121c', .2); }
+  tint(A.m.foot, '#f1e4e2', .6);
   A.o.hl.visible = a.hairStyle === 'long';
   var accs = a.accs || []; A.o.cap.visible = accs.indexOf('acc-cap') > -1; A.o.gl.visible = accs.indexOf('acc-glasses') > -1; A.o.ph.visible = accs.indexOf('acc-phones') > -1;
+  A.o.collar.visible = !!a.outer; A.o.cuffs.forEach(function(c){ c.visible = !!a.outer && top !== 'tee'; });
   if(isHex(a.cap)) tint(A.m.cap, a.cap, .2); if(isHex(a.phones)) tint(A.m.phones, a.phones, .3); if(isHex(a.glasses)){ A.m.glasses.color.set(a.glasses); }
 }
 function animAv(A, moving, sit, dt, y, face){
@@ -932,10 +976,132 @@ S.build = function(S){
   solidsToBlk(S, SOL); ROOT = prev;
 };
 S.act = function(a){
-  if(a === 'shop') return toast('🛒 Il negozio per ora è nel sito 2D (CAMBIA STANZA → torna al sito).');
+  if(a === 'shop') return SHOP.open();
   if(a === 'look') return toast('👕 Il cambio look per ora è nel sito 2D.');
   if(a === 'speaker') return toast('🔊 Cassa vecchia e rovinata: nel negozio ne trovi di migliori.');
 };
+})();
+
+// ======================= OGGETTI DEL NEGOZIO: modelli 3D (originati dallo studio/piazza) =======================
+// ogni modello è costruito con origine nell'angolo (0,0) del suo ingombro fp=[larghezza, profondità], fronte verso +z
+var CATS = [
+  {id:'tech', name:'Tecnologia'}, {id:'audio', name:'Audio'}, {id:'furniture', name:'Arredamento'}, {id:'clothes', name:'Vestiti VIP'}, {id:'dance', name:'Balli'}, {id:'walk', name:'Camminate'}, {id:'floor', name:'Pavimenti', soon:'Cambia il pavimento della stanza.'}, {id:'walls', name:'Pareti', soon:'Cambia colori e carta da parati.'}
+];
+function mkHolder(fp, fn){ var holder = new THREE.Group(), inner = new THREE.Group(); inner.position.set(-fp[0] / 2, 0, -fp[1] / 2); holder.add(inner); var prev = ROOT; ROOT = inner; try{ fn(fp); }finally{ ROOT = prev; } holder.userData.fp = fp; return holder; }
+function disc(x, y, z, r, col, rot){ var m = new THREE.Mesh(new THREE.CircleGeometry(r, 24), mbasic(col)); m.position.set(x, y, z); if(rot) m.rotation.y = rot; ROOT.add(m); return m; }
+function ring(x, y, z, r, col, t){ var m = new THREE.Mesh(new THREE.TorusGeometry(r, t || .02, 6, 24), mbasic(col)); m.position.set(x, y, z); ROOT.add(m); return m; }
+function speakerBox(x, z, w, d, h, drivers){ bxp(x, z, w, d, 0, h, '#14141e'); drivers.forEach(function(dv){ disc(x + dv[0], dv[1] * PXH, z + d + .004, dv[2], 0x0a0812); ring(x + dv[0], dv[1] * PXH, z + d + .006, dv[2], dv[3] || 0x555a70); }); }
+function guitarModel(col, neonK, len, bodyR){ var gg = new THREE.Group(); var body = new THREE.Mesh(new THREE.CylinderGeometry(bodyR, bodyR, .09, 20), M(col, {roughness:.3})); body.rotation.x = Math.PI / 2; body.position.y = .95; gg.add(body); var neck = new THREE.Mesh(new THREE.BoxGeometry(.07, len, .04), M(0x6a4a2a)); neck.position.y = .95 + len / 2 + .1; gg.add(neck); var head = new THREE.Mesh(new THREE.BoxGeometry(.13, .25, .05), M(0x2a1d14)); head.position.y = .95 + len + .22; gg.add(head); var st = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .8, 6), M(0x2a2438)); st.position.set(0, .4, -.02); gg.add(st); gg.rotation.x = -.06; return gg; }
+var ITEMS = {
+  laptop_pro:{cat:'tech', name:'Portatile nuovo', fp:[.9, .6], up:'laptop', desc:'Schermo acceso e tastiera che funziona. Sostituisce il rottame sul tavolo.', build:function(fp){ bxp(0, 0, .9, .6, 0, 2.5, '#3a3a4d'); var sc = new THREE.Mesh(new THREE.BoxGeometry(.9, .62, .04), M(0x3a3a4d)); sc.position.set(.45, .78, .05); sc.rotation.x = -.18; ROOT.add(sc); var s2 = new THREE.Mesh(new THREE.PlaneGeometry(.8, .5), mbasic(0x0c0c16)); s2.position.set(.45, .8, .075); s2.rotation.x = -.18; ROOT.add(s2); [38, 43, 48].forEach(function(hz, n){ var l = new THREE.Mesh(new THREE.PlaneGeometry(.5 - n * .1, .06), mbasic(n === 1 ? 0x7b2fff : 0x3dffa0)); l.position.set(.3 + (.5 - n * .1) / 2 - .15, .62 + n * .12, .078 + n * .004); l.rotation.x = -.18; ROOT.add(l); }); }},
+  speaker_pro:{cat:'audio', name:'Cassa nuova', fp:[.7, .6], up:'speaker', desc:'Cassa vera, senza nastro adesivo. Pulsa a tempo con la musica.', build:function(fp){ bxp(0, 0, .7, .55, 0, 52, '#1a1a2e'); disc(.35, 1.0, .557, .17, 0x0a0812); ring(.35, 1.0, .56, .17, 0x3dffa0, .025); disc(.35, .55, .557, .12, 0x0a0812); ring(.35, .55, .56, .12, 0x7b2fff, .025); }},
+  monitors_pair:{cat:'tech', name:'Monitor da studio', fp:[1.9, .7], desc:'Due monitor da studio su stand: ascolti il mix come si deve.', build:function(){ [0, 1.15].forEach(function(x){ bxp(x + .1, .1, .45, .4, 0, 52, '#1c1c28'); bxp(x, 0, .66, .55, 52, 112, '#14141e'); disc(x + .33, 98 * PXH, .552, .19, 0x0a0812); ring(x + .33, 98 * PXH, .555, .19, 0x555a70); disc(x + .33, 74 * PXH, .552, .34, 0x0a0812); ring(x + .33, 74 * PXH, .555, .34, 0x555a70); disc(x + .33, 74 * PXH, .557, .16, 0x1d1d2a); ring(x + .33, 74 * PXH, .559, .16, 0x3dffa0, .015); }); }},
+  mpc_table:{cat:'tech', name:'MPC e modulare', fp:[2.6, 1.0], desc:'Drum machine con i pad colorati e un sintetizzatore modulare con i cavi, su un tavolo da lavoro.', build:function(){ bxp(0, 0, 2.6, 1.0, 0, 34, '#241c18'); bxp(.1, .1, 1.0, .8, 34, 37, '#15151f'); for(var i = 0; i < 4; i++) for(var j = 0; j < 4; j++) bxp(.15 + i * .22, .15 + j * .18, .18, .14, 37, 38.5, ['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][(i + j) % 4]); bxp(1.3, .08, 1.2, .8, 34, 48, '#101018'); for(i = 0; i < 6; i++) for(j = 0; j < 2; j++) disc(1.38 + i * .18, (38 + j * 6) * PXH, .885, .045, 0xc8cde0); for(i = 0; i < 4; i++){ var cb = new THREE.Mesh(new THREE.TorusGeometry(.12, .012, 6, 14, Math.PI), mbasic([0xff2d55, 0x2d7bff, 0x3dffa0, 0xffd23d][i])); cb.position.set(1.6 + i * .28, 41 * PXH, .9); cb.rotation.z = Math.PI; ROOT.add(cb); } }},
+  synth_stand:{cat:'tech', name:'Tastiere e synth', fp:[2.6, .9], desc:'Due tastiere su stand con pannello di controllo e manopole.', build:function(){ [[0, 0], [2.6, 0], [0, .9], [2.6, .9]].forEach(function(p){ bxp(Math.min(p[0] + .02, 2.54), Math.min(p[1] + .02, .84), .06, .06, 0, 30, '#55506e'); }); bxp(0, 0, 2.6, .9, 52, 56, '#15151f'); for(var i = 0; i < 26; i++){ bxp(.05 + i * .1, .35, .09, .55, 56, 57, '#f4f1ff'); if(i % 7 !== 2 && i % 7 !== 6) bxp(.09 + i * .1, .35, .05, .33, 57, 58, '#0a0812'); } bxp(.05, .03, 1.25, .22, 56, 57.5, '#0a0812'); for(i = 0; i < 8; i++) cylP(1.4 + i * .1, .14, 57.5, 61, .04, [0xff3b3b, 0x3dffa0, 0xb57bff, 0xffd23d][i % 4]); bxp(0, .3, 2.6, .6, 32, 36, '#1a1522'); }},
+  rack_towers:{cat:'tech', name:'Rack outboard', fp:[2.2, 1.0], desc:'Due torri di outboard con le lucine verdi e arancioni.', build:function(){ [0, 1.15].forEach(function(x, k){ bxp(x, 0, 1.05, .9, 0, 128, '#101018'); planeY(.902, x + .05, x + 1.0, 4, 124, tmat(.95 * 96, 120 * 3, function(g, W, H){ g.fillStyle = '#0c0c14'; g.fillRect(0, 0, W, H); for(var q = 0; q < 9; q++){ var y0 = H - (17 + q * 13) * 3; g.fillStyle = '#17171f'; g.strokeStyle = '#2a2a3a'; g.lineWidth = 2; g.fillRect(2, y0, W - 4, 33); g.strokeRect(2, y0, W - 4, 33); for(var d = 0; d < 5; d++){ g.fillStyle = ((q + d + k) % 3) ? '#3dffa0' : '#ff9d3b'; g.beginPath(); g.arc((.15 + d * .17) * 96, y0 + 16, 4, 0, 7); g.fill(); } } })); }); }},
+  speaker_tower:{cat:'audio', name:'Torre di casse da palco', fp:[1.5, 1.2], desc:'Tre casse impilate come quelle del palco in piazza, con i coni viola e verdi.', build:function(){ [0, 1, 2].forEach(function(i){ bxp(.1, .1, 1.3, 1.0, i * 38 + (i ? 2 : 0), i * 38 + 36, '#0a0812'); var y = (i * 38 + 18) * PXH; disc(.45, y, 1.104, .26, 0x0a0812); ring(.45, y, 1.108, .26, 0x3dffa0, .03); disc(.45, y, 1.112, .1, 0x7b2fff); disc(1.1, y, 1.104, .13, 0x0a0812); ring(1.1, y, 1.108, .13, 0x7b2fff, .025); }); }},
+  mic_cond:{cat:'audio', name:'Microfono a condensatore', fp:[.9, .9], desc:'Microfono a condensatore con pop filter e asta, come quello della cabina.', build:function(){ cylP(.45, .45, 0, 3, .24, 0x0a0812); cylP(.45, .45, 0, 96, .04, 0x8a8fa8); cylP(.45, .45, 99, 120, .17, 0xb8963a, {metalness:.7, roughness:.3}); var pop = new THREE.Mesh(new THREE.CircleGeometry(.36, 24), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.12, side:THREE.DoubleSide})); pop.position.set(.45, 3.55, .78); ROOT.add(pop); var pr = new THREE.Mesh(new THREE.TorusGeometry(.36, .02, 6, 24), M(0x8a8fa8)); pr.position.copy(pop.position); ROOT.add(pr); }},
+  sofa_red:{cat:'furniture', name:'Divano rosso', fp:[3.2, 1.5], desc:'Il divano rosso dello studio. Ci si siedono due persone.', build:function(){ bxp(0, 0, 3.2, 1.5, 0, 20, '#5a1a2a'); bxp(0, 0, 3.2, .45, 20, 56, '#6a2234'); bxp(0, 0, .35, 1.5, 20, 40, '#6a2234'); bxp(2.85, 0, .35, 1.5, 20, 40, '#6a2234'); }},
+  pouf_set:{cat:'furniture', name:'Set di 3 pouf', fp:[2.8, 2.0], desc:'Tre pouf morbidi, rosso, blu e viola.', build:function(){ [[.1, .1, '#ff2d55'], [1.6, .1, '#2d7bff'], [.85, .9, '#b57bff']].forEach(function(p){ bxp(p[0], p[1], 1.1, 1.1, 0, 22, p[2], {roughness:.85}); cylP(p[0] + .55, p[1] + .55, 22, 23, .4, 0xffffff, {transparent:true, opacity:.12}); }); }},
+  plant_pot:{cat:'furniture', name:'Pianta', fp:[.9, .9], desc:'Una pianta per rendere la stanza viva.', build:function(){ bxp(0, 0, .9, .9, 0, 14, '#2a2438'); [[0, .85, .5, 0x1c7a52], [-.3, .55, .38, 0x25a06c], [.3, .6, .38, 0x1c7a52]].forEach(function(c){ var sp = new THREE.Mesh(new THREE.SphereGeometry(c[2], 14, 10), M(c[3], {roughness:.9})); sp.position.set(.45 + c[0], .44 + c[2] * .85 + (c[1] - .55) * .45, .45); ROOT.add(sp); }); }},
+  floor_lamp:{cat:'furniture', name:'Lampada da terra', fp:[.5, .5], desc:'Luce calda per le serate in studio.', build:function(){ cylP(.25, .25, 0, 3, .2, 0x2a2438); cylP(.25, .25, 0, 150, .03, 0x55506e); var sh = new THREE.Mesh(new THREE.CylinderGeometry(.18, .26, .35, 16, 1, true), new THREE.MeshBasicMaterial({color:0xffe8b0, side:THREE.DoubleSide})); sh.position.set(.25, 4.7, .25); ROOT.add(sh); var l = new THREE.PointLight(0xffd68a, .6, 6, 1.6); l.position.set(.25, 4.6, .25); ROOT.add(l); }},
+  upright_piano:{cat:'furniture', name:'Pianoforte verticale', fp:[2.0, 2.2], desc:'Il pianoforte verticale dello studio, con sgabello.', build:function(){ bxp(0, 0, 2.0, 1.1, 0, 86, '#0c0a12'); bxp(.05, 1.1, 1.9, .35, 54, 58, '#15101f'); for(var i = 0; i < 12; i++){ bxp(.12 + i * .155, 1.12, .12, .3, 58, 59, '#f4f1ff'); } for(i = 0; i < 12; i++) if(i % 7 !== 2 && i % 7 !== 6) bxp(.2 + i * .155, 1.12, .08, .18, 59, 60.5, '#0a0812'); bxp(.75, 1.6, .5, .5, 0, 20, '#15101f'); }},
+  grand_piano:{cat:'furniture', name:'Pianoforte a coda', fp:[3.4, 3.4], desc:'Il pianoforte a coda con il coperchio aperto, come nello studio.', build:function(){ var ox = -6.0, oy = -15.9, GP = [[5.0, 15.9], [7.6, 15.9], [8.4, 16.4], [8.4, 17.2], [7.4, 17.9], [5.0, 17.9]].map(function(q){ return [q[0] + 1 + ox, q[1] + oy]; }); [[5.25, 17.75], [7.95, 17.0], [5.3, 16.25]].forEach(function(q){ cylP(q[0] + 1 + ox, q[1] + oy, 0, 24, .07, 0x0b0b12); }); shaped(GP, 24, 38, 0x12121c, {roughness:.18, metalness:.5}); bxp(6.0 + ox, 17.9 + oy, 1.95, .55, 30, 34, '#0b0b12'); for(var i = 0; i < 14; i++) bxp(6.05 + i * .135 + ox, 17.95 + oy, .115, .47, 34, 35, '#f4f1ff'); for(i = 0; i < 13; i++) if([0, 1, 3, 4, 5, 7, 8, 10, 11, 12].indexOf(i) >= 0) bxp(6.13 + i * .135 + ox, 17.95 + oy, .07, .3, 35, 37, '#08080e'); quad3([[6.0 + ox, 38 * PXH, 15.9 + oy], [8.6 + ox, 38 * PXH, 15.9 + oy], [9.0 + ox, 72 * PXH, 16.9 + oy], [6.3 + ox, 72 * PXH, 16.9 + oy]], new THREE.MeshStandardMaterial({color:0x0e0e18, roughness:.25, metalness:.4})); bxp(6.65 + ox, 18.7 + oy, 1.2, .6, 0, 20, '#14101c'); bxp(6.62 + ox, 18.67 + oy, 1.26, .66, 20, 24, '#241a30'); }},
+  drum_kit:{cat:'furniture', name:'Batteria', fp:[2.0, 1.9], desc:'Cassa, tom, rullante e piatti d\'oro.', build:function(){ var kick = new THREE.Mesh(new THREE.CylinderGeometry(.62, .62, .55, 24), M(0x7a1020, {roughness:.35})); kick.rotation.x = Math.PI / 2; kick.position.set(1.0, .65, 1.2); ROOT.add(kick); disc(1.0, .65, 1.48, .4, 0x14081a); [[.65, .8], [1.35, .8]].forEach(function(t){ var tm = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .3, 20), M(0x1f1f30, {roughness:.4})); tm.position.set(t[0], 1.4, t[1]); ROOT.add(tm); }); [[.2, .7, 2.2], [1.8, .5, 2.3]].forEach(function(c){ var cm = new THREE.Mesh(new THREE.CylinderGeometry(.45, .45, .03, 20), M(0xd4af37, {metalness:.8, roughness:.3})); cm.position.set(c[0] + .1, c[2], c[1]); cm.rotation.z = .12; ROOT.add(cm); cylP(c[0] + .1, c[1], 0, c[2] / PXH, .02, 0x8a8fa8); }); var sn = new THREE.Mesh(new THREE.CylinderGeometry(.34, .34, .2, 20), M(0xd9dbe8, {metalness:.5, roughness:.3})); sn.position.set(.35, 1.05, 1.3); ROOT.add(sn); cylP(.35, 1.3, 0, 34, .02, 0x8a8fa8); cylP(1.0, .25, 14, 16, .5, 0x0a0812); }},
+  guitar_e:{cat:'furniture', name:'Chitarra elettrica', fp:[.6, .6], desc:'Chitarra elettrica rossa su supporto.', build:function(){ var g = guitarModel(0xc0392b, 0, 1.3, .27); g.position.set(.3, 0, .3); ROOT.add(g); }},
+  bass_b:{cat:'furniture', name:'Basso blu', fp:[.6, .6], desc:'Basso elettrico blu su supporto.', build:function(){ var g = guitarModel(0x1f6ed8, 0, 1.5, .27); g.position.set(.3, 0, .3); ROOT.add(g); }},
+  guitar_a:{cat:'furniture', name:'Chitarra acustica', fp:[.8, .6], desc:'Chitarra acustica in legno.', build:function(){ var b = new THREE.Mesh(new THREE.SphereGeometry(.4, 20, 16), M(0xa86a32, {roughness:.35})); b.scale.set(1, 1.15, .45); b.position.set(.4, .6, .3); ROOT.add(b); disc(.4, .7, .485, .1, 0x150e08); var n = new THREE.Mesh(new THREE.BoxGeometry(.08, 1.4, .05), M(0xc89a5a)); n.position.set(.4, 1.7, .3); ROOT.add(n); }},
+  amp_stack:{cat:'furniture', name:'Amplificatore', fp:[1.4, .9], desc:'Ampli per chitarra con la griglia e le manopole.', build:function(){ bxp(0, 0, 1.3, .8, 0, 50, '#19151f'); planeY(.802, .1, 1.2, 6, 44, mbasic(0x2a2438)); for(var i = 0; i < 4; i++) disc(.25 + i * .25, 40 * PXH, .804, .05, 0xc8cde0); }},
+  gold_record:{cat:'furniture', name:'Disco d\'oro', wall:true, fp:[1.0, .1], desc:'Disco d\'oro incorniciato per la parete.', build:function(){ var h = 2.85; planeY(.03, 0, 1.0, 112, 142, mbasic(0x0a0814)); var fr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .94), mbasic(0x0a0814)); fr.position.set(.5, h, .03); ROOT.add(fr); var f2 = new THREE.Mesh(new THREE.RingGeometry(.42, .46, 4, 1, Math.PI / 4), mbasic(0xd4af37)); f2.scale.set(1.2, 1.1, 1); f2.position.set(.5, h, .035); ROOT.add(f2); disc(.5, h, .04, .28, 0xd4af37); disc(.5, h, .045, .06, 0x0a0814); }},
+  platinum_record:{cat:'furniture', name:'Disco di platino', wall:true, fp:[1.0, .1], desc:'Disco di platino incorniciato per la parete.', build:function(){ var h = 2.85; var fr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, .94), mbasic(0x0a0814)); fr.position.set(.5, h, .03); ROOT.add(fr); var f2 = new THREE.Mesh(new THREE.RingGeometry(.42, .46, 4, 1, Math.PI / 4), mbasic(0xc0c0c0)); f2.scale.set(1.2, 1.1, 1); f2.position.set(.5, h, .035); ROOT.add(f2); disc(.5, h, .04, .28, 0xc0c0c0); disc(.5, h, .045, .06, 0x0a0814); }},
+  shirt_collar:{cat:'clothes', name:'Camicia con colletto', cloth:{outer:true}, desc:'Camicia nera con colletto e bottoni da mettere sopra la maglia base.'},
+  tee_omg:{cat:'clothes', name:'Maglia OMG KENNY!', cloth:{vip:'top'}, desc:'Maglia nera con la scritta OMG KENNY! verde neon. Maniche corte.'},
+  hoodie_kl:{cat:'clothes', name:'Felpa KENNYLAND', cloth:{vip:'top'}, desc:'Felpa nera con cappuccio e il logo KENNYLAND sul petto.'},
+  hoodie_vip:{cat:'clothes', name:'Felpa Platinum VIP', cloth:{vip:'top'}, desc:'La felpa d\'oro riservata ai veri VIP. Tessuto metallico, scritta VIP.'},
+  cargo_kl:{cat:'clothes', name:'Pantaloni Cargo KL', cloth:{vip:'bottom'}, desc:'Pantaloni cargo verde militare con tasche laterali.'},
+  shorts_kl:{cat:'clothes', name:'Pantaloncini KL Sport', cloth:{vip:'bottom'}, desc:'Pantaloncini neri con banda verde neon.'},
+  sneaker_kl:{cat:'clothes', name:'Sneakers KENNYLAND', cloth:{vip:'shoes'}, desc:'Sneakers bianche con la suola verde neon.'},
+  dance_base:{cat:'dance', name:'Ballo base', skill:'dance', desc:'Braccia in aria e passo a tempo quando suona la musica nella Dance Zone. Senza questo, il tuo avatar scuote solo la testa.'},
+  walk_sway:{cat:'walk', name:'Camminata oscillante', skill:'walk', desc:'Braccia che dondolano e passo molleggiato. La camminata di base resta quella classica.'}
+};
+var ITEM_ORDER = {tech:['laptop_pro', 'monitors_pair', 'mpc_table', 'synth_stand', 'rack_towers'], audio:['speaker_pro', 'speaker_tower', 'mic_cond'], furniture:['sofa_red', 'pouf_set', 'plant_pot', 'floor_lamp', 'guitar_e', 'bass_b', 'guitar_a', 'amp_stack', 'upright_piano', 'drum_kit', 'grand_piano', 'gold_record', 'platinum_record'], clothes:['shirt_collar', 'tee_omg', 'cargo_kl', 'shorts_kl', 'sneaker_kl', 'hoodie_kl', 'hoodie_vip'], dance:['dance_base'], walk:['walk_sway']};
+var PRICE = {laptop_pro:100, monitors_pair:800, mpc_table:1500, synth_stand:2000, rack_towers:1200, speaker_pro:100, speaker_tower:1800, mic_cond:900, sofa_red:1200, pouf_set:500, plant_pot:300, floor_lamp:400, upright_piano:2500, grand_piano:6000, drum_kit:3000, guitar_e:1000, bass_b:900, guitar_a:800, amp_stack:700, gold_record:1500, platinum_record:2500, shirt_collar:100, tee_omg:400, hoodie_kl:900, cargo_kl:700, shorts_kl:450, sneaker_kl:600, hoodie_vip:3000, dance_base:100, walk_sway:100};
+function itemModel(id){ var it = ITEMS[id]; return it && it.build ? mkHolder(it.fp, it.build) : null; }
+
+// ======================= NEGOZIO 3D =======================
+var INV = {own:{}, loaded:false};
+var THUMB = (function(){
+  var rn = null, cache = {};
+  function R(){ if(!rn){ rn = new THREE.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:true}); rn.setSize(220, 190); rn.setPixelRatio(1); } return rn; }
+  var FOCUS = {top:[1.25, 1.5], bottom:[.7, 1.75], shoes:[.3, .9], outer:[1.3, 1.4]};
+  function render(id){
+    if(cache[id]) return cache[id];
+    var it = ITEMS[id], sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 220 / 190, .1, 100), tgt = new THREE.Vector3(), dist;
+    sc.add(new THREE.HemisphereLight(0xffffff, 0x6a5a8a, 1.0)); var dl = new THREE.DirectionalLight(0xffffff, .9); dl.position.set(3, 5, 4); sc.add(dl);
+    var kind = it.cloth ? (it.cloth.outer ? 'outer' : it.cloth.vip) : null, obj;
+    if(it.cloth){
+      var look = {}; if(it.cloth.outer) look.outer = true; else { look.vip = {}; look.vip[it.cloth.vip] = id; }
+      var pv = ROOT; ROOT = sc; var A; try{ A = mkAvatar(sc); }finally{ ROOT = pv; } dressAv(A, look, false); A.g.rotation.y = .5; var f = FOCUS[kind]; tgt.set(0, f[0], 0); dist = f[1] * 2.2;
+    } else if(it.build){
+      obj = itemModel(id); sc.add(obj); var bb = new THREE.Box3().setFromObject(obj), sz = bb.getSize(new THREE.Vector3()); bb.getCenter(tgt); dist = Math.max(sz.x, sz.y * 1.25, sz.z) * 2.1 + .4;
+    } else return '';
+    cam.position.set(tgt.x + dist * .62, tgt.y + dist * .42, tgt.z + dist * .78); cam.lookAt(tgt);
+    var r = R(); r.render(sc, cam); var url = r.domElement.toDataURL('image/png');
+    sc.traverse(function(o){ if(o.geometry) o.geometry.dispose(); }); cache[id] = url; return url;
+  }
+  return {get:render};
+})();
+
+var SHOP = (function(){
+  var cat = null, price = {}, ov = null, busy = false;
+  function coinsNow(){ return parseInt($('coins').textContent, 10) || 0; }
+  function setCoins(n){ $('coins').textContent = n; }
+  async function load(){
+    try{ var c = await sb.from('shop_catalog').select('id,price,active'); if(c && c.data) c.data.forEach(function(r){ if(r.active) price[r.id] = r.price; }); }catch(e){}
+    Object.keys(PRICE).forEach(function(k){ if(price[k] === undefined && !Object.keys(price).length) price[k] = PRICE[k]; });
+    try{ var q = await sb.from('inventory').select('item_id'); INV.own = {}; if(q && q.data) q.data.forEach(function(r){ INV.own[r.item_id] = 1; }); INV.loaded = true; }catch(e){}
+  }
+  function render(){
+    if(!ov) return; var C = CATS.filter(function(x){ return true; });
+    var tabs = C.map(function(c){ return '<button type="button" class="sh-tab' + (c.id === cat ? ' on' : '') + (c.soon ? ' soon' : '') + '" data-c="' + c.id + '">' + c.name + '</button>'; }).join('');
+    var cur = CATS.filter(function(c){ return c.id === cat; })[0], body = '';
+    if(cur && cur.soon) body = '<div class="sh-soon">Presto: ' + esc(cur.soon) + '</div>';
+    else (ITEM_ORDER[cat] || []).forEach(function(id){
+      var it = ITEMS[id], p = price[id], own = INV.own[id], img = THUMB.get(id);
+      if(p === undefined) return;
+      body += '<div class="sh-card' + (own ? ' own' : '') + '"><div class="sh-img">' + (img ? '<img alt="" src="' + img + '">' : '<span>' + (it.skill === 'dance' ? '💃' : '🚶') + '</span>') + '</div><div class="sh-n">' + esc(it.name) + '</div><div class="sh-d">' + esc(it.desc || '') + '</div><div class="sh-b">' + (own ? '<span class="sh-ok">✓ Tuo</span>' : '<button type="button" class="sh-buy" data-id="' + id + '">🪙 ' + p + '</button>') + '</div></div>';
+    });
+    ov.querySelector('.sh-tabs').innerHTML = tabs; ov.querySelector('.sh-grid').innerHTML = body; ov.querySelector('.sh-coins').textContent = '🪙 ' + coinsNow();
+  }
+  async function buy(id){
+    if(busy) return; busy = true;
+    try{
+      var r = await sb.rpc('shop_buy', {p_item:id}), d = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data), res = d && d.res;
+      if(r.error || !d) toast('Acquisto non riuscito, riprova.');
+      else if(res === 'ok'){ INV.own[id] = 1; setCoins(d.total_coins); toast('✓ Comprato: ' + ITEMS[id].name + (ITEMS[id].cat === 'clothes' ? ' — lo trovi nell\'armadio' : '')); }
+      else if(res === 'owned'){ INV.own[id] = 1; toast('Ce l\'hai già.'); }
+      else if(res === 'poor'){ if(d.total_coins !== undefined && d.total_coins !== null) setCoins(d.total_coins); toast('Servono più monete: ' + price[id] + ' 🪙'); }
+      else toast('Oggetto non disponibile.');
+    }catch(e){ toast('Acquisto non riuscito, riprova.'); }
+    busy = false; render();
+  }
+  async function open(){
+    if(!ME.ready) return toast('Accedi dal sito per usare il negozio.');
+    if(ov) return;
+    ov = document.createElement('div'); ov.className = 'world-modal sh-modal';
+    ov.innerHTML = '<div class="world-card sh-card-main"><button type="button" class="world-x" aria-label="Chiudi">✕</button><h4>NEGOZIO</h4><div class="sh-coins"></div><div class="sh-tabs"></div><div class="sh-grid"><div class="sh-soon">Carico…</div></div></div>';
+    document.body.appendChild(ov);
+    function close(){ if(ov && ov.parentNode) ov.parentNode.removeChild(ov); ov = null; }
+    ov.querySelector('.world-x').addEventListener('click', close);
+    ov.addEventListener('click', function(e){
+      if(e.target === ov) return close();
+      var t = e.target.closest ? e.target.closest('[data-c]') : null; if(t){ cat = t.getAttribute('data-c'); render(); return; }
+      var b = e.target.closest ? e.target.closest('.sh-buy') : null; if(b) buy(b.getAttribute('data-id'));
+    });
+    cat = cat || 'tech';
+    await load(); render();
+  }
+  return {open:open, price:price};
 })();
 
 // ---- strumenti dello studio: registratore, mixer, synth (stesso codice del 2D, tutto locale nel browser)
@@ -1175,7 +1341,7 @@ function openRecorder(){ TOOLS.openRecorder(); }
   }
   if(ME.ready){ meLabel = {el:mkLabel(ME.nick, ME.owner), bt:0}; $('who').textContent = ME.nick; $('coinbox').hidden = false; $('chat').hidden = false; ME.A.g.position.set(ME.x, 0, ME.z); }
   else { scene.remove(ME.A.g); $('guest').hidden = false; }
-  window.kl3d = {enter:enterScene, cs:cs, ME:ME, goAct:goAct, doAct:doAct};
+  window.kl3d = {dress:function(a){ ME.A.sig = ''; dressAv(ME.A, a, ME.owner); }, enter:enterScene, cs:cs, ME:ME, goAct:goAct, doAct:doAct};
   joinChannel('kl-room-plaza'); djPull(); setInterval(djPull, 20000);
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
 })();
