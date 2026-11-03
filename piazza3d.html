@@ -1362,8 +1362,10 @@ var HOME = (function(){
     layout.forEach(function(o){ if(ITEMS[o.id]){ var h = mk(o); if(h) objs.push(h); } });
     rebuildBlk(); upgrades();
   }
-  function upPrefs(){ try{ return JSON.parse(localStorage.getItem('kl_home_up_' + ME.uid) || '{}') || {}; }catch(e){ return {}; } }
-  function setUpPref(k, v){ var p = upPrefs(); p[k] = v; try{ localStorage.setItem('kl_home_up_' + ME.uid, JSON.stringify(p)); }catch(e){} upgrades(); render(); }
+  var UPP = null;
+  function upPrefs(){ if(UPP) return UPP; try{ return JSON.parse(localStorage.getItem('kl_home_up_' + ME.uid) || '{}') || {}; }catch(e){ return {}; } }
+  async function setUpPref(k, v){ var p = Object.assign({}, upPrefs()); p[k] = v; UPP = p; try{ localStorage.setItem('kl_home_up_' + ME.uid, JSON.stringify(p)); }catch(e){} upgrades(); render();
+    try{ var u = await sb.from('home_layouts').update({prefs:p}).eq('user_id', ME.uid).select('user_id'); if(!(u && u.data && u.data.length)) await sb.from('home_layouts').insert({user_id:ME.uid, layout:layout.map(function(o){ var q = {id:o.id, x:o.x}; if(!ITEMS[o.id].wall){ q.z = o.z; q.r = o.r | 0; } return q; }), prefs:p}); }catch(e){} }
   function upgrades(){
     var pf = upPrefs();
     if(INV.own.laptop_pro && !upg.lap){ upg.lap = itemModel('laptop_pro'); upg.lap.position.set(4.5, 28 * PXH, .9); S.group.add(upg.lap); }
@@ -1378,7 +1380,7 @@ var HOME = (function(){
   async function load(){
     if(loaded) return; loaded = true;
     try{ var q = await sb.from('inventory').select('item_id'); INV.own = {}; if(q && q.data) q.data.forEach(function(r){ INV.own[r.item_id] = 1; }); INV.loaded = true; }catch(e){}
-    try{ var r = await sb.from('home_layouts').select('layout').eq('user_id', ME.uid).maybeSingle(); var L = r && r.data && r.data.layout; if(Array.isArray(L)) layout = L.filter(function(o){ return o && ITEMS[o.id] && INV.own[o.id] && isFinite(o.x); }).map(function(o){ return {id:o.id, x:+o.x, z:+o.z || 0, r:o.r | 0}; }); }catch(e){}
+    try{ var r = await sb.from('home_layouts').select('layout,prefs').eq('user_id', ME.uid).maybeSingle(); if(r && r.data && r.data.prefs && typeof r.data.prefs === 'object' && Object.keys(r.data.prefs).length){ UPP = r.data.prefs; } var L = r && r.data && r.data.layout; if(Array.isArray(L)) layout = L.filter(function(o){ return o && ITEMS[o.id] && INV.own[o.id] && isFinite(o.x); }).map(function(o){ return {id:o.id, x:+o.x, z:+o.z || 0, r:o.r | 0}; }); }catch(e){}
     build();
   }
   // ---- editor
