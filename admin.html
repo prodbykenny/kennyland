@@ -80,6 +80,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <div class="msg" id="stMsg"></div>
   </div>
   <h2 style="margin-top:34px">CHATLAND · moderazione</h2>
+  <div style="margin:8px 0"><button type="button" class="del" id="chatClear" style="padding:8px 14px;cursor:pointer">Svuota tutta la chat</button> <span class="muted" id="chatClearMsg" style="font-size:12px"></span></div>
   <div id="modChat"></div>
   <h2 style="margin-top:34px">BACHECA · moderazione</h2>
   <div id="modBoard"></div>
@@ -116,11 +117,16 @@ button.del{border-color:var(--mag);color:var(--mag);}
     var b = document.createElement('b'); b.textContent = head + ' '; t.appendChild(b); t.appendChild(document.createTextNode(text));
     row.appendChild(t); btns.forEach(function(x){ row.appendChild(x); }); root.appendChild(row);
   }
+  $('chatClear').addEventListener('click', async function(){
+    if(!confirm('Svuotare TUTTA la chat (CHATLAND sito + piazza + case)? Non si può annullare.')) return;
+    var r = await sb.rpc('chat_admin_clear'); $('chatClearMsg').textContent = r && typeof r.data === 'number' && r.data >= 0 ? 'Eliminati ' + r.data + ' messaggi.' : 'Non riuscito.'; loadMod();
+  });
   async function loadMod(){
     var c = $('modChat'), b = $('modBoard'); c.innerHTML = ''; b.innerHTML = '';
     var r = await sb.rpc('chat_admin_list', {p_limit:100});
     ((r && r.data) || []).forEach(function(m){
       var bs = [btn(m.hidden ? 'Mostra' : 'Nascondi', '', async function(){ await sb.rpc('chat_admin_hide', {p_id:m.id, p_hidden:!m.hidden}); loadMod(); })];
+      bs.push(btn('Elimina', 'del', async function(){ if(confirm('Eliminare definitivamente questo messaggio?')){ await sb.rpc('chat_admin_delete', {p_id:m.id}); loadMod(); } }));
       if(!m.registered) bs.push(btn('Blocca dispositivo', 'del', async function(){ if(confirm('Bloccare questo dispositivo dalla chat?')){ await sb.rpc('chat_admin_ban', {p_device:m.device}); loadMod(); } }));
       modRow(c, new Date(m.created_at).toLocaleString('it-IT') + ' · ' + m.nick + (m.registered ? '' : ' (ospite)') + ':', m.body, m.hidden, bs);
     });

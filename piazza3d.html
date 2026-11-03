@@ -1085,7 +1085,7 @@ S.build = function(S){
   // porta verso la piazza (parete destra, x 1.7-3.1, h 80px)
   planeY(.02, 1.7, 3.1, 0, 80, tmat(1.4 * 120, 80 * 3.75, function(g, W, H){ g.fillStyle = '#0b0618'; g.strokeStyle = '#b57bff'; g.lineWidth = 6; g.fillRect(0, 0, W, H); g.strokeRect(3, 3, W - 6, H - 6); g.fillStyle = 'rgba(61,255,160,.16)'; g.strokeStyle = '#3dffa0'; g.lineWidth = 3; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.fillRect(W * .11, H * .12, W * .78, H * .88); g.strokeRect(W * .11, H * .12, W * .78, H * .88); }));
   planeY(.021, 1.6, 3.2, 84, 98, tmat(256, 40, function(g, W, H){ g.fillStyle = '#3dffa0'; g.font = '700 30px "Space Grotesk",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#3dffa0'; g.shadowBlur = 8; g.fillText('PIAZZA', W / 2, H / 2); }, {transparent:true}));
-  S.STAND.sign = {x:2.0, z:4.0}; hitS(S, 'sign', 0, 2.2, .5, 3.6, 4.0); S.STAND.shop = {x:4.5, z:1.9}; S.STAND.look = {x:1.2, z:1.8}; S.STAND.plaza = {x:2.4, z:1.3};
+  S.STAND.speaker = {x:7.3, z:2.1}; S.STAND.sign = {x:2.0, z:4.0}; hitS(S, 'sign', 0, 2.2, .5, 3.6, 4.0); S.STAND.shop = {x:4.5, z:1.9}; S.STAND.look = {x:1.2, z:1.8}; S.STAND.plaza = {x:2.4, z:1.3};
   hitS(S, 'look', 0, 0, 1.8, 1.4, 2.5); hitS(S, 'shop', 3.2, .2, 2.5, 1.3, 1.3); hitS(S, 'plaza', 1.7, 0, 1.4, .4, 2.6); hitS(S, 'speaker', 6.9, .55, .8, .7, 1.0);
   plight(0xb57bff, 1.0, 4, 3.2, 4, 12); plight(0x3dffa0, .5, .8, 2.6, 4, 7);
   // zona ballo: bagliore viola che pulsa
@@ -1097,6 +1097,7 @@ S.act = function(a){
   if(a === 'look'){ CH.mission('click_wardrobe'); return LOOK.open(); }
   if(a === 'sign'){ CH.mission('click_sign'); return toast('✨ ' + (ME.nick || '') + ' ROOM: casa tua.'); }
   if(a === 'speaker'){ CH.mission('click_speaker'); return MUSIC.open(); }
+  if(a.indexOf('x:') === 0){ var kd = a.slice(2).replace(/_\d+$/, ''); if(kd === 'speaker'){ CH.mission('click_speaker'); return MUSIC.open(); } if(kd === 'shop'){ CH.mission('click_pc'); return SHOP.open(); } }
 };
 })();
 
@@ -1111,8 +1112,8 @@ function ring(x, y, z, r, col, t){ var m = new THREE.Mesh(new THREE.TorusGeometr
 function speakerBox(x, z, w, d, h, drivers){ bxp(x, z, w, d, 0, h, '#14141e'); drivers.forEach(function(dv){ disc(x + dv[0], dv[1] * PXH, z + d + .004, dv[2], 0x0a0812); ring(x + dv[0], dv[1] * PXH, z + d + .006, dv[2], dv[3] || 0x555a70); }); }
 function guitarModel(col, neonK, len, bodyR){ var gg = new THREE.Group(); var body = new THREE.Mesh(new THREE.CylinderGeometry(bodyR, bodyR, .09, 20), M(col, {roughness:.3})); body.rotation.x = Math.PI / 2; body.position.y = .95; gg.add(body); var neck = new THREE.Mesh(new THREE.BoxGeometry(.07, len, .04), M(0x6a4a2a)); neck.position.y = .95 + len / 2 + .1; gg.add(neck); var head = new THREE.Mesh(new THREE.BoxGeometry(.13, .25, .05), M(0x2a1d14)); head.position.y = .95 + len + .22; gg.add(head); var st = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .8, 6), M(0x2a2438)); st.position.set(0, .4, -.02); gg.add(st); gg.rotation.x = -.06; return gg; }
 var ITEMS = {
-  laptop_pro:{cat:'tech', name:'Portatile nuovo', fp:[.9, .6], up:'laptop', desc:'Schermo acceso, tutto nuovo. Sostituisce il rottame sulla scrivania.', build:function(fp){ bxp(0, 0, .9, .6, 0, 2.5, '#3a3a4d'); var sc = new THREE.Mesh(new THREE.BoxGeometry(.9, .62, .04), M(0x3a3a4d)); sc.position.set(.45, .78, .05); sc.rotation.x = -.18; ROOT.add(sc); var s2 = new THREE.Mesh(new THREE.PlaneGeometry(.8, .5), mbasic(0x0c0c16)); s2.position.set(.45, .8, .075); s2.rotation.x = -.18; ROOT.add(s2); [38, 43, 48].forEach(function(hz, n){ var l = new THREE.Mesh(new THREE.PlaneGeometry(.5 - n * .1, .06), mbasic(n === 1 ? 0x7b2fff : 0x3dffa0)); l.position.set(.3 + (.5 - n * .1) / 2 - .15, .62 + n * .12, .078 + n * .004); l.rotation.x = -.18; ROOT.add(l); }); }},
-  speaker_pro:{cat:'audio', name:'Cassa nuova', fp:[.7, .6], up:'speaker', desc:'Cassa vera, senza nastro adesivo. Sostituisce quella rovinata dell\'angolo.', build:function(fp){ bxp(0, 0, .7, .55, 0, 52, '#1a1a2e'); disc(.35, 1.0, .557, .17, 0x0a0812); ring(.35, 1.0, .56, .17, 0x3dffa0, .025); disc(.35, .55, .557, .12, 0x0a0812); ring(.35, .55, .56, .12, 0x7b2fff, .025); }},
+  laptop_pro:{cat:'tech', name:'Portatile nuovo', fp:[.9, .6], desc:'Schermo acceso, tutto nuovo. Mettilo dove vuoi: toccandolo apri il negozio.', build:function(fp){ bxp(0, 0, .9, .6, 0, 2.5, '#3a3a4d'); var sc = new THREE.Mesh(new THREE.BoxGeometry(.9, .62, .04), M(0x3a3a4d)); sc.position.set(.45, .78, .05); sc.rotation.x = -.18; ROOT.add(sc); var s2 = new THREE.Mesh(new THREE.PlaneGeometry(.8, .5), mbasic(0x0c0c16)); s2.position.set(.45, .8, .075); s2.rotation.x = -.18; ROOT.add(s2); [38, 43, 48].forEach(function(hz, n){ var l = new THREE.Mesh(new THREE.PlaneGeometry(.5 - n * .1, .06), mbasic(n === 1 ? 0x7b2fff : 0x3dffa0)); l.position.set(.3 + (.5 - n * .1) / 2 - .15, .62 + n * .12, .078 + n * .004); l.rotation.x = -.18; ROOT.add(l); }); }},
+  speaker_pro:{cat:'audio', name:'Cassa nuova', fp:[.7, .6], desc:'Cassa vera, senza nastro adesivo. Mettila dove vuoi: toccandola apri la musica.', build:function(fp){ bxp(0, 0, .7, .55, 0, 52, '#1a1a2e'); disc(.35, 1.0, .557, .17, 0x0a0812); ring(.35, 1.0, .56, .17, 0x3dffa0, .025); disc(.35, .55, .557, .12, 0x0a0812); ring(.35, .55, .56, .12, 0x7b2fff, .025); }},
   monitors_pair:{cat:'tech', name:'Monitor da studio', fp:[1.9, .7], desc:'Due monitor da studio su stand: ascolti il mix come si deve.', build:function(){ [0, 1.15].forEach(function(x){ bxp(x + .1, .1, .45, .4, 0, 52, '#1c1c28'); bxp(x, 0, .66, .55, 52, 112, '#14141e'); disc(x + .33, 98 * PXH, .552, .19, 0x0a0812); ring(x + .33, 98 * PXH, .555, .19, 0x555a70); disc(x + .33, 74 * PXH, .552, .34, 0x0a0812); ring(x + .33, 74 * PXH, .555, .34, 0x555a70); disc(x + .33, 74 * PXH, .557, .16, 0x1d1d2a); ring(x + .33, 74 * PXH, .559, .16, 0x3dffa0, .015); }); }},
   mpc_table:{cat:'tech', name:'MPC e modulare', fp:[2.6, 1.0], desc:'Drum machine con i pad colorati e un sintetizzatore modulare con i cavi, su un tavolo da lavoro.', build:function(){ bxp(0, 0, 2.6, 1.0, 0, 34, '#241c18'); bxp(.1, .1, 1.0, .8, 34, 37, '#15151f'); for(var i = 0; i < 4; i++) for(var j = 0; j < 4; j++) bxp(.15 + i * .22, .15 + j * .18, .18, .14, 37, 38.5, ['#ff2d55', '#2d7bff', '#3dffa0', '#ffd23d'][(i + j) % 4]); bxp(1.3, .08, 1.2, .8, 34, 48, '#101018'); for(i = 0; i < 6; i++) for(j = 0; j < 2; j++) disc(1.38 + i * .18, (38 + j * 6) * PXH, .885, .045, 0xc8cde0); for(i = 0; i < 4; i++){ var cb = new THREE.Mesh(new THREE.TorusGeometry(.12, .012, 6, 14, Math.PI), mbasic([0xff2d55, 0x2d7bff, 0x3dffa0, 0xffd23d][i])); cb.position.set(1.6 + i * .28, 41 * PXH, .9); cb.rotation.z = Math.PI; ROOT.add(cb); } }},
   synth_stand:{cat:'tech', name:'Tastiere e synth', fp:[2.6, .9], desc:'Due tastiere su stand con pannello di controllo e manopole.', build:function(){ [[0, 0], [2.6, 0], [0, .9], [2.6, .9]].forEach(function(p){ bxp(Math.min(p[0] + .02, 2.54), Math.min(p[1] + .02, .84), .06, .06, 0, 30, '#55506e'); }); bxp(0, 0, 2.6, .9, 52, 56, '#15151f'); for(var i = 0; i < 26; i++){ bxp(.05 + i * .1, .35, .09, .55, 56, 57, '#f4f1ff'); if(i % 7 !== 2 && i % 7 !== 6) bxp(.09 + i * .1, .35, .05, .33, 57, 58, '#0a0812'); } bxp(.05, .03, 1.25, .22, 56, 57.5, '#0a0812'); for(i = 0; i < 8; i++) cylP(1.4 + i * .1, .14, 57.5, 61, .04, [0xff3b3b, 0x3dffa0, 0xb57bff, 0xffd23d][i % 4]); bxp(0, .3, 2.6, .6, 32, 36, '#1a1522'); }},
@@ -1329,13 +1330,17 @@ var HOME = (function(){
     if(CUR === S){ BLK = S.BLK; var i = Math.floor(ME.x), j = Math.floor(ME.z);
       if(!ME.seat && BLK[j * S.N + i]){ var best = null, bd = 99; for(var a = 0; a < S.N; a++) for(var b = 0; b < S.N; b++) if(!BLK[b * S.N + a]){ var d = Math.hypot(a + .5 - ME.x, b + .5 - ME.z); if(d < bd){ bd = d; best = [a + .5, b + .5]; } } if(best){ ME.x = best[0]; ME.z = best[1]; ME.path = []; ME.A.g.position.set(ME.x, 0, ME.z); } } }
   }
+  var ITEMACT = {speaker_pro:'speaker', speaker_tower:'speaker', laptop_pro:'shop'};
   var SEATDEF = {
     sofa_red:{h:-.2, seats:[{pre:'sf', suf:'0', x:-.8, z:.2}, {pre:'sf', suf:'1', x:.8, z:.2}], hits:[{pre:'sf', x:0, z:0, w:3.2, d:1.5, hh:.9, base:1}]},
     pouf_set:{h:-.22, seats:[{pre:'pa', suf:'', x:-.75, z:-.35}, {pre:'pb', suf:'', x:.75, z:-.35}, {pre:'pc', suf:'', x:0, z:.45}], hits:[{pre:'pa', x:-.75, z:-.35, w:1.1, d:1.1, hh:.7}, {pre:'pb', x:.75, z:-.35, w:1.1, d:1.1, hh:.7}, {pre:'pc', x:0, z:.45, w:1.1, d:1.1, hh:.7}]}
   }, seatHits = [];
   function seats(){
     seatHits.forEach(function(m){ S.group.remove(m); var i = S.HIT.indexOf(m); if(i > -1) S.HIT.splice(i, 1); }); seatHits = [];
-    Object.keys(S.SEAT).forEach(function(k){ if(/^(sf|pa|pb|pc)_/.test(k)) delete S.SEAT[k]; });
+    Object.keys(S.SEAT).forEach(function(k){ if(/^(sf|pa|pb|pc)_/.test(k)) delete S.SEAT[k]; }); Object.keys(S.STAND).forEach(function(k){ if(k.indexOf('x:') === 0) delete S.STAND[k]; });
+    layout.forEach(function(o, n){ var ia = ITEMACT[o.id]; if(!ia) return; var rc = rectOf(o), cx = rc[0] + rc[2] / 2, cz = rc[1] + rc[3] / 2, key = 'x:' + ia + '_' + n, out = null, cs2 = [[cx, rc[1] + rc[3] + .6], [rc[0] - .6, cz], [rc[0] + rc[2] + .6, cz], [cx, rc[1] - .6]];
+      for(var i = 0; i < cs2.length && !out; i++){ var q = cs2[i]; if(q[0] > .3 && q[0] < 7.7 && q[1] > .3 && q[1] < 7.7 && !S.BLK[Math.floor(q[1]) * S.N + Math.floor(q[0])]) out = {x:q[0], z:q[1]}; }
+      if(!out) out = {x:cx, z:Math.min(7.5, rc[1] + rc[3] + .6)}; S.STAND[key] = out; var before = S.HIT.length; hitS(S, key, rc[0], rc[1], rc[2], rc[3], ia === 'speaker' ? 1.0 : .7); seatHits.push(S.HIT[before]); });
     layout.forEach(function(o, n){
       var def = SEATDEF[o.id]; if(!def) return; var th = (o.r | 0) * Math.PI / 2, c = Math.cos(th), sn = Math.sin(th), fp = F(o.id);
       function W(lx, lz){ return {x: o.x + lx * c + lz * sn, z: o.z - lx * sn + lz * c}; }
@@ -1357,10 +1362,7 @@ var HOME = (function(){
     layout.forEach(function(o){ if(ITEMS[o.id]){ var h = mk(o); if(h) objs.push(h); } });
     rebuildBlk(); upgrades();
   }
-  function upgrades(){
-    if(INV.own.laptop_pro && !upg.lap){ S.oldLap.visible = false; upg.lap = itemModel('laptop_pro'); upg.lap.position.set(4.5, 28 * PXH, .9); S.group.add(upg.lap); }
-    if(INV.own.speaker_pro && !upg.spk){ S.oldSpk.visible = false; upg.spk = itemModel('speaker_pro'); upg.spk.position.set(7.3, 0, .92); S.group.add(upg.spk); }
-  }
+  function upgrades(){}
   async function persist(){
     var a = layout.map(function(o){ var q = {id:o.id, x:o.x}; if(!ITEMS[o.id].wall){ q.z = o.z; q.r = o.r | 0; } return q; });
     try{ var r = await sb.from('home_layouts').upsert({user_id:ME.uid, layout:a, updated_at:new Date().toISOString()}); if(r && r.error){ toast('Non riesco a salvare la casa, riprova.'); return false; } return true; }catch(e){ toast('Non riesco a salvare la casa, riprova.'); return false; }
@@ -1397,7 +1399,7 @@ var HOME = (function(){
     if(ed.o){
       var it = ITEMS[ed.o.id]; h += '<h5>' + esc(it.name) + '</h5><div class="lk-note">' + (it.wall ? 'Tocca un punto della parete (lato porta) per spostarlo.' : 'Tocca il pavimento per spostarlo.') + '</div><div class="lk-note" style="color:' + (ed.ok ? '#3dffa0' : '#ff6b6b') + '">' + (ed.ok ? '✓ Posizione libera' : '✗ Posizione occupata') + '</div><div class="lk-t-row" style="margin-top:10px">' + (it.wall ? '' : '<button type="button" class="lk-t" data-d="rot">↻ Ruota</button>') + '<button type="button" class="lk-t" data-d="ok">✓ Conferma</button>' + (ed.isNew ? '' : '<button type="button" class="lk-t" data-d="del">🗑 Rimuovi</button>') + '<button type="button" class="lk-t" data-d="no">✕ Annulla</button></div>';
     } else {
-      var list = Object.keys(INV.own).filter(function(i){ var t = ITEMS[i]; return t && t.build && !t.up; });
+      var list = Object.keys(INV.own).filter(function(i){ var t = ITEMS[i]; return t && t.build; });
       h += '<div class="lk-note">Scegli un oggetto tuo da mettere in casa (o da spostare). Si salva da solo.</div>';
       if(!list.length) h += '<div class="lk-note" style="margin-top:14px">Non hai ancora oggetti. Comprali nel negozio (computer sulla scrivania).</div>';
       h += '<div class="dc-list">' + list.map(function(i){ var placed = layout.some(function(o){ return o.id === i; }); return '<button type="button" class="dc-it" data-i="' + i + '"><img alt="" src="' + THUMB.get(i) + '"><span>' + esc(ITEMS[i].name) + '</span><em>' + (placed ? 'Sposta' : 'Metti') + '</em></button>'; }).join('') + '</div>';
@@ -1966,7 +1968,11 @@ var MUSIC = (function(){
   else { scene.remove(ME.A.g); $('guest').hidden = false; $('gEnter').onclick = function(){ var had = false; try{ had = !!localStorage.getItem('kl_has_account'); }catch(e){} AUTH.open(noProfile ? 'nickonly' : (had ? 'login' : 'signup')); }; if(noProfile) AUTH.afterSession(ME.uid); }
   if(ME.ready){ try{ localStorage.setItem('kl_has_account', '1'); }catch(e){} }
   window.kl3d = {cam:cam, dress:function(a){ ME.A.sig = ''; dressAv(ME.A, a, ME.owner); }, enter:enterScene, cs:cs, ME:ME, goAct:goAct, doAct:doAct};
-  joinChannel('kl-room-plaza'); if(!EMB3){ djPull(); setInterval(djPull, 20000); }
+  var toHome = ME.ready && !EMB3 && !/[?&]plaza=1/.test(location.search);
+  if(toHome){ enterScene('home'); var av0 = ME.av, defAv = !av0 || (['shirt', 'pants', 'shoes', 'hair'].every(function(k){ return !av0[k] || String(av0[k]).toLowerCase() === '#ffffff'; }) && !(av0.accs && av0.accs.length) && !av0.top && !av0.vip), fk = 'kl_look_intro_' + ME.uid, seen = false; try{ seen = !!localStorage.getItem(fk); }catch(e){}
+    if(defAv && !seen){ try{ localStorage.setItem(fk, '1'); }catch(e){} setTimeout(function(){ try{ LOOK.open(); }catch(e){} }, 1100); } }
+  else joinChannel('kl-room-plaza');
+  if(!EMB3){ djPull(); setInterval(djPull, 20000); }
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
 })();
 })();
