@@ -80,6 +80,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <div class="field"><label for="scTitle">Titolo del prossimo drop (max 60)</label><input type="text" id="scTitle" maxlength="60" placeholder="es. Nuovo EP: NEON"></div>
     <div class="field"><label for="scAt">Data e ora di uscita (ora italiana · lascia vuoto per «Coming soon»)</label><input type="datetime-local" id="scAt"></div>
     <div class="field"><label for="scCover">Copertina: link https a un'immagine (opzionale, quadrata)</label><input type="text" id="scCover" placeholder="https://…"></div>
+    <div class="field"><label for="scFile">…oppure carica un'immagine (jpg/png/webp, max 2MB)</label><input type="file" id="scFile" accept="image/jpeg,image/png,image/webp"><div id="scPrev" style="margin-top:8px"></div></div>
     <div class="field"><label for="scMsg">Messaggio libero sullo schermo (max 120 · vuoto = nessuno)</label><input type="text" id="scMsg" maxlength="120"></div>
     <button class="main" id="scSave" type="button">Salva e aggiorna la piazza</button>
     <button type="button" class="del" id="scClear">Svuota drop</button>
@@ -157,7 +158,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
   function scrPing(){ try{ if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'screen', payload:{}}); }); } else djCh.send({type:'broadcast', event:'screen', payload:{}}); }catch(e){} }
   function pad2(n){ return (n < 10 ? '0' : '') + n; }
   function toLocalInput(iso){ if(!iso) return ''; var d = new Date(iso); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
-  async function scLoad(){ var r = await sb.from('plaza_screen').select('*').eq('id', 1).maybeSingle(); var d = r && r.data; if(!d) return; $('scMode').value = d.mode || 'auto'; $('scTitle').value = d.drop_title || ''; $('scAt').value = toLocalInput(d.drop_at); $('scCover').value = d.cover_url || ''; $('scMsg').value = d.message || ''; }
+  async function scLoad(){ var r = await sb.from('plaza_screen').select('*').eq('id', 1).maybeSingle(); var d = r && r.data; if(!d) return; $('scMode').value = d.mode || 'auto'; $('scTitle').value = d.drop_title || ''; $('scAt').value = toLocalInput(d.drop_at); $('scCover').value = d.cover_url || ''; scPrev(); $('scMsg').value = d.message || ''; }
   async function scSave(clear){
     var o = clear ? {drop_title:'', drop_at:null, cover_url:''} : {mode:$('scMode').value, drop_title:$('scTitle').value.trim(), drop_at:$('scAt').value ? new Date($('scAt').value).toISOString() : null, cover_url:$('scCover').value.trim(), message:$('scMsg').value.trim()};
     if(!clear){ o.updated_at = new Date().toISOString(); if(o.cover_url && !/^https:\/\//.test(o.cover_url)){ $('scOut').textContent = 'La copertina deve essere un link https.'; return; } }
@@ -165,6 +166,17 @@ button.del{border-color:var(--mag);color:var(--mag);}
     if(u.error || !(u.data && u.data.length)){ $('scOut').textContent = 'Non riuscito: ' + ((u.error && u.error.message) || 'controlla i dati'); return; }
     $('scOut').textContent = 'Salvato ✓ La piazza si aggiorna ora.'; if(clear) scLoad(); scrPing();
   }
+  function scPrev(){ var u = $('scCover').value.trim(); $('scPrev').innerHTML = /^https:\/\//.test(u) ? '<img src="' + u.replace(/"/g, '') + '" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid #333"> <button type="button" class="btn" id="scRm">Rimuovi copertina</button>' : ''; var rm = $('scRm'); if(rm) rm.onclick = function(){ $('scCover').value = ''; scPrev(); $('scOut').textContent = 'Copertina tolta: premi Salva per applicare.'; }; }
+  $('scCover').addEventListener('input', scPrev);
+  $('scFile').addEventListener('change', async function(){
+    var f = this.files[0]; if(!f) return;
+    if(f.size > 2097152){ $('scOut').textContent = 'File troppo grande (max 2MB).'; return; }
+    var ext = f.type === 'image/png' ? 'png' : f.type === 'image/webp' ? 'webp' : 'jpg', path = 'drop-' + Date.now() + '.' + ext;
+    $('scOut').textContent = 'Carico…';
+    var up = await sb.storage.from('covers').upload(path, f, {contentType:f.type, upsert:false});
+    if(up.error){ $('scOut').textContent = 'Upload non riuscito: ' + up.error.message; return; }
+    $('scCover').value = sb.storage.from('covers').getPublicUrl(path).data.publicUrl; scPrev(); $('scOut').textContent = 'Caricata ✓ Premi Salva per mostrarla in piazza (cartello e schermo).';
+  });
   $('scSave').addEventListener('click', function(){ scSave(false); }); $('scClear').addEventListener('click', function(){ if(confirm('Svuotare titolo, data e copertina del drop?')) scSave(true); });
   function djPing(){
     try{
