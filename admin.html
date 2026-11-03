@@ -73,6 +73,18 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <h3 style="margin-top:18px">File caricati per la piazza</h3>
     <div id="djFiles"></div>
   </div>
+  <h2 style="margin-top:34px">PIAZZA · SCHERMO E PROSSIMO DROP</h2>
+  <div class="panel" id="scrPanel">
+    <p class="muted">Lo schermo gigante del palco e il cartello «Prossimo drop» (parete ovest) leggono questi dati. Si aggiornano da soli in pochi secondi.</p>
+    <div class="field"><label for="scMode">Cosa mostra lo schermo</label><select id="scMode"><option value="auto">Automatico (alterna: in onda · drop · messaggio)</option><option value="now">Solo «In onda» / KENNYLAND</option><option value="drop">Solo prossimo drop</option><option value="msg">Solo messaggio</option></select></div>
+    <div class="field"><label for="scTitle">Titolo del prossimo drop (max 60)</label><input type="text" id="scTitle" maxlength="60" placeholder="es. Nuovo EP: NEON"></div>
+    <div class="field"><label for="scAt">Data e ora di uscita (ora italiana · lascia vuoto per «Coming soon»)</label><input type="datetime-local" id="scAt"></div>
+    <div class="field"><label for="scCover">Copertina: link https a un'immagine (opzionale, quadrata)</label><input type="text" id="scCover" placeholder="https://…"></div>
+    <div class="field"><label for="scMsg">Messaggio libero sullo schermo (max 120 · vuoto = nessuno)</label><input type="text" id="scMsg" maxlength="120"></div>
+    <button class="main" id="scSave" type="button">Salva e aggiorna la piazza</button>
+    <button type="button" class="del" id="scClear">Svuota drop</button>
+    <div class="msg" id="scOut"></div>
+  </div>
   <h2 style="margin-top:34px">STUDIO · CODICE PORTA</h2>
   <div class="panel">
     <div class="field"><label for="stCode">Codice attuale (3-12 lettere o numeri, senza spazi)</label><input type="text" id="stCode" maxlength="12"></div>
@@ -142,6 +154,18 @@ button.del{border-color:var(--mag);color:var(--mag);}
 
   // ---- piazza: DJ e codice studio ----
   var djCh = null;
+  function scrPing(){ try{ if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'screen', payload:{}}); }); } else djCh.send({type:'broadcast', event:'screen', payload:{}}); }catch(e){} }
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function toLocalInput(iso){ if(!iso) return ''; var d = new Date(iso); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  async function scLoad(){ var r = await sb.from('plaza_screen').select('*').eq('id', 1).maybeSingle(); var d = r && r.data; if(!d) return; $('scMode').value = d.mode || 'auto'; $('scTitle').value = d.drop_title || ''; $('scAt').value = toLocalInput(d.drop_at); $('scCover').value = d.cover_url || ''; $('scMsg').value = d.message || ''; }
+  async function scSave(clear){
+    var o = clear ? {drop_title:'', drop_at:null, cover_url:''} : {mode:$('scMode').value, drop_title:$('scTitle').value.trim(), drop_at:$('scAt').value ? new Date($('scAt').value).toISOString() : null, cover_url:$('scCover').value.trim(), message:$('scMsg').value.trim()};
+    if(!clear){ o.updated_at = new Date().toISOString(); if(o.cover_url && !/^https:\/\//.test(o.cover_url)){ $('scOut').textContent = 'La copertina deve essere un link https.'; return; } }
+    var u = await sb.from('plaza_screen').update(o).eq('id', 1).select('id');
+    if(u.error || !(u.data && u.data.length)){ $('scOut').textContent = 'Non riuscito: ' + ((u.error && u.error.message) || 'controlla i dati'); return; }
+    $('scOut').textContent = 'Salvato ✓ La piazza si aggiorna ora.'; if(clear) scLoad(); scrPing();
+  }
+  $('scSave').addEventListener('click', function(){ scSave(false); }); $('scClear').addEventListener('click', function(){ if(confirm('Svuotare titolo, data e copertina del drop?')) scSave(true); });
   function djPing(){
     try{
       if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'dj', payload:{}}); }); }
@@ -201,7 +225,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('who').textContent = session.user.email || '';
     show('panel');
     await load();
-    loadMod(); djRefresh(); stLoad();
+    loadMod(); djRefresh(); stLoad(); scLoad();
   }
 
   async function load(){
