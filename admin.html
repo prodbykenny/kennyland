@@ -104,6 +104,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <div class="field"><label for="evTitle">Titolo (max 60)</label><input type="text" id="evTitle" maxlength="60"></div>
     <div class="field"><label for="evAt">Data e ora (ora italiana)</label><input type="datetime-local" id="evAt"></div>
     <div class="field"><label for="evBody">Descrizione (max 200, opzionale)</label><input type="text" id="evBody" maxlength="200"></div>
+    <div class="field"><label for="evRew">Monete a chi è presente in piazza durante l'evento (0 = nessun premio, max 500)</label><input type="number" id="evRew" min="0" max="500" value="0"></div>
     <div class="field"><label for="evCover">Immagine: link https (opzionale)</label><input type="text" id="evCover" placeholder="https://…"></div>
     <button class="main" id="evSave" type="button">Aggiungi al calendario</button>
     <div class="msg" id="evOut"></div>
@@ -216,11 +217,11 @@ button.del{border-color:var(--mag);color:var(--mag);}
   });
   async function evLoad(){
     var r = await sb.from('plaza_events').select('*').gte('starts_at', new Date(Date.now() - 3 * 3600000).toISOString()).order('starts_at', {ascending:true}).limit(50), box = $('evList'); box.innerHTML = '';
-    ((r && r.data) || []).forEach(function(e){ var row = document.createElement('div'); row.className = 'muted'; row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:6px 0'; var t = document.createElement('span'); t.style.flex = '1'; t.textContent = new Date(e.starts_at).toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'}) + ' · ' + e.kind + ' · ' + e.title; row.appendChild(t); row.appendChild(btn('Elimina', 'del', async function(){ await sb.from('plaza_events').delete().eq('id', e.id); evLoad(); })); box.appendChild(row); });
+    ((r && r.data) || []).forEach(function(e){ var row = document.createElement('div'); row.className = 'muted'; row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:6px 0'; var t = document.createElement('span'); t.style.flex = '1'; t.textContent = new Date(e.starts_at).toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'}) + ' · ' + e.kind + ' · ' + e.title + (e.reward ? ' · +' + e.reward + ' presenza' : ''); row.appendChild(t); row.appendChild(btn('Elimina', 'del', async function(){ await sb.from('plaza_events').delete().eq('id', e.id); evLoad(); })); box.appendChild(row); });
     if(!box.children.length) box.innerHTML = '<div class="muted">Calendario vuoto.</div>';
   }
   $('evSave').addEventListener('click', async function(){
-    var cv = $('evCover').value.trim(), o = {kind:$('evKind').value, title:$('evTitle').value.trim(), body:$('evBody').value.trim(), cover_url:cv, starts_at:$('evAt').value ? new Date($('evAt').value).toISOString() : null};
+    var cv = $('evCover').value.trim(), o = {kind:$('evKind').value, title:$('evTitle').value.trim(), body:$('evBody').value.trim(), cover_url:cv, reward:parseInt($('evRew').value, 10) || 0, starts_at:$('evAt').value ? new Date($('evAt').value).toISOString() : null};
     if(!o.title || !o.starts_at){ $('evOut').textContent = 'Servono titolo e data.'; return; }
     if(cv && !/^https:\/\//.test(cv)){ $('evOut').textContent = "L'immagine deve essere un link https."; return; }
     var u = await sb.from('plaza_events').insert(o);
