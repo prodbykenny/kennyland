@@ -57,6 +57,8 @@ body.emb>*:not(#c):not(#labels):not(script){display:none!important}
 .sh-coins{position:absolute;top:22px;right:60px;font-family:'Press Start 2P',monospace;font-size:12px;color:var(--gold,#ffd23d);}
 .sh-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px;}
 .sh-tab{background:#150a26;border:1px solid #3a2a66;color:var(--muted,#9a93b8);padding:7px 11px;font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;}
+.mis-r.vip .mis-x{color:#ffd23d;font-weight:700} .mis-go{margin-left:6px;background:#ffd23d;color:#14101f;border:0;border-radius:6px;font:700 11px inherit;padding:2px 8px;cursor:pointer}
+.cal-list{max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;margin-top:10px} .cal-r{display:flex;gap:12px;padding:10px;border:1px solid #2a2340;border-radius:10px;background:#0d0a18} .cal-r.live{border-color:#3dffa0} .cal-r img{width:64px;height:64px;object-fit:cover;border-radius:8px} .cal-k{font-size:11px;color:#b57bff;letter-spacing:.05em} .cal-k b{color:#3dffa0} .cal-n{font-weight:700;margin-top:2px} .cal-w{font-size:12px;color:#9a93b8} .cal-b{font-size:13px;margin-top:4px;color:#cfcbe3}
 .sh-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff;} .sh-tab.soon{opacity:.55;}
 .sh-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding-right:4px;}
 .sh-card{background:#100620;border:1px solid #2a1c4a;padding:8px;display:flex;flex-direction:column;gap:5px;}
@@ -137,7 +139,7 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
   <div class="lcol"><div class="tag">KENNYLAND 3D<small id="count">PIAZZA</small><small id="who"></small></div>
   <div class="hudw" id="hudw" hidden><button type="button" class="hudc" id="hudCard" aria-expanded="false" aria-label="Il tuo profilo di gioco"><span id="hNick"></span><em>LIV <b id="hLvl">1</b></em><span class="hx"><i id="hXp"></i></span><span class="hco">🪙 <b id="hCoins">0</b></span><i class="hdot" id="hDot"></i></button>
    <div class="hpop" id="hudPop" hidden><div class="hst">GIORNI DI FILA<b id="hStreak">0</b></div><div class="lvb"><i id="lvFill"></i></div><div class="lvt" id="lvTxt"></div>
-    <button type="button" class="hbtn" id="hClaim" disabled>BONUS DEL GIORNO</button><div id="hMis" style="display:none"></div><button type="button" class="hbtn alt" id="hShop" style="margin-top:8px">NEGOZIO</button>
+    <button type="button" class="hbtn" id="hClaim" disabled>BONUS DEL GIORNO</button><div id="hMis" style="display:none"></div><button type="button" class="hbtn alt" id="hCal" style="margin-top:8px">CALENDARIO</button><button type="button" class="hbtn alt" id="hShop" style="margin-top:8px">NEGOZIO</button>
     <div class="acc"><div>Nickname <b id="aNick"></b></div><div>Email <b id="aEmail"></b></div><label><input type="checkbox" id="aNews"><span>Avvisami via email quando esce un nuovo drop</span></label><a id="aOut" href="#">Esci</a><button type="button" class="dng" id="aDel">Elimina il mio account</button><div id="aMsg" style="margin-top:6px"></div></div></div></div></div>
   <div class="right"><div class="cnt"><span title="Abitanti iscritti">👥 <b id="mCount">0</b></span><span title="Online ora">● <b id="oCount">0</b></span></div><div class="soc"><a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a><a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a><a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a></div><a href="index.html?sito=1">← Torna al sito</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
 </div>
@@ -1756,7 +1758,7 @@ function openRecorder(){ TOOLS.openRecorder(); }
 
 // ======================= BARRA, LIVELLO, BONUS, MISSIONI, ACCOUNT =======================
 var CH = (function(){
-  var U = {}, Q = {}, qt = 0, wallet = {coins:0, streak:0, last_claim:null}, missions = [], misDay = '', loaded = false, uEmail = '';
+  var U = {}, Q = {}, qt = 0, wallet = {coins:0, streak:0, last_claim:null}, missions = [], vip = null, misDay = '', loaded = false, uEmail = '';
   var LV = [0, 15, 40, 80, 140, 220, 330, 470, 650, 900];
   var MIS_T = {walk_dance:'Cammina fino alla Dance Zone', click_pc:'Clicca il computer', click_wardrobe:"Clicca l'armadio", click_speaker:'Clicca la cassa', click_sign:"Clicca l'insegna al neon", open_shop:'Apri il negozio', change_look:"Cambia un colore all'avatar", listen_any:'Ascolta un brano', claim_bonus:'Ritira il bonus del giorno'};
   function today(d){ return (d || new Date()).toLocaleDateString('en-CA', {timeZone:'Europe/Rome'}); }
@@ -1781,10 +1783,10 @@ var CH = (function(){
     var b = $('hClaim'), t = today();
     if(wallet.last_claim === t){ b.textContent = 'BONUS RITIRATO — TORNA DOMANI'; b.disabled = true; }
     else { var y = today(new Date(Date.now() - 86400000)), ns = wallet.last_claim === y ? wallet.streak + 1 : 1; b.textContent = 'RITIRA BONUS +' + (10 + Math.min(ns - 1, 6) * 5); b.disabled = false; }
-    var box = $('hMis'), done = missions.filter(function(m){ return m.done; }).length;
-    if(!missions.length) box.style.display = 'none'; else { box.style.display = '';
-      box.innerHTML = '<div class="mis-t">MISSIONI DEL GIORNO<span>' + done + ' / ' + missions.length + '</span></div>' + missions.map(function(m){ return '<div class="mis-r' + (m.done ? ' done' : '') + '"><span class="mis-c">' + (m.done ? '✓' : '') + '</span><span class="mis-x">' + esc(MIS_T[m.key] || m.key) + '</span><span class="mis-p">+' + m.reward + '</span></div>'; }).join(''); }
-    $('hDot').classList.toggle('on', wallet.last_claim !== t || missions.some(function(m){ return !m.done; }));
+    var box = $('hMis'), all = missions.concat(vip ? [{vip:1, done:vip.done, reward:vip.reward}] : []), done = all.filter(function(m){ return m.done; }).length;
+    if(!all.length) box.style.display = 'none'; else { box.style.display = '';
+      box.innerHTML = '<div class="mis-t">MISSIONI DEL GIORNO<span>' + done + ' / ' + all.length + '</span></div>' + (vip ? '<div class="mis-r vip' + (vip.done ? ' done' : '') + '"><span class="mis-c">' + (vip.done ? '✓' : '★') + '</span><span class="mis-x">' + esc(vip.title) + (!vip.done && vip.action === 'manual' ? ' <button type="button" class="mis-go" id="vipGo">Fatto</button>' : '') + '</span><span class="mis-p">+' + vip.reward + '</span></div>' : '') + missions.map(function(m){ return '<div class="mis-r' + (m.done ? ' done' : '') + '"><span class="mis-c">' + (m.done ? '✓' : '') + '</span><span class="mis-x">' + esc(MIS_T[m.key] || m.key) + '</span><span class="mis-p">+' + m.reward + '</span></div>'; }).join(''); }
+    $('hDot').classList.toggle('on', wallet.last_claim !== t || missions.some(function(m){ return !m.done; }) || !!(vip && !vip.done));
   }
   function flash(t){ toast(t); }
   async function claim(){
@@ -1794,15 +1796,23 @@ var CH = (function(){
     paint(); refreshStats();
   }
   async function mission(key){
-    if(!ME.ready) return; var m = missions.filter(function(x){ return x.key === key && !x.done; })[0]; if(!m) return; m.done = true; paint();
+    if(!ME.ready) return; if(vip && !vip.done && vip.action === key) vipDone(); var m = missions.filter(function(x){ return x.key === key && !x.done; })[0]; if(!m) return; m.done = true; paint();
     try{ var r = await sb.rpc('complete_mission', {p_key:key}), row = r && r.data ? (Array.isArray(r.data) ? r.data[0] : r.data) : null;
       if(!row){ m.done = false; paint(); return; }
       if(row.did){ wallet.coins = row.total_coins; $('coins').textContent = wallet.coins; flash('+' + row.got + ' monete · missione completata!'); refreshStats(); }
     }catch(e){ m.done = false; paint(); }
     paint();
   }
+  async function vipDone(){
+    if(!vip || vip.done) return; vip.done = true; paint();
+    try{ var r = await sb.rpc('complete_vip_mission'), row = r && r.data ? (Array.isArray(r.data) ? r.data[0] : r.data) : null;
+      if(!row){ vip.done = false; paint(); return; }
+      if(row.did){ wallet.coins = row.total_coins; $('coins').textContent = wallet.coins; flash('★ +' + row.got + ' monete · missione VIP completata!'); refreshStats(); }
+    }catch(e){ vip.done = false; }
+    paint();
+  }
   async function refreshStats(){ try{ var u = await sb.from('user_stats').select('key,value'); if(u && !u.error && u.data){ var n = {}; u.data.forEach(function(x){ n[x.key] = Number(x.value); }); Object.keys(Q).forEach(function(k){ n[k] = (n[k] || 0) + Q[k]; }); U = n; } }catch(e){} paintLevel(); }
-  async function loadMissions(){ try{ var r = await sb.rpc('my_missions'); if(r && !r.error && r.data){ missions = r.data; misDay = today(); } }catch(e){} paint(); }
+  async function loadMissions(){ try{ var r = await sb.rpc('my_missions'); if(r && !r.error && r.data){ missions = r.data; misDay = today(); } }catch(e){} try{ var v = await sb.rpc('my_vip_mission'); var vr = v && !v.error && v.data && (Array.isArray(v.data) ? v.data[0] : v.data); vip = vr && vr.title ? vr : null; }catch(e){} paint(); }
   async function counts(){
     try{ var r = await sb.from('profiles').select('id', {count:'exact', head:true}); if(r && !r.error && r.count !== null) $('mCount').textContent = r.count; }catch(e){}
   }
@@ -1823,6 +1833,21 @@ var CH = (function(){
     setInterval(function(){ if(misDay && misDay !== today()) loadMissions(); paint(); }, 60000);
   }
   $('hudCard').onclick = function(){ var p = $('hudPop'); p.hidden = !p.hidden; this.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); };
+  $('hMis').addEventListener('click', function(e){ if(e.target && e.target.id === 'vipGo') vipDone(); });
+  var KIND = {evento:'🎤 Evento', anteprima:'🎧 Anteprima', annuncio:'📣 Annuncio', drop:'💿 Drop'};
+  async function calOpen(){
+    $('hudPop').hidden = true; if(document.querySelector('.cal-modal')) return;
+    var ov = document.createElement('div'); ov.className = 'world-modal sh-modal cal-modal';
+    ov.innerHTML = '<div class="world-card sh-card-main"><button type="button" class="world-x" aria-label="Chiudi">✕</button><h4>CALENDARIO</h4><div class="cal-list"><div class="sh-soon">Carico…</div></div></div>';
+    document.body.appendChild(ov); function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }
+    ov.querySelector('.world-x').addEventListener('click', close); ov.addEventListener('click', function(e){ if(e.target === ov) close(); });
+    var rows = []; try{ var r = await sb.from('plaza_events').select('id,starts_at,kind,title,body,cover_url').gte('starts_at', new Date(Date.now() - 3 * 3600000).toISOString()).order('starts_at', {ascending:true}).limit(30); rows = r && r.data || []; }catch(e){}
+    var box = ov.querySelector('.cal-list');
+    if(!rows.length){ box.innerHTML = '<div class="sh-soon">Niente in programma per ora. Torna presto!</div>'; return; }
+    box.innerHTML = rows.map(function(x){ var d = new Date(x.starts_at), live = Date.now() >= d.getTime() && Date.now() < d.getTime() + 2 * 3600000;
+      return '<div class="cal-r' + (live ? ' live' : '') + '">' + (x.cover_url ? '<img alt="" src="' + esc(x.cover_url) + '">' : '') + '<div><div class="cal-k">' + (KIND[x.kind] || '') + (live ? ' · <b>IN CORSO</b>' : '') + '</div><div class="cal-n">' + esc(x.title) + '</div><div class="cal-w">' + d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric', month:'short', timeZone:'Europe/Rome'}) + ' · ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome'}) + '</div>' + (x.body ? '<div class="cal-b">' + esc(x.body) + '</div>' : '') + '</div></div>'; }).join('');
+  }
+  $('hCal').onclick = calOpen;
   $('hClaim').onclick = claim; $('hShop').onclick = function(){ $('hudPop').hidden = true; SHOP.open(); };
   $('aNews').onchange = async function(){ var el = this, ok = await setNews(el.checked); $('aMsg').textContent = ok ? 'Preferenza salvata.' : 'Non sono riuscito a salvare, riprova.'; if(!ok) el.checked = !el.checked; };
   $('aOut').onclick = async function(e){ e.preventDefault(); try{ await sb.auth.signOut(); }catch(x){} location.reload(); };

@@ -86,6 +86,29 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <button type="button" class="del" id="scClear">Svuota drop</button>
     <div class="msg" id="scOut"></div>
   </div>
+  <h2 style="margin-top:34px">PIAZZA · MISSIONE VIP DEL GIORNO</h2>
+  <div class="panel">
+    <p class="muted">Una missione extra, dorata, in più rispetto alle 3 normali. Una per giorno: se ne salvi un'altra per lo stesso giorno la sostituisce.</p>
+    <div class="field"><label for="vmDay">Giorno</label><input type="date" id="vmDay"></div>
+    <div class="field"><label for="vmTitle">Testo della missione (max 80)</label><input type="text" id="vmTitle" maxlength="80" placeholder="es. Ascolta l'anteprima in piazza"></div>
+    <div class="field"><label for="vmAct">Come si completa</label><select id="vmAct"><option value="manual">Con il pulsante «Fatto» (fiducia, per cose fuori dal gioco)</option><option value="listen_any">Ascoltando un brano</option><option value="open_shop">Aprendo il negozio</option><option value="change_look">Cambiando look</option><option value="walk_dance">Andando nella Dance Zone</option><option value="click_pc">Cliccando il computer</option><option value="click_wardrobe">Cliccando l'armadio</option><option value="click_speaker">Cliccando la cassa</option></select></div>
+    <div class="field"><label for="vmRew">Monete (1-500)</label><input type="number" id="vmRew" min="1" max="500" value="30"></div>
+    <button class="main" id="vmSave" type="button">Salva missione VIP</button>
+    <div class="msg" id="vmOut"></div>
+    <h3 style="margin-top:18px">In programma</h3><div id="vmList"></div>
+  </div>
+  <h2 style="margin-top:34px">PIAZZA · CALENDARIO</h2>
+  <div class="panel">
+    <p class="muted">Eventi, anteprime, annunci e drop che i giocatori vedono da «Calendario» nel menu del profilo. Sparisce da solo 3 ore dopo l'inizio.</p>
+    <div class="field"><label for="evKind">Tipo</label><select id="evKind"><option value="evento">🎤 Evento (es. set live)</option><option value="anteprima">🎧 Anteprima</option><option value="annuncio">📣 Annuncio</option><option value="drop">💿 Drop</option></select></div>
+    <div class="field"><label for="evTitle">Titolo (max 60)</label><input type="text" id="evTitle" maxlength="60"></div>
+    <div class="field"><label for="evAt">Data e ora (ora italiana)</label><input type="datetime-local" id="evAt"></div>
+    <div class="field"><label for="evBody">Descrizione (max 200, opzionale)</label><input type="text" id="evBody" maxlength="200"></div>
+    <div class="field"><label for="evCover">Immagine: link https (opzionale)</label><input type="text" id="evCover" placeholder="https://…"></div>
+    <button class="main" id="evSave" type="button">Aggiungi al calendario</button>
+    <div class="msg" id="evOut"></div>
+    <h3 style="margin-top:18px">In programma</h3><div id="evList"></div>
+  </div>
   <h2 style="margin-top:34px">STUDIO · CODICE PORTA</h2>
   <div class="panel">
     <div class="field"><label for="stCode">Codice attuale (3-12 lettere o numeri, senza spazi)</label><input type="text" id="stCode" maxlength="12"></div>
@@ -178,6 +201,31 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('scCover').value = sb.storage.from('covers').getPublicUrl(path).data.publicUrl; scPrev(); $('scOut').textContent = 'Caricata ✓ Premi Salva per mostrarla in piazza (cartello e schermo).';
   });
   $('scSave').addEventListener('click', function(){ scSave(false); }); $('scClear').addEventListener('click', function(){ if(confirm('Svuotare titolo, data e copertina del drop?')) scSave(true); });
+  function dKey(d){ return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  async function vmLoad(){
+    if(!$('vmDay').value) $('vmDay').value = dKey(new Date());
+    var r = await sb.from('vip_missions').select('*').gte('day', dKey(new Date())).order('day', {ascending:true}).limit(30), box = $('vmList'); box.innerHTML = '';
+    ((r && r.data) || []).forEach(function(m){ var row = document.createElement('div'); row.className = 'muted'; row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:6px 0'; var t = document.createElement('span'); t.style.flex = '1'; t.textContent = m.day + ' · ' + m.title + ' · +' + m.reward + ' (' + m.action + ')'; row.appendChild(t); row.appendChild(btn('Elimina', 'del', async function(){ await sb.from('vip_missions').delete().eq('day', m.day); vmLoad(); })); box.appendChild(row); });
+    if(!box.children.length) box.innerHTML = '<div class="muted">Nessuna missione VIP in programma.</div>';
+  }
+  $('vmSave').addEventListener('click', async function(){
+    var o = {day:$('vmDay').value, title:$('vmTitle').value.trim(), action:$('vmAct').value, reward:parseInt($('vmRew').value, 10)};
+    if(!o.day || !o.title || !(o.reward >= 1 && o.reward <= 500)){ $('vmOut').textContent = 'Compila giorno, testo e monete (1-500).'; return; }
+    var u = await sb.from('vip_missions').upsert(o, {onConflict:'day'});
+    $('vmOut').textContent = u.error ? 'Non riuscito: ' + u.error.message : 'Salvata ✓'; if(!u.error){ $('vmTitle').value = ''; vmLoad(); }
+  });
+  async function evLoad(){
+    var r = await sb.from('plaza_events').select('*').gte('starts_at', new Date(Date.now() - 3 * 3600000).toISOString()).order('starts_at', {ascending:true}).limit(50), box = $('evList'); box.innerHTML = '';
+    ((r && r.data) || []).forEach(function(e){ var row = document.createElement('div'); row.className = 'muted'; row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:6px 0'; var t = document.createElement('span'); t.style.flex = '1'; t.textContent = new Date(e.starts_at).toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'}) + ' · ' + e.kind + ' · ' + e.title; row.appendChild(t); row.appendChild(btn('Elimina', 'del', async function(){ await sb.from('plaza_events').delete().eq('id', e.id); evLoad(); })); box.appendChild(row); });
+    if(!box.children.length) box.innerHTML = '<div class="muted">Calendario vuoto.</div>';
+  }
+  $('evSave').addEventListener('click', async function(){
+    var cv = $('evCover').value.trim(), o = {kind:$('evKind').value, title:$('evTitle').value.trim(), body:$('evBody').value.trim(), cover_url:cv, starts_at:$('evAt').value ? new Date($('evAt').value).toISOString() : null};
+    if(!o.title || !o.starts_at){ $('evOut').textContent = 'Servono titolo e data.'; return; }
+    if(cv && !/^https:\/\//.test(cv)){ $('evOut').textContent = "L'immagine deve essere un link https."; return; }
+    var u = await sb.from('plaza_events').insert(o);
+    $('evOut').textContent = u.error ? 'Non riuscito: ' + u.error.message : 'Aggiunto ✓'; if(!u.error){ $('evTitle').value = ''; $('evBody').value = ''; $('evCover').value = ''; evLoad(); }
+  });
   function djPing(){
     try{
       if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'dj', payload:{}}); }); }
@@ -237,7 +285,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('who').textContent = session.user.email || '';
     show('panel');
     await load();
-    loadMod(); djRefresh(); stLoad(); scLoad();
+    loadMod(); djRefresh(); stLoad(); scLoad(); vmLoad(); evLoad();
   }
 
   async function load(){
