@@ -381,7 +381,7 @@ var wheelG = new THREE.Group();
 })();
 // ---- bacheca da piazza e porta di casa, distribuite sulla parete ovest (come nel 2D, ma con più aria)
 (function(){
-  var BZ = 8.13, SC = 128, BW = 3.8, BH = 100 / 32;
+  var BZ = 6.6, SC = 128, BW = 3.4, BH = 100 / 32;
   box(.14, BH, BW, M(0x2a1f14, {roughness:.9}), .07, BH / 2, BZ);
   var tb = tex(Math.round(BW * SC), Math.round(BH * SC), function(g, W, H){
     g.fillStyle = '#2a1f14'; g.fillRect(0, 0, W, H);
@@ -389,14 +389,14 @@ var wheelG = new THREE.Group();
     g.fillStyle = '#0a0414'; g.strokeStyle = '#7b2fff'; g.lineWidth = 5; g.shadowColor = '#7b2fff'; g.shadowBlur = 8; g.fillRect(px0, py0, px1 - px0, py1 - py0); g.strokeRect(px0, py0, px1 - px0, py1 - py0); g.shadowBlur = 0;
     var cols = ['#fbf7e8', '#fff2a0', '#e8d6ff', '#ffd6e0', '#d5ffe9'], pins = ['#ff3b3b', '#7b2fff', '#3dffa0'], v = 5;
     function rn(){ v = (v * 16807) % 2147483647; return v / 2147483647; }
-    for(var i = 0; i < 9; i++){ var yy = (5.4 + (i % 3) * 1.1 - 5.1) * SC, zz = (30 + Math.floor(i / 3) * 20 + rn() * 4) / 32 * SC, w = .8 * SC, h = 15 / 32 * SC;
+    for(var i = 0; i < 9; i++){ var yy = (5.4 + (i % 3) * .95 - 5.1) * SC, zz = (30 + Math.floor(i / 3) * 20 + rn() * 4) / 32 * SC, w = .8 * SC, h = 15 / 32 * SC;
       g.save(); g.translate(yy + w / 2, H - zz - h / 2); g.rotate((rn() - .5) * .08); g.fillStyle = cols[i % 5]; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 6; g.fillRect(-w / 2, -h / 2, w, h); g.shadowBlur = 0; g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1.5; g.strokeRect(-w / 2, -h / 2, w, h);
       g.fillStyle = 'rgba(0,0,0,.28)'; for(var l = 0; l < 3; l++) g.fillRect(-w / 2 + 8, -h / 2 + 9 + l * 9, w - 16 - (l == 2 ? 30 : 0), 3);
       g.fillStyle = pins[i % 3]; g.beginPath(); g.arc(0, -h / 2 + 4, 5, 0, 7); g.fill(); g.restore(); }
     g.fillStyle = '#3dffa0'; g.font = '800 24px "Space Grotesk",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = '#3dffa0'; g.shadowBlur = 10; g.fillText('BACHECA', W / 2, py0 / 2 + 1);
   });
   var bf = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), new THREE.MeshBasicMaterial({map:tb})); bf.rotation.y = Math.PI / 2; bf.position.set(.145, BH / 2, BZ); ROOT.add(bf);
-  ob(0, BZ - 2, .4, BZ + 2);
+  ob(0, BZ - BW / 2, .4, BZ + BW / 2);
   var DZ = 3.4, DH = 82 / 32, DWd = 1.5;
   var td = tex(240, Math.round(240 * DH / DWd), function(g, W, H){
     g.fillStyle = '#2b2d36'; g.fillRect(0, 0, W, H); g.strokeStyle = '#8a8fa8'; g.lineWidth = 9; g.strokeRect(5, 5, W - 10, H - 10);
@@ -479,18 +479,16 @@ bench(8.6, 15.4, 0); bench(14.6, 15.4, 0);
 // cartello PROSSIMO DROP (parete ovest)
 var DROPS = (function(){
   var cv = document.createElement('canvas'); cv.width = 520; cv.height = 600; var t = new THREE.CanvasTexture(cv); t.anisotropy = 4;
-  box(.12, 3.0, 2.6, M(0x120d22), .06, 1.7, 12.6); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 11.34); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 13.86);
-  var m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.65), new THREE.MeshBasicMaterial({map:t})); m.rotation.y = Math.PI / 2; m.position.set(.135, 1.7, 12.6); ROOT.add(m);
-  plight(0xb57bff, .6, 1.4, 2.0, 12.6, 5);
+  box(.12, 3.0, 2.6, M(0x120d22), .06, 1.7, 13.0); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 11.74); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 14.26);
+  var m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.65), new THREE.MeshBasicMaterial({map:t})); m.rotation.y = Math.PI / 2; m.position.set(.135, 1.7, 13.0); ROOT.add(m);
+  plight(0xb57bff, .6, 1.4, 2.0, 13.0, 5);
   return {cv:cv, tex:t, mesh:m};
 })();
 var CALB = (function(){
   var cv = document.createElement('canvas'); cv.width = 400; cv.height = 560; var t = new THREE.CanvasTexture(cv); t.anisotropy = 4;
-  var g = new THREE.Group(); g.position.set(19.4, 0, 14.0); g.rotation.y = .55; ROOT.add(g);
-  box(.12, 1.0, .12, M(0x2a2438), -.55, .5, 0, g); box(.12, 1.0, .12, M(0x2a2438), .55, .5, 0, g);
-  box(1.6, 2.1, .12, M(0x120d22), 0, 1.85, 0, g); box(1.66, .05, .14, glow(0xb57bff), 0, 2.92, 0, g); box(1.66, .05, .14, glow(0xb57bff), 0, .8, 0, g);
-  var m = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2.0), new THREE.MeshBasicMaterial({map:t})); m.position.set(0, 1.85, .07); g.add(m);
-  plight(0xb57bff, .5, 19.4, 2.4, 14.6, 5);
+  box(.12, 3.0, 2.0, M(0x120d22), .06, 1.7, 10.0); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 9.04); box(.04, 3.0, .06, glow(0xb57bff), .14, 1.7, 10.96);
+  var m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 2.66), new THREE.MeshBasicMaterial({map:t})); m.rotation.y = Math.PI / 2; m.position.set(.135, 1.7, 10.0); ROOT.add(m);
+  plight(0xb57bff, .5, 1.4, 2.0, 10.0, 5);
   return {cv:cv, tex:t};
 })();
 [[23, 9], [23, 14.5], [15.5, 23], [10, 23]].forEach(function(p){ box(.9, .45, .9, M(0x2a2438), p[0], .22, p[1]); [[0, .8, 0, .5], [-.3, .55, 0, .35], [.3, .6, 0, .35]].forEach(function(c){ var s = new THREE.Mesh(new THREE.SphereGeometry(c[3], 12, 10), M(0x1c9a62, {roughness:.9})); s.position.set(p[0] + c[0], .45 + c[1], p[1]); s.castShadow = true; ROOT.add(s); }); ob(p[0] - .5, p[1] - .5, p[0] + .5, p[1] + .5); });
@@ -508,8 +506,8 @@ var dev = ''; try{ dev = localStorage.getItem('kl_dev') || ''; if(dev.length < 1
 // ---- griglia di calpestio (stessi blocchi della piazza 2D, così 2D e 3D si capiscono)
 var curH = plazaH, NG = 24, BLK = new Uint8Array(NG * NG);
 [[3,0,1,6],[4,6,3,1],[9,6,5,1],[6,7,1,1],[9,7,1,1],[7,8,2,1],[13,0,1,3],[13,4,1,2],[4,0,9,1],[5.4,2,6.1,1.4],[2,.2,1.8,1.8],[14.2,.2,1.8,1.8],[9.4,9.9,4.2,4.2],[20,0,4,1],[20.2,2.3,3.8,.7],
- [20.75,3.25,.5,.5],[21.95,3.25,.5,.5],[23.15,3.25,.5,.5],[16.25,7.6,2.5,1],[0,6,1,4],[0,2,.4,1.3],[0,15,3.7,6],
- [22.5,8.5,1,1],[22.5,14,1,1],[18.9,13.6,1,.9],[15,22.5,1,1],[9.5,22.5,1,1],[15.6,11.3,1.6,.8],[21.6,15.5,2.4,4.8],[7.7,15.1,1.8,.6],[13.7,15.1,1.8,.6],[21.1,10.7,1,1],[13.5,20.8,1,1],[2.0,22.1,1,1]].forEach(function(r){ for(var j = Math.floor(r[1]); j < Math.ceil(r[1] + r[3]); j++) for(var i = Math.floor(r[0]); i < Math.ceil(r[0] + r[2]); i++) if(i >= 0 && j >= 0 && i < NG && j < NG) BLK[j * NG + i] = 1; });
+ [20.75,3.25,.5,.5],[21.95,3.25,.5,.5],[23.15,3.25,.5,.5],[16.25,7.6,2.5,1],[0,4.9,1,3.4],[0,2,.4,1.3],[0,15,3.7,6],
+ [22.5,8.5,1,1],[22.5,14,1,1],[15,22.5,1,1],[9.5,22.5,1,1],[15.6,11.3,1.6,.8],[21.6,15.5,2.4,4.8],[7.7,15.1,1.8,.6],[13.7,15.1,1.8,.6],[21.1,10.7,1,1],[13.5,20.8,1,1],[2.0,22.1,1,1]].forEach(function(r){ for(var j = Math.floor(r[1]); j < Math.ceil(r[1] + r[3]); j++) for(var i = Math.floor(r[0]); i < Math.ceil(r[0] + r[2]); i++) if(i >= 0 && j >= 0 && i < NG && j < NG) BLK[j * NG + i] = 1; });
 function free(i, j){ return i >= 0 && j >= 0 && i < NG && j < NG && !BLK[j * NG + i]; }
 function findPath(a, b){
   var s = [Math.min(NG - 1, Math.max(0, Math.floor(a.x))), Math.min(NG - 1, Math.max(0, Math.floor(a.z)))], g = [Math.min(NG - 1, Math.max(0, Math.floor(b.x))), Math.min(NG - 1, Math.max(0, Math.floor(b.z)))];
@@ -643,7 +641,7 @@ function turn(cur, tgt, dt){ var d = ((tgt - cur + Math.PI * 3) % (Math.PI * 2))
 // ---- stato giocatore locale e remoti
 var ME = {A:mkAvatar(), x:2.2, z:3.9, face:0, path:[], seat:null, nick:'', uid:'', owner:false, ready:false}; ME.A.g.position.set(ME.x, 0, ME.z);
 var REM = {}, SEAT = {bar0:{x:21, z:3.5, out:{x:21, z:4.5}}, bar1:{x:22.2, z:3.5, out:{x:22.2, z:4.5}}, bar2:{x:23.4, z:3.5, out:{x:23.4, z:4.5}}, bn00:{x:8.15, z:15.4, f:Math.PI, h:-.05, out:{x:8.15, z:16.3}}, bn01:{x:9.05, z:15.4, f:Math.PI, h:-.05, out:{x:9.05, z:16.3}}, bn10:{x:14.15, z:15.4, f:Math.PI, h:-.05, out:{x:14.15, z:16.3}}, bn11:{x:15.05, z:15.4, f:Math.PI, h:-.05, out:{x:15.05, z:16.3}}, bn20:{x:7.6, z:11.55, f:-Math.PI / 2, h:-.05, out:{x:6.7, z:11.55}}, bn21:{x:7.6, z:12.45, f:-Math.PI / 2, h:-.05, out:{x:6.7, z:12.45}}};
-var STAND = {dj:{x:8.5, z:1.5}, mic:{x:8.5, z:7.4}, cafe:{x:22, z:4.6}, wheel:{x:16.4, z:12.9}, studio:{x:4.6, z:17.8}, home:{x:1.5, z:3.4}, board:{x:1.8, z:8.1}, fountain:{x:11.5, z:9.1}, shop:{x:20.0, z:17.9}, cal:{x:19.4, z:15.6}, drop:{x:1.7, z:12.6}, rank:{x:17.9, z:2.0}};
+var STAND = {dj:{x:8.5, z:1.5}, mic:{x:8.5, z:7.4}, cafe:{x:22, z:4.6}, wheel:{x:16.4, z:12.9}, studio:{x:4.6, z:17.8}, home:{x:1.5, z:3.4}, board:{x:1.8, z:6.6}, fountain:{x:11.5, z:9.1}, shop:{x:20.0, z:17.9}, cal:{x:1.7, z:10.0}, drop:{x:1.7, z:13.0}, rank:{x:17.9, z:2.0}};
 var ch = null, myKey = '', labels = [];
 function mkLabel(nick, own){ var d = document.createElement('div'); d.className = 'nm' + (own ? ' own' : ''); d.innerHTML = '<div class="bub"></div><span>' + esc(nick) + '</span>'; $('labels').appendChild(d); return d; }
 function bubble(lb, text){ var b = lb.el.querySelector('.bub'); b.textContent = text; b.classList.add('on'); clearTimeout(lb.bt); lb.bt = setTimeout(function(){ b.classList.remove('on'); }, 6000); }
@@ -687,7 +685,7 @@ var HIT = [];
 function hit(act, x0, z0, x1, z1, h){ var m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, h, z1 - z0), new THREE.MeshBasicMaterial({visible:false})); m.position.set((x0 + x1) / 2, h / 2, (z0 + z1) / 2); m.userData.act = act; scene.add(m); HIT.push(m); }
 hit('dj', 5.4, 2, 11.6, 3.4, 2.4); hit('mic', 8.2, 7.6, 8.8, 8.4, 2.2); hit('cafe', 20, 0, 24, 1, 7); hit('cafe', 20.2, 2.3, 24, 3, 1.4);
 [21, 22.2, 23.4].forEach(function(x, i){ hit('sit:bar' + i, x - .3, 3.25, x + .3, 3.85, 1); });
-hit('wheel', 15.6, 11.3, 17.2, 12.1, 3.5); hit('cal', 18.6, 13.4, 20.2, 14.7, 3.2); hit('shop', 21.2, 15.5, 24, 20.3, 3.4); hit('drop', 0, 11.3, .5, 13.9, 3.4); hit('sit:bn0', 7.7, 15.1, 9.5, 15.7, 1.0); hit('sit:bn1', 13.7, 15.1, 15.5, 15.7, 1.0); hit('fountain', 9.2, 9.7, 13.8, 14.3, 3.6); hit('studio', .2, 15, 3.8, 20.8, 3.5); hit('board', 0, 6.2, .7, 10.1, 3.2); hit('rank', 15.8, 0, 19.9, .9, 4.8); hit('home', 0, 2.65, .3, 4.15, 2.6);
+hit('wheel', 15.6, 11.3, 17.2, 12.1, 3.5); hit('cal', 0, 9.05, .5, 10.95, 3.4); hit('shop', 21.2, 15.5, 24, 20.3, 3.4); hit('drop', 0, 11.7, .5, 14.3, 3.4); hit('sit:bn0', 7.7, 15.1, 9.5, 15.7, 1.0); hit('sit:bn1', 13.7, 15.1, 15.5, 15.7, 1.0); hit('fountain', 9.2, 9.7, 13.8, 14.3, 3.6); hit('studio', .2, 15, 3.8, 20.8, 3.5); hit('board', 0, 4.9, .7, 8.3, 3.2); hit('rank', 15.8, 0, 19.9, .9, 4.8); hit('home', 0, 2.65, .3, 4.15, 2.6);
 SCN.plaza = {name:'plaza', N:24, group:G.plaza, BLK:BLK, SEAT:SEAT, STAND:STAND, HIT:HIT, h:plazaH, chan:'kl-room-plaza', place:'piazza', label:'PIAZZA', ph:'Scrivi in piazza…', spawn:{x:2.2, z:3.9}, bg:0x0a0a12, fog:[40, 95], sun:true, hemi:.75, btns:true, chat:true, cam:{yaw:.55, pitch:.62, dist:15}};
 var CUR = SCN.plaza;
 
@@ -2034,14 +2032,14 @@ var SCR = (function(){
   function drawCal(){
     var c = CALB.cv, g = c.getContext('2d'), W = c.width, H = c.height; g.save();
     g.fillStyle = '#0a0612'; g.fillRect(0, 0, W, H); g.strokeStyle = '#b57bff'; g.lineWidth = 8; g.strokeRect(8, 8, W - 16, H - 16); g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = '#3dffa0'; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.font = '900 40px ' + SANS; g.fillText('PROGRAMMA', W / 2, 56); g.shadowBlur = 0;
+    g.fillStyle = '#3dffa0'; g.shadowColor = '#3dffa0'; g.shadowBlur = 12; g.font = '900 36px ' + SANS; g.fillText('CALENDARIO', W / 2, 56); g.shadowBlur = 0;
     if(!evs.length){ g.fillStyle = '#8d88a8'; g.font = '600 26px ' + SANS; g.fillText('presto novità', W / 2, H / 2); }
     evs.slice(0, 3).forEach(function(e, i){ var y = 110 + i * 142, d = new Date(e.starts_at), live = Date.now() >= d.getTime();
       g.fillStyle = live ? 'rgba(61,255,160,.14)' : 'rgba(123,47,255,.12)'; g.fillRect(24, y, W - 48, 128); g.textAlign = 'left';
       g.fillStyle = live ? '#3dffa0' : '#b57bff'; g.font = '700 22px ' + SANS; g.fillText((KI[e.kind] || '') + ' ' + (live ? 'IN CORSO' : d.toLocaleDateString('it-IT', {weekday:'short', day:'numeric', month:'short', timeZone:'Europe/Rome'}).toUpperCase() + ' · ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome'})), 38, y + 28);
       g.fillStyle = '#fff'; var sz = fit(g, e.title, W - 90, 34, function(s){ return '800 ' + s + 'px ' + SERIF; }); g.fillText(e.title, 38, y + 70);
       if(e.reward > 0){ g.fillStyle = '#ffd23d'; g.font = '700 20px ' + SANS; g.fillText('+' + e.reward + ' monete presenti', 38, y + 106); } g.textAlign = 'center'; });
-    g.fillStyle = '#8d88a8'; g.font = '600 20px ' + SANS; g.fillText('tocca per il calendario', W / 2, H - 30);
+    g.fillStyle = '#8d88a8'; g.font = '600 20px ' + SANS; g.fillText('tocca per aprire', W / 2, H - 30);
     g.restore(); CALB.tex.needsUpdate = true;
   }
   function tick(){
