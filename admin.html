@@ -110,6 +110,19 @@ button.del{border-color:var(--mag);color:var(--mag);}
     <div class="msg" id="evOut"></div>
     <h3 style="margin-top:18px">In programma</h3><div id="evList"></div>
   </div>
+  <h2 style="margin-top:34px">PIAZZA · CACCIA AL TESORO</h2>
+  <div class="panel">
+    <p class="muted">Il baule nell'angolo sud-est. Ogni indizio manda il giocatore a toccare un punto della piazza; trovati tutti, vince le monete. Una caccia alla volta (vale quella iniziata più di recente tra quelle in corso). Ricordati di annunciarla nel Calendario.</p>
+    <div class="field"><label for="huTitle">Nome della caccia (max 60)</label><input type="text" id="huTitle" maxlength="60" placeholder="es. Il tesoro di novembre"></div>
+    <div class="field"><label for="huFrom">Inizia (ora italiana)</label><input type="datetime-local" id="huFrom"></div>
+    <div class="field"><label for="huTo">Finisce</label><input type="datetime-local" id="huTo"></div>
+    <div class="field"><label for="huRew">Monete al tesoro (1-1000)</label><input type="number" id="huRew" min="1" max="1000" value="100"></div>
+    <h3>Indizi (in ordine)</h3><div id="huClues"></div>
+    <button type="button" id="huAdd">+ Aggiungi indizio</button>
+    <button class="main" id="huSave" type="button">Crea caccia</button>
+    <div class="msg" id="huOut"></div>
+    <h3 style="margin-top:18px">Cacce create</h3><div id="huList"></div>
+  </div>
   <h2 style="margin-top:34px">STUDIO · CODICE PORTA</h2>
   <div class="panel">
     <div class="field"><label for="stCode">Codice attuale (3-12 lettere o numeri, senza spazi)</label><input type="text" id="stCode" maxlength="12"></div>
@@ -227,6 +240,25 @@ button.del{border-color:var(--mag);color:var(--mag);}
     var u = await sb.from('plaza_events').insert(o);
     $('evOut').textContent = u.error ? 'Non riuscito: ' + u.error.message : 'Aggiunto ✓'; if(!u.error){ $('evTitle').value = ''; $('evBody').value = ''; $('evCover').value = ''; evLoad(); }
   });
+  var HU_SPOTS = [['fountain','Fontana'],['wheel','Ruota della fortuna'],['studio','Studio di registrazione'],['shop','Negozio'],['drop','Cartello prossimo drop'],['board','Bacheca'],['cal','Calendario'],['rank','Classifica'],['home','Porta CASA'],['cafe','Bar'],['dj','Console DJ sul palco'],['mic','Microfono'],['bench','Panchina']];
+  function huRow(){ var row = document.createElement('div'); row.className = 'field'; row.style.cssText = 'display:flex;gap:8px;align-items:center'; var i = document.createElement('input'); i.type = 'text'; i.maxLength = 160; i.placeholder = 'Indizio (es. «Dove l\'acqua non smette mai di cantare»)'; i.style.flex = '1'; var sel = document.createElement('select'); HU_SPOTS.forEach(function(sp){ var o = document.createElement('option'); o.value = sp[0]; o.textContent = '→ ' + sp[1]; sel.appendChild(o); }); row.appendChild(i); row.appendChild(sel); row.appendChild(btn('✕', 'del', function(){ row.remove(); })); $('huClues').appendChild(row); }
+  $('huAdd').addEventListener('click', huRow); huRow(); huRow(); huRow();
+  async function huLoad(){
+    var r = await sb.from('hunts').select('*').gte('ends_at', new Date(Date.now() - 86400000).toISOString()).order('starts_at', {ascending:false}).limit(20), box = $('huList'); box.innerHTML = '';
+    ((r && r.data) || []).forEach(function(h){ var row = document.createElement('div'); row.className = 'muted'; row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:6px 0'; var t = document.createElement('span'); t.style.flex = '1'; t.textContent = h.title + ' · ' + new Date(h.starts_at).toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'}) + ' → ' + new Date(h.ends_at).toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'}) + ' · +' + h.reward; row.appendChild(t); row.appendChild(btn('Elimina', 'del', async function(){ if(confirm('Eliminare questa caccia?')){ await sb.from('hunts').delete().eq('id', h.id); huLoad(); } })); box.appendChild(row); });
+    if(!box.children.length) box.innerHTML = '<div class="muted">Nessuna caccia.</div>';
+  }
+  $('huSave').addEventListener('click', async function(){
+    var rows = Array.prototype.slice.call($('huClues').children).map(function(r){ return {clue:r.querySelector('input').value.trim(), spot:r.querySelector('select').value}; }).filter(function(x){ return x.clue; });
+    var o = {title:$('huTitle').value.trim(), reward:parseInt($('huRew').value, 10), starts_at:$('huFrom').value ? new Date($('huFrom').value).toISOString() : null, ends_at:$('huTo').value ? new Date($('huTo').value).toISOString() : null};
+    if(!o.title || !o.starts_at || !o.ends_at || !(o.reward >= 1) || rows.length < 1){ $('huOut').textContent = 'Servono nome, date, monete e almeno un indizio.'; return; }
+    if(o.ends_at <= o.starts_at){ $('huOut').textContent = 'La fine deve essere dopo l\'inizio.'; return; }
+    var h = await sb.from('hunts').insert(o).select('id').single();
+    if(h.error){ $('huOut').textContent = 'Non riuscito: ' + h.error.message; return; }
+    var c = await sb.from('hunt_clues').insert(rows.map(function(x, i){ return {hunt_id:h.data.id, step:i + 1, clue:x.clue, spot:x.spot}; }));
+    if(c.error){ await sb.from('hunts').delete().eq('id', h.data.id); $('huOut').textContent = 'Indizi non salvati: ' + c.error.message; return; }
+    $('huOut').textContent = 'Caccia creata ✓'; $('huTitle').value = ''; $('huClues').innerHTML = ''; huRow(); huRow(); huRow(); huLoad();
+  });
   function djPing(){
     try{
       if(!djCh){ djCh = sb.channel('kl-room-plaza', {config:{broadcast:{self:false}}}); djCh.subscribe(function(st){ if(st === 'SUBSCRIBED') djCh.send({type:'broadcast', event:'dj', payload:{}}); }); }
@@ -286,7 +318,7 @@ button.del{border-color:var(--mag);color:var(--mag);}
     $('who').textContent = session.user.email || '';
     show('panel');
     await load();
-    loadMod(); djRefresh(); stLoad(); scLoad(); vmLoad(); evLoad();
+    loadMod(); djRefresh(); stLoad(); scLoad(); vmLoad(); evLoad(); huLoad();
   }
 
   async function load(){
