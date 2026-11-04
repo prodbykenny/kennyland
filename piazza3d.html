@@ -440,7 +440,7 @@ var LAMPS = [];
 [[20.7, 21.0]].forEach(function(p){
   cyl(.05, 2.7, M(0x55506e), p[0], 1.35, p[1], ROOT, 8); box(.3, .06, .3, M(0x2a2438), p[0], 2.72, p[1]);
   var bm = new THREE.MeshBasicMaterial({color:0xffe8b0}), l = new THREE.Mesh(new THREE.SphereGeometry(.17, 12, 12), bm); l.position.set(p[0], 2.82, p[1]); ROOT.add(l);
-  LAMPS.push({m:bm, l:plight(0xffd68a, .55, p[0], 2.7, p[1], 8)});
+  plight(0xffd68a, 1.1, p[0], 2.7, p[1], 9); // sempre acceso, anche di giorno
 });
 // alberi
 [[21.6, 11.2], [14.0, 21.3], [2.5, 22.6]].forEach(function(p){
