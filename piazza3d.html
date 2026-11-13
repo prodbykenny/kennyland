@@ -58,7 +58,8 @@ body.emb>*:not(#c):not(#labels):not(script){display:none!important}
 .sh-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px;}
 .sh-tab{background:#150a26;border:1px solid #3a2a66;color:var(--muted,#9a93b8);padding:7px 11px;font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;}
 .mis-r.vip .mis-x{color:#ffd23d;font-weight:700} .mis-go{margin-left:6px;background:#ffd23d;color:#14101f;border:0;border-radius:6px;font:700 11px inherit;padding:2px 8px;cursor:pointer}
-.evb{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:30;background:#0d0a18;border:1px solid #3dffa0;border-radius:12px;padding:8px 8px 8px 14px;display:flex;gap:12px;align-items:center;font-size:13px;box-shadow:0 0 18px rgba(61,255,160,.3)} .evb[hidden]{display:none} .evb button{background:#3dffa0;color:#0a0612;border:0;border-radius:8px;font:700 12px inherit;padding:7px 12px;cursor:pointer}
+.evb{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:30;background:#0d0a18;border:1px solid #3dffa0;border-radius:12px;padding:8px 8px 8px 14px;display:flex;gap:12px;align-items:center;font-size:13px;box-shadow:0 0 18px rgba(61,255,160,.3)} .evb[hidden]{display:none} .ck-note{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;max-width:min(560px,92vw);background:#0d0a18;border:1px solid #2a2340;border-radius:12px;padding:10px 12px;display:flex;gap:12px;align-items:center;font-size:12px;color:#cfcbe3} .ck-note[hidden]{display:none} .ck-note a{color:#3dffa0} .ck-note button{background:#3dffa0;color:#0a0612;border:0;border-radius:8px;font:700 12px inherit;padding:6px 12px;cursor:pointer}
+.tour{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:55;width:min(420px,92vw);background:#0d0a18;border:1px solid #b57bff;border-radius:14px;padding:14px 16px;box-shadow:0 0 24px rgba(181,123,255,.35);color:#f2f0e8} .tour p{margin:6px 0 12px;font-size:14px;line-height:1.45} .tour-n{font-size:11px;color:#9a93b8;float:right} .tour-b{display:flex;gap:8px;justify-content:flex-end} .tour-b button{background:#3dffa0;color:#0a0612;border:0;border-radius:8px;font:700 12px inherit;padding:8px 14px;cursor:pointer} .tour-b .alt{background:transparent;color:#9a93b8;border:1px solid #2a2340} .evb button{background:#3dffa0;color:#0a0612;border:0;border-radius:8px;font:700 12px inherit;padding:7px 12px;cursor:pointer}
 .cal-list{max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;margin-top:10px} .cal-r{display:flex;gap:12px;padding:10px;border:1px solid #2a2340;border-radius:10px;background:#0d0a18} .cal-r.live{border-color:#3dffa0} .cal-r img{width:64px;height:64px;object-fit:cover;border-radius:8px} .cal-k{font-size:11px;color:#b57bff;letter-spacing:.05em} .cal-k b{color:#3dffa0} .cal-n{font-weight:700;margin-top:2px} .cal-w{font-size:12px;color:#9a93b8} .cal-b{font-size:13px;margin-top:4px;color:#cfcbe3}
 .sh-tab.on{background:#7b2fff;color:#fff;border-color:#b57bff;} .sh-tab.soon{opacity:.55;}
 .sh-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding-right:4px;}
@@ -141,8 +142,8 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
   <div class="hudw" id="hudw" hidden><button type="button" class="hudc" id="hudCard" aria-expanded="false" aria-label="Il tuo profilo di gioco"><span id="hNick"></span><em>LIV <b id="hLvl">1</b></em><span class="hx"><i id="hXp"></i></span><span class="hco">🪙 <b id="hCoins">0</b></span><i class="hdot" id="hDot"></i></button>
    <div class="hpop" id="hudPop" hidden><div class="hst">GIORNI DI FILA<b id="hStreak">0</b></div><div class="lvb"><i id="lvFill"></i></div><div class="lvt" id="lvTxt"></div>
     <button type="button" class="hbtn" id="hClaim" disabled>BONUS DEL GIORNO</button><div id="hMis" style="display:none"></div><button type="button" class="hbtn alt" id="hCal" style="margin-top:8px">CALENDARIO</button><button type="button" class="hbtn alt" id="hShop" style="margin-top:8px">NEGOZIO</button>
-    <div class="acc"><div>Nickname <b id="aNick"></b></div><div>Email <b id="aEmail"></b></div><label><input type="checkbox" id="aNews"><span>Avvisami via email quando esce un nuovo drop</span></label><a id="aOut" href="#">Esci</a><button type="button" class="dng" id="aDel">Elimina il mio account</button><div id="aMsg" style="margin-top:6px"></div></div></div></div></div>
-  <div class="right"><div class="cnt"><span title="Abitanti iscritti">👥 <b id="mCount">0</b></span><span title="Online ora">● <b id="oCount">0</b></span></div><div class="soc"><a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a><a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a><a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a></div><a href="index.html?sito=1">← Torna al sito</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
+    <div class="acc"><label><input type="checkbox" id="aLite"><span>Grafica leggera (più fluida su telefoni lenti)</span></label><div>Nickname <b id="aNick"></b></div><div>Email <b id="aEmail"></b></div><label><input type="checkbox" id="aNews"><span>Avvisami via email quando esce un nuovo drop</span></label><a id="aOut" href="#">Esci</a><button type="button" class="dng" id="aDel">Elimina il mio account</button><div id="aMsg" style="margin-top:6px"></div></div></div></div></div>
+  <div class="right"><div class="cnt"><span title="Abitanti iscritti">👥 <b id="mCount">0</b></span><span title="Online ora">● <b id="oCount">0</b></span></div><div class="soc"><a href="privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://open.spotify.com/artist/1A4ZZ7547fH0sEMwOqFc9y" target="_blank" rel="noopener">Spotify</a><a href="https://soundcloud.com/escaape" target="_blank" rel="noopener">SoundCloud</a><a href="https://www.instagram.com/chiamamikenny" target="_blank" rel="noopener">Instagram</a></div><a href="index.html?sito=1">← Torna al sito</a><div class="coin" id="coinbox" hidden>🪙 <span id="coins">0</span></div><button id="snd" type="button" aria-label="Audio DJ">🔇</button></div>
 </div>
 <div id="banner"></div><div id="toast"></div><div id="evB" hidden></div><div id="log"></div>
 <button class="deco dnc" id="bDance" type="button" hidden>💃 Balla</button><button class="deco" id="bDeco" type="button" hidden>🛋 Arredamento</button><div class="btns" id="btns"><button id="bStage" type="button">Microfono</button><button id="bBar" type="button">Bar</button><button id="bWheel" type="button">Ruota</button></div>
@@ -154,7 +155,7 @@ body.looking #chat,body.looking .right,body.looking .deco,body.looking #btns{dis
 (function(){
 var cv = document.getElementById('c');
 var renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+var PRMAX = 2; renderer.setPixelRatio(Math.min(devicePixelRatio, PRMAX));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 var scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a0a12); scene.fog = new THREE.Fog(0x0a0a12, 40, 95);
 var EMB3 = /[?&]embed=1/.test(location.search); if(EMB3) document.body.classList.add('emb');
@@ -889,6 +890,10 @@ var cs = {yaw:.55, pitch:.62, dist:15, tyaw:.55, tpitch:.62, tdist:15};
 if(EMB3){ cs.dist = cs.tdist = 26; cs.pitch = cs.tpitch = .5; }
 function size(){ var w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
 addEventListener('resize', size); size();
+function applyLite(on){ PRMAX = on ? 1 : 2; renderer.setPixelRatio(Math.min(devicePixelRatio, PRMAX)); renderer.shadowMap.enabled = !on; scene.traverse(function(o){ if(o.material){ (Array.isArray(o.material) ? o.material : [o.material]).forEach(function(m){ m.needsUpdate = true; }); } }); size(); }
+var LITE = null; try{ LITE = localStorage.getItem('kl_lite'); }catch(e){}
+if(LITE === null) LITE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? '1' : '0';
+if(LITE === '1') applyLite(true);
 var drag = null, moved = 0, cv2 = $('c');
 cv2.addEventListener('pointerdown', function(e){ drag = {x:e.clientX, y:e.clientY}; moved = 0; cv2.setPointerCapture(e.pointerId); });
 var hoverRc = new THREE.Raycaster(), hoverV = new THREE.Vector2(), hoverBusy = false;
@@ -2243,6 +2248,31 @@ var MUSIC = (function(){
   else joinChannel('kl-room-plaza');
   if(!EMB3){ djPull(); setInterval(djPull, 20000); }
   try{ var q = await sb.from('wheel_spins').select('slot').eq('day', wheelDay()).maybeSingle(); wheelUsed = !!(q && q.data); }catch(e){}
+})();
+
+// ---- avviso cookie, grafica leggera, guida del primo ingresso
+(function(){
+  var lt = $('aLite'); lt.checked = LITE === '1';
+  lt.addEventListener('change', function(){ LITE = lt.checked ? '1' : '0'; try{ localStorage.setItem('kl_lite', LITE); }catch(e){} applyLite(lt.checked); });
+  var seen = false; try{ seen = !!localStorage.getItem('kl_cookie_ok'); }catch(e){}
+  var cn = document.createElement('div'); cn.className = 'ck-note'; cn.hidden = seen;
+  cn.innerHTML = '<span>Usiamo solo memoria tecnica del browser (accesso, avatar, preferenze). I player Spotify e SoundCloud possono usare cookie propri. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></span><button type="button">Ok</button>';
+  document.body.appendChild(cn);
+  cn.querySelector('button').addEventListener('click', function(){ cn.hidden = true; try{ localStorage.setItem('kl_cookie_ok', '1'); }catch(e){} });
+  var done = false; try{ done = !!localStorage.getItem('kl_tour1'); }catch(e){}
+  if(done) return;
+  var touch = matchMedia('(pointer:coarse)').matches;
+  var STEPS = [
+    ['Benvenuto in KENNYLAND', (touch ? 'Tocca' : 'Clicca') + ' sul pavimento per camminare. Trascina per girare la telecamera' + (touch ? '.' : ', usa la rotella per lo zoom.')],
+    ['Tocca gli oggetti', 'Fontana, ruota della fortuna, negozio, studio, bacheca, bar: ' + (touch ? 'tocca' : 'dove il cursore diventa una manina puoi cliccare') + ' per usarli. Puoi anche sederti sulle panchine.'],
+    ['Ogni giorno qualcosa', 'In alto a sinistra, dal tuo profilo, trovi il bonus giornaliero e le missioni: più giorni di fila ti connetti, più monete ricevi.'],
+    ['Eventi e tesori', 'Il Calendario sulla parete ti dice cosa succede e quando. Nell\'angolo c\'è il baule del tesoro: quando c\'è una caccia, segui gli indizi.']
+  ], i = 0, tc = null;
+  function show(){
+    if(!tc){ tc = document.createElement('div'); tc.className = 'tour'; document.body.appendChild(tc); tc.addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; if(b.id === 'tourSkip' || i >= STEPS.length - 1){ tc.remove(); tc = null; clearInterval(iv); try{ localStorage.setItem('kl_tour1', '1'); }catch(er){} return; } i++; show(); }); }
+    tc.innerHTML = '<div class="tour-n">' + (i + 1) + ' / ' + STEPS.length + '</div><b>' + STEPS[i][0] + '</b><p>' + STEPS[i][1] + '</p><div class="tour-b"><button type="button" id="tourSkip" class="alt">Salta</button><button type="button" id="tourNext">' + (i >= STEPS.length - 1 ? 'Inizia' : 'Avanti') + '</button></div>';
+  }
+  var iv = setInterval(function(){ if(tc || !ME.ready || CUR.name !== 'plaza' || cn.hidden === false || document.querySelector('.world-modal')) return; show(); }, 2500);
 })();
 })();
 </script></body></html>
